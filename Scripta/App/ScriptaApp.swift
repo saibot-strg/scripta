@@ -22,7 +22,7 @@ struct ScriptaApp: App {
         }
         self.container = container
 
-        let model = AppModel(library: LibraryService(modelContext: container.mainContext))
+        let model = AppModel(library: LibraryService(modelContext: container.mainContext, locations: StorageLocations()))
         if let startupError { model.presentedError = startupError }
         Task { await model.performStartupMaintenance() }
         #if DEBUG

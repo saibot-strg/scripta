@@ -8,6 +8,9 @@
 	<!-- Files and folders chosen by the user (import, export, storage location via security-scoped bookmark). -->
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
+	<!-- Remember a chosen storage folder across launches (security-scoped bookmark). -->
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
 	<!-- Outgoing connections, used only to download the speech model once (Hugging Face). -->
 	<key>com.apple.security.network.client</key>
 	<true/>

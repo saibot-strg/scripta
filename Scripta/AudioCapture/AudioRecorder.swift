@@ -5,6 +5,15 @@ import os
 struct FinishedRecording: Sendable {
     let manifest: RecordingManifest
     let duration: TimeInterval
+    /// Where the files were written.
+    let storage: RecordingStorage
+    let rootBookmark: Data?
+}
+
+/// Storage location for a new recording.
+struct RecordingLocation: Sendable {
+    let storage: RecordingStorage
+    let bookmark: Data?
 }
 
 /// Records the microphone, or a meeting (microphone + system audio as two
@@ -51,7 +60,8 @@ final class AudioRecorder {
 
     static let maxLevelCount = 160
 
-    private let storage: RecordingStorage
+    /// Asked at the start of each recording (the user may change the location).
+    private let location: @MainActor () -> RecordingLocation
     private var session: Session?
 
     private struct Track {
@@ -63,6 +73,7 @@ final class AudioRecorder {
 
     private struct Session {
         let manifest: RecordingManifest
+        let location: RecordingLocation
         let tracks: [Track]
         let activity: any NSObjectProtocol
         let monitor: Task<Void, Never>?
@@ -74,8 +85,13 @@ final class AudioRecorder {
         let source: any AudioInputSource
     }
 
-    init(storage: RecordingStorage) {
-        self.storage = storage
+    init(location: @escaping @MainActor () -> RecordingLocation) {
+        self.location = location
+    }
+
+    /// Fixed location, for tests.
+    convenience init(storage: RecordingStorage) {
+        self.init(location: { RecordingLocation(storage: storage, bookmark: nil) })
     }
 
     // MARK: - Start
@@ -113,6 +129,8 @@ final class AudioRecorder {
         levels = []
         systemLevels = []
 
+        let location = location()
+        let storage = location.storage
         var tracks: [Track] = []
         do {
             try storage.makeFolder(for: manifest.id)
@@ -162,7 +180,7 @@ final class AudioRecorder {
             reason: "Recording audio"
         )
         session = Session(
-            manifest: manifest, tracks: tracks, activity: activity,
+            manifest: manifest, location: location, tracks: tracks, activity: activity,
             monitor: manifest.isMeeting ? monitorSystemAudio() : nil
         )
         state = .recording
@@ -211,7 +229,10 @@ final class AudioRecorder {
         systemLevels = []
         duration = 0
         Logger.recording.info("Recording \(session.manifest.id, privacy: .public) stopped after \(recordedDuration, format: .fixed(precision: 1)) s")
-        return FinishedRecording(manifest: session.manifest, duration: recordedDuration)
+        return FinishedRecording(
+            manifest: session.manifest, duration: recordedDuration,
+            storage: session.location.storage, rootBookmark: session.location.bookmark
+        )
     }
 
     // MARK: - Events

@@ -36,6 +36,10 @@ extension SpeakerLabel {
     /// Localized at display time so the UI language can change later.
     var displayName: String {
         if let customName, !customName.isEmpty { return customName }
+        return defaultName
+    }
+
+    var defaultName: String {
         switch role {
         case .me: return String(localized: "Ich")
         case .others: return String(localized: "Andere")

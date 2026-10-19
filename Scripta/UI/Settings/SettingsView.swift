@@ -71,6 +71,7 @@ private struct GeneralSettingsView: View {
 }
 
 private struct RecordingSettingsView: View {
+    @Environment(AppModel.self) private var appModel
     @AppStorage(SettingsKey.recordingFormat) private var format: RecordingFileFormat = .aac
     @AppStorage(SettingsKey.recordingQuality) private var quality: RecordingQuality = .standard
     @AppStorage(SettingsKey.meetingSource) private var meetingSource = ""
@@ -79,6 +80,7 @@ private struct RecordingSettingsView: View {
     @State private var inputs: [AudioInputDevice] = []
 
     var body: some View {
+        let locations = appModel.library.locations
         Form {
             Section {
                 Picker("Mikrofon", selection: $microphone) {
@@ -124,23 +126,35 @@ private struct RecordingSettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Section("Speicherort") {
-                LabeledContent("Aufnahmen") {
-                    Text(RecordingStorage.defaultRootURL.path(percentEncoded: false))
+            Section {
+                LabeledContent("Neue Aufnahmen") {
+                    Text(locations.current.rootURL.path(percentEncoded: false))
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .textSelection(.enabled)
                 }
-                Button("Im Finder zeigen") {
-                    let url = RecordingStorage.defaultRootURL
-                    try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-                    NSWorkspace.shared.activateFileViewerSelecting([url])
+                HStack {
+                    Button("Ändern …") { appModel.chooseStorageFolder() }
+                    if !locations.isDefault {
+                        Button("Standard verwenden") { appModel.useDefaultStorage() }
+                    }
+                    Spacer()
+                    Button("Im Finder zeigen") {
+                        let url = locations.current.rootURL
+                        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+                        NSWorkspace.shared.activateFileViewerSelecting([url])
+                    }
                 }
+                .disabled(appModel.recorder.isActive)
+            } header: {
+                Text("Speicherort")
+            } footer: {
+                Text("Bestehende Aufnahmen bleiben, wo sie sind. Ordner in iCloud Drive oder auf externen Platten funktionieren, solange sie verfügbar sind.")
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
-        .scrollDisabled(true)
-        .frame(height: 470)
+        .frame(height: 560)
         .task {
             apps = AudioAppCatalog.availableApps()
             inputs = AudioInputDevices.available()

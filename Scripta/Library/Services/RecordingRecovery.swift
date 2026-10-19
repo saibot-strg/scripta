@@ -12,7 +12,14 @@ struct RecordingRecovery {
     ///   any; its manifest is expected and must not be recovered.
     @discardableResult
     func recoverInterruptedRecordings(activeRecordingID: () -> UUID? = { nil }) async -> Int {
-        let storage = library.storage
+        var recovered = 0
+        for location in library.locations.allLocations {
+            recovered += await recover(in: location.storage, bookmark: location.bookmark, activeRecordingID: activeRecordingID)
+        }
+        return recovered
+    }
+
+    private func recover(in storage: RecordingStorage, bookmark: Data?, activeRecordingID: () -> UUID?) async -> Int {
         var recovered = 0
         for folder in storage.recordingFolders() {
             guard let manifest = storage.readManifest(in: folder),
@@ -24,7 +31,7 @@ struct RecordingRecovery {
                 continue
             }
 
-            guard let duration = await recoverableDuration(of: manifest), duration > 0 else {
+            guard let duration = await recoverableDuration(of: manifest, in: storage), duration > 0 else {
                 // Nothing usable was written.
                 Logger.storage.info("Discarding empty interrupted recording \(manifest.id, privacy: .public)")
                 try? storage.removeFolder(for: manifest.id)
@@ -33,7 +40,7 @@ struct RecordingRecovery {
 
             do {
                 let title = String(localized: "\(manifest.title) (wiederhergestellt)")
-                try library.addRecording(manifest: manifest, duration: duration, title: title)
+                try library.addRecording(manifest: manifest, duration: duration, title: title, rootBookmark: bookmark)
                 recovered += 1
                 Logger.storage.notice("Recovered interrupted recording \(manifest.id, privacy: .public)")
             } catch {
@@ -44,8 +51,7 @@ struct RecordingRecovery {
     }
 
     /// Duration of the playable file; meetings get their tracks mixed first.
-    private func recoverableDuration(of manifest: RecordingManifest) async -> TimeInterval? {
-        let storage = library.storage
+    private func recoverableDuration(of manifest: RecordingManifest, in storage: RecordingStorage) async -> TimeInterval? {
         guard manifest.isMeeting else {
             return AudioFileInfo.duration(of: storage.fileURL(for: manifest.id, fileName: manifest.fileName))
         }

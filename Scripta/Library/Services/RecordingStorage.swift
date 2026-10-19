@@ -34,6 +34,13 @@ struct RecordingStorage: Sendable {
         return url
     }
 
+    /// Free space on the volume holding the recordings, if known.
+    var availableCapacity: Int64? {
+        try? FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
+        let values = try? rootURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+        return values?.volumeAvailableCapacityForImportantUsage
+    }
+
     /// Removes the recording's folder. A missing folder is not an error.
     func removeFolder(for recordingID: UUID) throws {
         let url = folderURL(for: recordingID)

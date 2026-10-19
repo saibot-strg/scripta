@@ -9,6 +9,7 @@ enum RecordingError: LocalizedError {
     case fileFailed(underlying: any Error)
     case writeFailed(message: String)
     case systemAudioFailed(underlying: any Error)
+    case notEnoughSpace
 
     var errorDescription: String? {
         switch self {
@@ -26,6 +27,8 @@ enum RecordingError: LocalizedError {
             String(localized: "Die Aufnahme wurde unterbrochen.")
         case .systemAudioFailed:
             String(localized: "Systemaudio kann nicht aufgenommen werden.")
+        case .notEnoughSpace:
+            String(localized: "Zu wenig freier Speicherplatz")
         }
     }
 
@@ -39,6 +42,8 @@ enum RecordingError: LocalizedError {
             String(localized: "Alles bis zu diesem Zeitpunkt wurde gespeichert. Prüfe, ob genug Speicherplatz frei ist.")
         case .systemAudioFailed:
             String(localized: "Erlaube Scripta in den Systemeinstellungen unter „Datenschutz & Sicherheit“ → „Bildschirm- & Systemaudioaufnahme“ die Systemaudio-Aufnahme.")
+        case .notEnoughSpace:
+            String(localized: "Für eine Aufnahme werden mindestens 500 MB freier Speicher benötigt. Lösche nicht mehr benötigte Dateien oder wähle in den Einstellungen einen anderen Speicherort.")
         case .alreadyRecording, .engineFailed, .fileFailed:
             nil
         }
@@ -50,7 +55,7 @@ enum RecordingError: LocalizedError {
             error.localizedDescription
         case .writeFailed(let message):
             message
-        case .microphoneAccessDenied, .noInputDevice, .alreadyRecording:
+        case .microphoneAccessDenied, .noInputDevice, .alreadyRecording, .notEnoughSpace:
             nil
         }
     }

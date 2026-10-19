@@ -35,7 +35,9 @@ final class AppModel {
 
     init(library: LibraryService) {
         self.library = library
-        recorder = AudioRecorder(storage: library.storage)
+        recorder = AudioRecorder(location: { [library] in
+            RecordingLocation(storage: library.storage, bookmark: library.locations.currentBookmark)
+        })
         transcription = TranscriptionService(library: library)
         dictation = DictationController(transcription: transcription)
         recorder.onFailure = { [weak self] error in
@@ -104,11 +106,15 @@ final class AppModel {
         var status = ImportStatus(total: urls.count, isQueued: autoTranscribe)
         importStatus = status
         var failures: [String] = []
+        let storage = library.storage
+        let bookmark = library.locations.currentBookmark
 
         for url in urls {
             do {
-                let prepared = try await AudioImporter.prepare(url, storage: library.storage)
-                let recording = try library.addRecording(manifest: prepared.manifest, duration: prepared.duration)
+                let prepared = try await AudioImporter.prepare(url, storage: storage)
+                let recording = try library.addRecording(
+                    manifest: prepared.manifest, duration: prepared.duration, rootBookmark: bookmark
+                )
                 status.importedIDs.append(recording.id)
                 if autoTranscribe { transcription.enqueue(recording) }
             } catch {
@@ -169,7 +175,7 @@ final class AppModel {
     /// An empty name restores the default ("Ich", "Andere", "Sprecher 2").
     func rename(_ speaker: SpeakerLabel, to name: String) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        speaker.customName = trimmed.isEmpty ? nil : trimmed
+        speaker.customName = trimmed.isEmpty || trimmed == speaker.defaultName ? nil : trimmed
         speaker.transcript?.rebuildFullText()
         perform { try library.save() }
     }
@@ -280,6 +286,7 @@ final class AppModel {
     func startRecording() async {
         guard !recorder.isActive else { return }
         do {
+            try ensureFreeSpace()
             try await ensureMicrophoneAccess()
             let title = String(localized: "Aufnahme \(Date.now.formatted(date: .abbreviated, time: .shortened))")
             try await recorder.startMicrophone(title: title)
@@ -293,6 +300,7 @@ final class AppModel {
     func startMeeting(_ target: SystemAudioTarget? = nil) async {
         guard !recorder.isActive else { return }
         do {
+            try ensureFreeSpace()
             try await ensureMicrophoneAccess()
             let target = target ?? defaultMeetingTarget()
             let date = Date.now.formatted(date: .abbreviated, time: .shortened)
@@ -314,6 +322,15 @@ final class AppModel {
         guard let bundleID = RecordingSettings.meetingSourceBundleID,
               let app = AudioAppCatalog.app(withBundleID: bundleID) else { return .allSystemAudio }
         return .application(app)
+    }
+
+    /// About an hour of a meeting in lossless PCM, before encoding.
+    static let minimumFreeSpace: Int64 = 500_000_000
+
+    private func ensureFreeSpace() throws(RecordingError) {
+        if let available = library.storage.availableCapacity, available < Self.minimumFreeSpace {
+            throw .notEnoughSpace
+        }
     }
 
     private func ensureMicrophoneAccess() async throws(RecordingError) {
@@ -345,15 +362,15 @@ final class AppModel {
     func stopRecording() {
         guard let finished = recorder.stop() else { return }
         guard finished.manifest.isMeeting else {
-            addToLibrary(finished.manifest, duration: finished.duration)
+            addToLibrary(finished.manifest, duration: finished.duration, rootBookmark: finished.rootBookmark)
             return
         }
         isSavingRecording = true
         Task {
             defer { isSavingRecording = false }
             do {
-                let duration = try await MeetingFinisher.mixTracks(of: finished.manifest, storage: library.storage)
-                addToLibrary(finished.manifest, duration: duration)
+                let duration = try await MeetingFinisher.mixTracks(of: finished.manifest, storage: finished.storage)
+                addToLibrary(finished.manifest, duration: duration, rootBookmark: finished.rootBookmark)
             } catch {
                 // The manifest stays on disk, so the meeting is recovered on next launch.
                 Logger.recording.error("Mixing failed: \(error.localizedDescription, privacy: .public)")
@@ -366,12 +383,12 @@ final class AppModel {
     /// saved right away; meetings are mixed and saved on the next launch.
     func stopRecordingForTermination() {
         guard let finished = recorder.stop(), !finished.manifest.isMeeting else { return }
-        _ = try? library.addRecording(manifest: finished.manifest, duration: finished.duration)
+        _ = try? library.addRecording(manifest: finished.manifest, duration: finished.duration, rootBookmark: finished.rootBookmark)
     }
 
-    private func addToLibrary(_ manifest: RecordingManifest, duration: TimeInterval) {
+    private func addToLibrary(_ manifest: RecordingManifest, duration: TimeInterval, rootBookmark: Data?) {
         do {
-            let recording = try library.addRecording(manifest: manifest, duration: duration)
+            let recording = try library.addRecording(manifest: manifest, duration: duration, rootBookmark: rootBookmark)
             reveal(recording)
             encodeIfNeeded(recording)
             if UserDefaults.standard.bool(forKey: SettingsKey.autoTranscribe) {
@@ -393,7 +410,7 @@ final class AppModel {
         guard !pending.isEmpty else { return }
 
         let id = recording.id
-        let storage = library.storage
+        let storage = library.storage(for: recording)
         let bitRate = RecordingSettings.quality.aacBitRate
         encodingIDs.insert(id)
 
@@ -456,6 +473,27 @@ final class AppModel {
         }
         transcription.cancel(recording)
         perform { try library.delete(recording) }
+    }
+
+    // MARK: - Storage location
+
+    /// Lets the user pick the folder for new recordings.
+    func chooseStorageFolder() {
+        guard !recorder.isActive else { return }
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = String(localized: "Auswählen")
+        panel.message = String(localized: "Ordner für neue Aufnahmen wählen")
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        perform { try library.locations.use(url) }
+    }
+
+    func useDefaultStorage() {
+        guard !recorder.isActive else { return }
+        library.locations.useDefault()
     }
 
     func revealInFinder(_ recording: Recording) {

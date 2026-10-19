@@ -7,17 +7,37 @@ import os
 @MainActor
 final class LibraryService {
     let modelContext: ModelContext
-    let storage: RecordingStorage
+    let locations: StorageLocations
 
-    init(modelContext: ModelContext, storage: RecordingStorage = RecordingStorage()) {
+    /// Storage for new recordings (the chosen location).
+    var storage: RecordingStorage { locations.current }
+
+    init(modelContext: ModelContext, locations: StorageLocations) {
         self.modelContext = modelContext
-        self.storage = storage
+        self.locations = locations
+    }
+
+    /// Fixed storage, for tests and previews.
+    convenience init(modelContext: ModelContext, storage: RecordingStorage = RecordingStorage()) {
+        self.init(modelContext: modelContext, locations: StorageLocations(fixed: storage))
+    }
+
+    /// Where a recording's files are (its location at recording time).
+    func storage(for recording: Recording) -> RecordingStorage {
+        locations.storage(forBookmark: recording.storageRootBookmark)
     }
 
     /// Adds a finished recording whose audio files are already on disk, then
     /// removes its manifest. Meetings get their microphone and system tracks too.
+    /// - Parameter rootBookmark: The storage location the files were written to.
     @discardableResult
-    func addRecording(manifest: RecordingManifest, duration: TimeInterval, title: String? = nil) throws(LibraryError) -> Recording {
+    func addRecording(
+        manifest: RecordingManifest,
+        duration: TimeInterval,
+        title: String? = nil,
+        rootBookmark: Data? = nil
+    ) throws(LibraryError) -> Recording {
+        let storage = locations.storage(forBookmark: rootBookmark)
         let recording = Recording(
             id: manifest.id,
             title: title ?? manifest.title,
@@ -25,6 +45,7 @@ final class LibraryService {
             duration: duration,
             source: manifest.source
         )
+        recording.storageRootBookmark = rootBookmark
         modelContext.insert(recording)
         recording.tracks.append(AudioTrack(role: .primary, fileName: manifest.fileName, duration: duration))
         let separateTracks: [(TrackRole, String?)] = [(.microphone, manifest.microphoneFileName), (.system, manifest.systemFileName)]
@@ -51,14 +72,14 @@ final class LibraryService {
     /// URL of a track's file, if it exists on disk.
     func audioURL(for recording: Recording, role: TrackRole) -> URL? {
         guard let track = recording.tracks.first(where: { $0.role == role }) else { return nil }
-        let url = storage.fileURL(for: recording.id, fileName: track.fileName)
+        let url = storage(for: recording).fileURL(for: recording.id, fileName: track.fileName)
         return FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) ? url : nil
     }
 
     /// Points a track to a new file (e.g. after AAC encoding) and deletes the old one.
     func replaceFile(of track: AudioTrack, in recording: Recording, with fileName: String) throws(LibraryError) {
         guard track.fileName != fileName else { return }
-        let oldURL = storage.fileURL(for: recording.id, fileName: track.fileName)
+        let oldURL = storage(for: recording).fileURL(for: recording.id, fileName: track.fileName)
         track.fileName = fileName
         try save()
         try? FileManager.default.removeItem(at: oldURL)
@@ -75,6 +96,7 @@ final class LibraryService {
     /// Deletes a recording, its transcript and its audio files.
     func delete(_ recording: Recording) throws(LibraryError) {
         let id = recording.id
+        let storage = storage(for: recording)
         modelContext.delete(recording)
         try save()
         // Files go last: if saving fails, the recording stays intact and playable.

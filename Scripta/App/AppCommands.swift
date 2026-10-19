@@ -8,6 +8,13 @@ struct AppCommands: Commands {
         let recorder = appModel.recorder
         let player = appModel.player
 
+        CommandGroup(replacing: .appInfo) {
+            Button("Über Scripta") {
+                NSApp.orderFrontStandardAboutPanel(options: [.credits: AboutCredits.text])
+                NSApp.activate()
+            }
+        }
+
         CommandGroup(replacing: .newItem) {
             Button("Neue Aufnahme", systemImage: "record.circle") {
                 Task { await appModel.startRecording() }
