@@ -19,7 +19,7 @@ Building from source also needs **Xcode 26** or later, free on the Mac App Store
 
 ## Installation
 
-### Download (recommended)
+### Option 1: Download (recommended)
 
 1. Go to the [latest release](https://github.com/saibot-strg/scripta/releases/latest) and download **Scripta-x.y.z.dmg**.
 2. Open the DMG and drag **Scripta** onto the **Applications** folder.
@@ -34,7 +34,7 @@ To check that your download is intact, compare its checksum with the `.sha256` f
 shasum -a 256 ~/Downloads/Scripta-*.dmg
 ```
 
-### Build from source
+### Option 2: Build from source
 
 #### 1. Set up Xcode
 
