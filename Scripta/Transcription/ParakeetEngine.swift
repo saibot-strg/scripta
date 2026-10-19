@@ -2,17 +2,20 @@ import Foundation
 import FluidAudio
 import os
 
-/// NVIDIA Parakeet TDT 0.6B v3 (multilingual, 25 European languages) through
-/// FluidAudio: CoreML on the Apple Neural Engine, fully offline once the model
-/// is downloaded. Long files are read from disk in 15 s windows, so memory
-/// stays flat even for hour-long recordings.
+/// Parakeet Ultra (multilingual, 25 European languages) through FluidAudio:
+/// CoreML on the Apple Neural Engine, fully offline once the model is
+/// downloaded. Ultra is moondream's post-training of NVIDIA Parakeet TDT 0.6B
+/// v3: same architecture and speed, lower error rate in every language.
+/// Long files are read from disk in 15 s windows, so memory stays flat even
+/// for hour-long recordings.
 actor ParakeetEngine: TranscriptionEngine {
-    nonisolated let identifier = "parakeet-tdt-0.6b-v3"
+    nonisolated let identifier = "parakeet-ultra"
 
-    /// The re-quantized encoder avoids token corruption of the original int8
-    /// encoder in some contexts (FluidAudio issue #760); ~640 MB in total.
-    static let encoderPrecision: ParakeetEncoderPrecision = .int8V2
-    static let version: AsrModelVersion = .v3
+    /// Ultra ships a single int8 encoder (~630 MB in total), so there is no
+    /// encoder precision to choose.
+    static let version: AsrModelVersion = .ultra
+    /// Models of earlier Scripta versions, removed once Ultra is ready.
+    static let legacyVersions: [AsrModelVersion] = [.v3]
 
     private var manager: AsrManager?
     /// Separate manager for dictation, sharing the loaded models: it can run
@@ -26,7 +29,21 @@ actor ParakeetEngine: TranscriptionEngine {
 
     /// True if all model files are on disk (no network needed).
     nonisolated static var isModelInstalled: Bool {
-        AsrModels.modelsExist(at: modelDirectory, version: version, encoderPrecision: encoderPrecision)
+        AsrModels.modelsExist(at: modelDirectory, version: version)
+    }
+
+    /// Deletes models of earlier versions that are still on disk.
+    nonisolated static func removeLegacyModels() {
+        for legacy in legacyVersions {
+            let directory = AsrModels.defaultCacheDirectory(for: legacy)
+            guard FileManager.default.fileExists(atPath: directory.path(percentEncoded: false)) else { continue }
+            do {
+                try FileManager.default.removeItem(at: directory)
+                Logger.transcription.notice("Removed legacy model \(directory.lastPathComponent, privacy: .public)")
+            } catch {
+                Logger.transcription.error("Could not remove legacy model: \(error.localizedDescription, privacy: .public)")
+            }
+        }
     }
 
     func prepare(progress: @escaping @Sendable (ModelPreparation) -> Void) async throws {
@@ -34,7 +51,6 @@ actor ParakeetEngine: TranscriptionEngine {
         let wasInstalled = Self.isModelInstalled
         let models = try await AsrModels.downloadAndLoad(
             version: Self.version,
-            encoderPrecision: Self.encoderPrecision,
             progressHandler: { update in
                 switch update.phase {
                 case .listing, .downloading:
@@ -55,6 +71,8 @@ actor ParakeetEngine: TranscriptionEngine {
         var warmUpState = try TdtDecoderState()
         _ = try? await dictationManager.transcribe([Float](repeating: 0, count: 16_000), decoderState: &warmUpState, language: nil)
         Logger.transcription.notice("Parakeet ready (downloaded now: \(!wasInstalled, privacy: .public))")
+        // Only now: if the download had failed, the old model would still be there.
+        Self.removeLegacyModels()
     }
 
     func transcribe(fileURL: URL, progress: @escaping @Sendable (Double) -> Void) async throws -> EngineTranscript {

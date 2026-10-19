@@ -9,7 +9,7 @@ struct EngineTranscript: Sendable {
 /// Speech-to-text backend. Keeping this small lets other engines (e.g. a
 /// Whisper variant) replace Parakeet without touching the rest of the app.
 protocol TranscriptionEngine: Sendable {
-    /// Stored with each transcript, e.g. "parakeet-tdt-0.6b-v3".
+    /// Stored with each transcript, e.g. "parakeet-ultra".
     var identifier: String { get }
 
     /// Downloads (first run) and loads the model. Progress is 0...1.

@@ -5,7 +5,7 @@ Local transcription for the Mac. Scripta records voice notes and meetings, impor
 - **Record** voice notes with your microphone
 - **Record meetings** with your microphone ("Me") and system audio ("Others") on separate tracks, e.g. for Zoom, Teams or browser meetings
 - **Import** audio and video files from the menu or by dragging them into the window
-- **Transcribe** with NVIDIA Parakeet, which detects English, German and 23 other European languages automatically
+- **Transcribe** with NVIDIA Parakeet Ultra, which detects English, German and 23 other European languages automatically
 - **Dictate in any app:** hold a shortcut, speak, let go, and the text appears at your cursor
 - **Export** as plain text, Markdown, subtitles (SRT, WebVTT) or JSON with timestamps
 
@@ -234,5 +234,5 @@ To publish a release, push a version tag such as `git tag v0.2.0 && git push ori
 
 ## Acknowledgments
 
-- Speech recognition: [NVIDIA Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Scripta uses the [CoreML conversion by FluidInference](https://huggingface.co/FluidInference/parakeet-tdt-0.6b-v3-coreml).
+- Speech recognition: [Parakeet Ultra](https://huggingface.co/moondream/parakeet-ultra) by moondream, a post-training of [NVIDIA Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3). Both are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Scripta uses the [CoreML conversion by FluidInference](https://huggingface.co/FluidInference/parakeet-ultra-coreml).
 - [FluidAudio](https://github.com/FluidInference/FluidAudio) by FluidInference, Apache License 2.0

@@ -198,7 +198,7 @@ private struct TranscriptionSettingsView: View {
 
             Section {
                 LabeledContent("Modell") {
-                    Text(verbatim: "Parakeet TDT 0.6B v3")
+                    Text(verbatim: "Parakeet Ultra")
                 }
                 LabeledContent("Status") {
                     modelStatus(service.modelState)
@@ -231,7 +231,7 @@ private struct TranscriptionSettingsView: View {
             } header: {
                 Text("Spracherkennung")
             } footer: {
-                Text("Läuft auf der Neural Engine dieses Macs. Das Modell wird einmalig von Hugging Face geladen; danach arbeitet Scripta komplett offline. Modell: NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference.")
+                Text("Läuft auf der Neural Engine dieses Macs. Das Modell wird einmalig von Hugging Face geladen; danach arbeitet Scripta komplett offline. Modell: Parakeet Ultra von moondream auf Basis von NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference.")
                     .foregroundStyle(.secondary)
             }
         }

@@ -107,6 +107,7 @@ final class TranscriptionService {
     func deleteModel() async {
         await engine.unload()
         try? FileManager.default.removeItem(at: ParakeetEngine.modelDirectory)
+        ParakeetEngine.removeLegacyModels()
         modelState = .notInstalled
     }
 

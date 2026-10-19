@@ -9,7 +9,7 @@ enum AboutCredits {
         paragraph.paragraphSpacing = 6
         let lines = [
             String(localized: "Lokale Transkription. Audio und Text bleiben auf diesem Mac."),
-            String(localized: "Spracherkennung: NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference."),
+            String(localized: "Spracherkennung: Parakeet Ultra von moondream auf Basis von NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference."),
             String(localized: "FluidAudio und Textnormalisierung von FluidInference (Apache License 2.0)."),
         ]
         return NSAttributedString(

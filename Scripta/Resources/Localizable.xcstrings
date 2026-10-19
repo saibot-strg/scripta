@@ -1671,12 +1671,12 @@
         }
       }
     },
-    "Läuft auf der Neural Engine dieses Macs. Das Modell wird einmalig von Hugging Face geladen; danach arbeitet Scripta komplett offline. Modell: NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference." : {
+    "Läuft auf der Neural Engine dieses Macs. Das Modell wird einmalig von Hugging Face geladen; danach arbeitet Scripta komplett offline. Modell: Parakeet Ultra von moondream auf Basis von NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Runs on this Mac's Neural Engine. The model is downloaded once from Hugging Face; afterwards Scripta works fully offline. Model: NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML version by FluidInference."
+            "value" : "Runs on this Mac's Neural Engine. The model is downloaded once from Hugging Face; afterwards Scripta works fully offline. Model: Parakeet Ultra by moondream, based on NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML version by FluidInference."
           }
         }
       }
@@ -2361,12 +2361,12 @@
         }
       }
     },
-    "Spracherkennung: NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference." : {
+    "Spracherkennung: Parakeet Ultra von moondream auf Basis von NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speech recognition: NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML version by FluidInference."
+            "value" : "Speech recognition: Parakeet Ultra by moondream, based on NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML version by FluidInference."
           }
         }
       }
