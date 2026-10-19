@@ -24,6 +24,8 @@ struct MeetingSourceMenu: View {
                 }
             }
         }
-        .onAppear { appModel.refreshMeetingApps() }
+        // No refresh from here: menus rebuild their content on every change,
+        // so a refresh in onAppear would loop. AppModel refreshes on app
+        // launches and quits.
     }
 }

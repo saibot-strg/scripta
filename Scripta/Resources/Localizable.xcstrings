@@ -151,12 +151,42 @@
         }
       }
     },
+    "Ab hier abspielen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play from Here"
+          }
+        }
+      }
+    },
     "Abbrechen" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "Abschnitt bearbeiten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit section"
+          }
+        }
+      }
+    },
+    "Abschnitt kopieren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Section"
           }
         }
       }
@@ -321,6 +351,16 @@
         }
       }
     },
+    "Aufnahme läuft · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording · %@"
+          }
+        }
+      }
+    },
     "Aufnahme löschen?" : {
       "localizations" : {
         "en" : {
@@ -421,6 +461,16 @@
         }
       }
     },
+    "Auswählen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose"
+          }
+        }
+      }
+    },
     "Automatisch" : {
       "localizations" : {
         "en" : {
@@ -437,6 +487,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transcribe automatically"
+          }
+        }
+      }
+    },
+    "Bearbeitet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edited"
+          }
+        }
+      }
+    },
+    "Bearbeitet – klicken zum erneuten Bearbeiten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edited – click to edit again"
           }
         }
       }
@@ -507,6 +577,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Permissions"
+          }
+        }
+      }
+    },
+    "Bestehende Aufnahmen bleiben, wo sie sind. Ordner in iCloud Drive oder auf externen Platten funktionieren, solange sie verfügbar sind." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Existing recordings stay where they are. Folders in iCloud Drive or on external disks work as long as they are available."
           }
         }
       }
@@ -791,6 +871,26 @@
         }
       }
     },
+    "Diktat ist ausgeschaltet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation is off"
+          }
+        }
+      }
+    },
+    "Diktat: %@ halten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation: hold %@"
+          }
+        }
+      }
+    },
     "Du kannst die App währenddessen normal weiter benutzen." : {
       "localizations" : {
         "en" : {
@@ -837,6 +937,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About 640 MB once, fully offline afterwards."
+          }
+        }
+      }
+    },
+    "Einstellungen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings …"
           }
         }
       }
@@ -981,6 +1091,16 @@
         }
       }
     },
+    "FluidAudio und Textnormalisierung von FluidInference (Apache License 2.0)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FluidAudio and text normalization by FluidInference (Apache License 2.0)."
+          }
+        }
+      }
+    },
     "Folgt in einem späteren Meilenstein" : {
       "localizations" : {
         "en" : {
@@ -1061,6 +1181,16 @@
         }
       }
     },
+    "Für eine Aufnahme werden mindestens 500 MB freier Speicher benötigt. Lösche nicht mehr benötigte Dateien oder wähle in den Einstellungen einen anderen Speicherort." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A recording needs at least 500 MB of free space. Delete files you no longer need or choose another storage location in Settings."
+          }
+        }
+      }
+    },
     "Für sofortige Ergebnisse bleibt das Sprachmodell geladen, solange das Diktat aktiv ist (einige hundert MB Arbeitsspeicher)." : {
       "localizations" : {
         "en" : {
@@ -1097,6 +1227,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yesterday"
+          }
+        }
+      }
+    },
+    "Gilt für Aufnahmen, Meetings („Ich“) und das Diktat." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used for recordings, meetings (“Me”) and dictation."
+          }
+        }
+      }
+    },
+    "Gilt für alle Abschnitte dieses Sprechers. Leer lassen für den Standardnamen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applies to all sections of this speaker. Leave empty for the default name."
           }
         }
       }
@@ -1411,6 +1561,16 @@
         }
       }
     },
+    "Lokale Transkription. Audio und Text bleiben auf diesem Mac." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local transcription. Audio and text stay on this Mac."
+          }
+        }
+      }
+    },
     "Läuft" : {
       "localizations" : {
         "en" : {
@@ -1501,12 +1661,32 @@
         }
       }
     },
+    "Meeting aufnehmen mit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record Meeting With"
+          }
+        }
+      }
+    },
     "Meeting aufnehmen: Mikrofon und Systemaudio getrennt (⇧⌘N)" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Record a meeting: microphone and system audio as separate tracks (⇧⌘N)"
+          }
+        }
+      }
+    },
+    "Meeting läuft · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting · %@"
           }
         }
       }
@@ -1601,6 +1781,16 @@
         }
       }
     },
+    "Name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
     "Neu laden" : {
       "localizations" : {
         "en" : {
@@ -1627,6 +1817,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "New recording (⌘N)"
+          }
+        }
+      }
+    },
+    "Neue Aufnahmen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Recordings"
           }
         }
       }
@@ -1691,6 +1891,16 @@
         }
       }
     },
+    "Nicht verbunden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Connected"
+          }
+        }
+      }
+    },
     "Nichts erkannt" : {
       "localizations" : {
         "en" : {
@@ -1737,6 +1947,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Ordner für neue Aufnahmen wählen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a folder for new recordings"
+          }
+        }
+      }
+    },
+    "Originaltext wiederherstellen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore Original Text"
           }
         }
       }
@@ -1871,12 +2101,42 @@
         }
       }
     },
+    "Scripta beenden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit Scripta"
+          }
+        }
+      }
+    },
     "Scripta wurde während einer Aufnahme beendet. Alles bis zu diesem Zeitpunkt ist gespeichert." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scripta quit during a recording. Everything up to that point has been saved."
+          }
+        }
+      }
+    },
+    "Scripta öffnen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Scripta"
+          }
+        }
+      }
+    },
+    "Scripta – Aufnahme läuft" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scripta – recording"
           }
         }
       }
@@ -1961,6 +2221,16 @@
         }
       }
     },
+    "Spracherkennung: NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speech recognition: NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML version by FluidInference."
+          }
+        }
+      }
+    },
     "Sprechblasen" : {
       "localizations" : {
         "en" : {
@@ -1981,6 +2251,16 @@
         }
       }
     },
+    "Sprecher umbenennen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename Speaker"
+          }
+        }
+      }
+    },
     "Springe zu %@" : {
       "localizations" : {
         "en" : {
@@ -1997,6 +2277,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Standard (64 kbit/s)"
+          }
+        }
+      }
+    },
+    "Standard verwenden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Default"
           }
         }
       }
@@ -2027,6 +2317,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Status"
+          }
+        }
+      }
+    },
+    "Symbol in der Menüleiste" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show in Menu Bar"
           }
         }
       }
@@ -2077,6 +2377,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "System Settings › Privacy & Security › Screen & System Audio Recording"
+          }
+        }
+      }
+    },
+    "Systemstandard" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Default"
           }
         }
       }
@@ -2147,6 +2457,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Text (.txt)"
+          }
+        }
+      }
+    },
+    "Text bearbeiten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Text"
           }
         }
       }
@@ -2451,6 +2771,16 @@
         }
       }
     },
+    "Zu wenig freier Speicherplatz" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Enough Free Space"
+          }
+        }
+      }
+    },
     "Zugriff erlauben" : {
       "localizations" : {
         "en" : {
@@ -2471,12 +2801,32 @@
         }
       }
     },
+    "Ändern …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change …"
+          }
+        }
+      }
+    },
     "Öffnen" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open"
+          }
+        }
+      }
+    },
+    "Über Scripta" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About Scripta"
           }
         }
       }
@@ -2497,6 +2847,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“%1$@” could not be imported: %2$@"
+          }
+        }
+      }
+    },
+    "„%@“ umbenennen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename “%@” …"
           }
         }
       }

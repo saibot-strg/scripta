@@ -48,7 +48,12 @@ struct ScriptaApp: App {
                 .environment(appModel)
         }
 
-        MenuBarExtra(isInserted: $showsMenuBarIcon) {
+        // MenuBarExtra writes `isInserted` back on every update; writing the
+        // same value to UserDefaults would trigger another update, endlessly.
+        MenuBarExtra(isInserted: Binding(
+            get: { showsMenuBarIcon },
+            set: { if $0 != showsMenuBarIcon { showsMenuBarIcon = $0 } }
+        )) {
             MenuBarContent()
                 .environment(appModel)
         } label: {

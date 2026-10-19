@@ -315,7 +315,9 @@ final class AppModel {
     }
 
     func refreshMeetingApps() {
-        meetingApps = AudioAppCatalog.availableApps()
+        let apps = AudioAppCatalog.availableApps()
+        // Assign only on change: every assignment re-renders the menus.
+        if apps != meetingApps { meetingApps = apps }
     }
 
     private func defaultMeetingTarget() -> SystemAudioTarget {
