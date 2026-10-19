@@ -1,0 +1,53 @@
+# Builds Scripta and publishes it as a downloadable DMG.
+#
+# - Push a version tag (git tag v0.2.0 && git push origin v0.2.0) to create a
+#   GitHub release with the DMG and its SHA-256 checksum.
+# - Run it manually (Actions → Release → Run workflow) to build a test DMG
+#   without publishing anything; it is attached to the run as an artifact.
+#
+# Builds are ad-hoc signed and not notarized (no paid Apple Developer
+# membership), so users confirm the first launch with "Open Anyway".
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Read version from tag
+        if: github.ref_type == 'tag'
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Build and package
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: Scripts/package-release.sh ${VERSION:-}
+
+      - name: Upload DMG to this run
+        uses: actions/upload-artifact@v4
+        with:
+          name: Scripta
+          path: dist/
+          if-no-files-found: error
+
+      - name: Publish release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.dmg dist/*.sha256 \
+            --title "Scripta $VERSION" \
+            --notes-file .github/release-notes.md --generate-notes \
+            --verify-tag

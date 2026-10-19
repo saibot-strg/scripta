@@ -15,3 +15,5 @@ Config/Local.xcconfig
 .swiftpm/
 .build/
 /logo
+# Release packaging (Scripts/package-release.sh)
+dist/

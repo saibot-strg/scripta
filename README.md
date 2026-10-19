@@ -13,14 +13,30 @@ Local transcription for the Mac. Scripta records voice notes and meetings, impor
 
 - A Mac with **Apple silicon** (M1 or later). Intel Macs are not supported.
 - **macOS 26** or later
-- **Xcode 26** or later, free on the Mac App Store (tested with Xcode 27.1). You don't need an Apple Developer account.
-- An internet connection for the build and, once, for the speech model (about 640 MB). After that, Scripta works offline.
+- An internet connection, once, for the speech model (about 640 MB). After that, Scripta works offline.
 
-There is no prebuilt download yet. You build Scripta from source, which only takes a few minutes.
+Building from source also needs **Xcode 26** or later, free on the Mac App Store. You don't need an Apple Developer account.
 
 ## Installation
 
-### 1. Set up Xcode
+### Download (recommended)
+
+1. Go to the [latest release](https://github.com/saibot-strg/scripta/releases/latest) and download **Scripta-x.y.z.dmg**.
+2. Open the DMG and drag **Scripta** onto the **Applications** folder.
+3. Open Scripta from your Applications folder. macOS says it can't verify the app. Click **Done**.
+4. Open **System Settings → Privacy & Security** and scroll down to **Security**. Next to "Scripta was blocked to protect your Mac", click **Open Anyway**. Confirm with **Open Anyway** and your password or Touch ID.
+
+Step 4 is needed because Scripta isn't notarized by Apple, which requires a paid developer membership. You only need to do it once per version. Each release is built by [GitHub Actions](.github/workflows/release.yml) directly from the source code in this repository.
+
+To check that your download is intact, compare its checksum with the `.sha256` file attached to the release:
+
+```sh
+shasum -a 256 ~/Downloads/Scripta-*.dmg
+```
+
+### Build from source
+
+#### 1. Set up Xcode
 
 1. Install **Xcode** from the Mac App Store.
 2. Open Xcode once and accept the license. You don't need any additional platforms (iOS etc.). You can quit Xcode afterwards.
@@ -36,7 +52,7 @@ There is no prebuilt download yet. You build Scripta from source, which only tak
    sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
    ```
 
-### 2. Clone the repository
+#### 2. Clone the repository
 
 In Terminal:
 
@@ -47,7 +63,7 @@ cd scripta
 
 This puts the source code in a folder called `scripta` in your home folder.
 
-### 3. Build and install
+#### 3. Build and install
 
 ```sh
 Scripts/install.sh
@@ -59,7 +75,7 @@ The script builds Scripta, copies the app to **/Applications** and registers it 
 Done: Scripta is in /Applications and can be found with Spotlight.
 ```
 
-### 4. Launch
+#### 4. Launch
 
 Press **⌘ Space**, type "Scripta" and press Return, or open the app from your Applications folder. Because you built it yourself, it opens without a Gatekeeper warning.
 
@@ -150,6 +166,12 @@ Press **⇧⌘C** to copy the transcript to the clipboard.
 
 ## Updating
 
+Your recordings and settings are kept when you update.
+
+**Downloaded version:** Download the new DMG from the [latest release](https://github.com/saibot-strg/scripta/releases/latest), quit Scripta (⌘Q) and drag the new version into Applications, replacing the old one. Confirm the first launch with **Open Anyway** again, as described above.
+
+**Built from source:**
+
 ```sh
 cd ~/scripta
 git pull
@@ -158,7 +180,7 @@ Scripts/install.sh --wait
 
 With `--wait`, the script builds the new version first, then waits until you quit Scripta (⌘Q), installs the update and opens it. A recording in progress is never interrupted. `--force` quits Scripta without waiting.
 
-After an update, macOS may ask for permissions again. Self-built apps are only signed locally, so macOS treats the new version as a different app.
+After an update, macOS may ask for permissions again. Scripta isn't signed with an Apple Developer ID, so macOS treats each new version as a different app.
 
 ## Uninstalling
 
@@ -174,7 +196,7 @@ After an update, macOS may ask for permissions again. Self-built apps are only s
    ```
 
    If you chose a custom storage location, delete that folder separately.
-3. Move the source folder `~/scripta` to the Trash.
+3. If you built from source, move the folder `~/scripta` to the Trash.
 
 ## Troubleshooting
 
@@ -201,6 +223,8 @@ Another app is already using it. Scripta shows this in the Dictation settings. P
 Open `Scripta.xcodeproj` in Xcode and run the **Scripta** scheme. Debug builds use their own bundle ID (`….Scripta.debug`), so their data and permissions stay separate from the installed app.
 
 By default, builds are signed to run locally. With a stable signature, permissions persist across builds. To set one up, copy `Config/Local.xcconfig.template` to `Config/Local.xcconfig` and enter your team ID. A free Apple ID in Xcode is enough. `Local.xcconfig` is in `.gitignore` and never ends up in the repository.
+
+To publish a release, push a version tag such as `git tag v0.2.0 && git push origin v0.2.0`. The [Release workflow](.github/workflows/release.yml) builds the app with `Scripts/package-release.sh` and attaches the DMG and its checksum to a new GitHub release. You can also run the script locally; release builds are always ad-hoc signed, even if `Local.xcconfig` sets a team.
 
 ## Acknowledgments
 
