@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Merged into the generated Info.plist. This key has no INFOPLIST_KEY_ build setting,
+	     and without it Core Audio taps deliver only silence. English: InfoPlist.xcstrings. -->
+	<!-- Scripta keeps running in the background (dictation shortcut, recordings):
+	     macOS must not terminate it automatically when no window is open. -->
+	<key>NSSupportsAutomaticTermination</key>
+	<false/>
+	<key>NSSupportsSuddenTermination</key>
+	<false/>
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>Scripta nimmt in Meetings den Ton anderer Apps auf, damit „Ich“ und „Andere“ getrennt transkribiert werden können. Die Aufnahmen bleiben auf deinem Mac.</string>
+</dict>
+</plist>

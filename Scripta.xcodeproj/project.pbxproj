@@ -1,0 +1,327 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7A0000000000000000000030 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0000000000000000000031 /* FluidAudio */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7A0000000000000000000011 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7A0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7A0000000000000000000009;
+			remoteInfo = Scripta;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		7A0000000000000000000007 /* Scripta.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scripta.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A0000000000000000000008 /* ScriptaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScriptaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A000000000000000000001C /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		7A000000000000000000001D /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		7A000000000000000000001E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		7A000000000000000000001F /* App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = App.xcconfig; sourceTree = "<group>"; };
+		7A0000000000000000000020 /* Tests.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Tests.xcconfig; sourceTree = "<group>"; };
+		7A0000000000000000000021 /* Scripta.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Scripta.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		7A0000000000000000000005 /* Scripta */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Scripta;
+			sourceTree = "<group>";
+		};
+		7A0000000000000000000006 /* ScriptaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ScriptaTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7A000000000000000000000C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A0000000000000000000030 /* FluidAudio in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A000000000000000000000F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7A0000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				7A0000000000000000000004 /* Config */,
+				7A0000000000000000000005 /* Scripta */,
+				7A0000000000000000000006 /* ScriptaTests */,
+				7A0000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7A0000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7A0000000000000000000007 /* Scripta.app */,
+				7A0000000000000000000008 /* ScriptaTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7A0000000000000000000004 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				7A000000000000000000001C /* Base.xcconfig */,
+				7A000000000000000000001D /* Debug.xcconfig */,
+				7A000000000000000000001E /* Release.xcconfig */,
+				7A000000000000000000001F /* App.xcconfig */,
+				7A0000000000000000000020 /* Tests.xcconfig */,
+				7A0000000000000000000021 /* Scripta.entitlements */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7A0000000000000000000009 /* Scripta */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7A0000000000000000000016 /* Build configuration list for PBXNativeTarget "Scripta" */;
+			buildPhases = (
+				7A000000000000000000000B /* Sources */,
+				7A000000000000000000000C /* Frameworks */,
+				7A000000000000000000000D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7A0000000000000000000005 /* Scripta */,
+			);
+			name = Scripta;
+			packageProductDependencies = (
+				7A0000000000000000000031 /* FluidAudio */,
+			);
+			productName = Scripta;
+			productReference = 7A0000000000000000000007 /* Scripta.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7A000000000000000000000A /* ScriptaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7A0000000000000000000019 /* Build configuration list for PBXNativeTarget "ScriptaTests" */;
+			buildPhases = (
+				7A000000000000000000000E /* Sources */,
+				7A000000000000000000000F /* Frameworks */,
+				7A0000000000000000000010 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7A0000000000000000000012 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				7A0000000000000000000006 /* ScriptaTests */,
+			);
+			name = ScriptaTests;
+			packageProductDependencies = (
+			);
+			productName = ScriptaTests;
+			productReference = 7A0000000000000000000008 /* ScriptaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7A0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2710;
+				LastUpgradeCheck = 2710;
+				TargetAttributes = {
+					7A0000000000000000000009 = {
+						CreatedOnToolsVersion = 27.1;
+					};
+					7A000000000000000000000A = {
+						CreatedOnToolsVersion = 27.1;
+						TestTargetID = 7A0000000000000000000009;
+					};
+				};
+			};
+			buildConfigurationList = 7A0000000000000000000013 /* Build configuration list for PBXProject "Scripta" */;
+			developmentRegion = de;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				de,
+				en,
+				Base,
+			);
+			mainGroup = 7A0000000000000000000002;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7A0000000000000000000032 /* XCRemoteSwiftPackageReference "FluidAudio" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7A0000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7A0000000000000000000009 /* Scripta */,
+				7A000000000000000000000A /* ScriptaTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7A000000000000000000000D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A0000000000000000000010 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7A000000000000000000000B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A000000000000000000000E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7A0000000000000000000012 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7A0000000000000000000009 /* Scripta */;
+			targetProxy = 7A0000000000000000000011 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		7A0000000000000000000014 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A000000000000000000001D /* Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		7A0000000000000000000015 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A000000000000000000001E /* Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		7A0000000000000000000017 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A000000000000000000001F /* App.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		7A0000000000000000000018 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A000000000000000000001F /* App.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		7A000000000000000000001A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A0000000000000000000020 /* Tests.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		7A000000000000000000001B /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A0000000000000000000020 /* Tests.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7A0000000000000000000013 /* Build configuration list for PBXProject "Scripta" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7A0000000000000000000014 /* Debug */,
+				7A0000000000000000000015 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7A0000000000000000000016 /* Build configuration list for PBXNativeTarget "Scripta" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7A0000000000000000000017 /* Debug */,
+				7A0000000000000000000018 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7A0000000000000000000019 /* Build configuration list for PBXNativeTarget "ScriptaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7A000000000000000000001A /* Debug */,
+				7A000000000000000000001B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7A0000000000000000000032 /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FluidInference/FluidAudio.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.17.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7A0000000000000000000031 /* FluidAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A0000000000000000000032 /* XCRemoteSwiftPackageReference "FluidAudio" */;
+			productName = FluidAudio;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 7A0000000000000000000001 /* Project object */;
+}

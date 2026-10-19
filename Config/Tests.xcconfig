@@ -1,0 +1,9 @@
+// Tests.xcconfig
+// Unit tests run inside the app host (access to SwiftData models and services).
+
+PRODUCT_NAME = ScriptaTests
+PRODUCT_BUNDLE_IDENTIFIER = io.github.saibot-strg.ScriptaTests
+GENERATE_INFOPLIST_FILE = YES
+TEST_HOST = $(BUILT_PRODUCTS_DIR)/Scripta.app/Contents/MacOS/Scripta
+BUNDLE_LOADER = $(TEST_HOST)
+SWIFT_EMIT_LOC_STRINGS = NO

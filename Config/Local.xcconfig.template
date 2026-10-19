@@ -1,0 +1,7 @@
+// Local.xcconfig.template
+// Copy to "Local.xcconfig" (git-ignored) and enter your team ID.
+// A stable signature keeps macOS privacy permissions (microphone, system audio)
+// across builds; ad-hoc signed builds are asked again after every build.
+
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+CODE_SIGN_IDENTITY = Apple Development

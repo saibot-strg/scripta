@@ -1,0 +1,30 @@
+// App.xcconfig
+// App target settings.
+
+PRODUCT_NAME = Scripta
+PRODUCT_MODULE_NAME = Scripta
+// Debug builds use their own bundle ID (".debug"), so development data and
+// permissions stay separate from the installed app in /Applications.
+PRODUCT_BUNDLE_IDENTIFIER = io.github.saibot-strg.Scripta$(BUNDLE_ID_SUFFIX)
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+
+// Generated Info.plist; usage descriptions are added with the features that need them.
+GENERATE_INFOPLIST_FILE = YES
+// Keys without an INFOPLIST_KEY_ build setting (system audio capture).
+INFOPLIST_FILE = Config/Info.plist
+INFOPLIST_KEY_CFBundleDisplayName = Scripta
+INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.productivity
+INFOPLIST_KEY_NSHumanReadableCopyright = © 2026 Scripta contributors
+// German source text; English lives in Scripta/Resources/InfoPlist.xcstrings.
+INFOPLIST_KEY_NSMicrophoneUsageDescription = Scripta nimmt über das Mikrofon auf, damit du Sprachnotizen und Gespräche später transkribieren kannst. Die Aufnahmen bleiben auf deinem Mac.
+
+// App Sandbox + Hardened Runtime. Entitlements live in an explicit file so they are easy to review.
+CODE_SIGN_ENTITLEMENTS = Config/Scripta.entitlements
+ENABLE_HARDENED_RUNTIME = YES
+
+// Icon Composer document (Liquid Glass icon with light, dark and clear variants).
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor
+COMBINE_HIDPI_IMAGES = YES
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks
