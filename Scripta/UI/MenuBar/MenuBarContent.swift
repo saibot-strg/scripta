@@ -39,6 +39,11 @@ struct MenuBarContent: View {
         }
 
         Divider()
+        if let update = appModel.updates.availableUpdate {
+            Button("Scripta \(update.version.description) herunterladen …") {
+                appModel.updates.openReleasePage(for: update)
+            }
+        }
         Button("Scripta öffnen") {
             openWindow(id: "main")
             NSApp.activate()

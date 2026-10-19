@@ -20,7 +20,10 @@ struct SidebarView: View {
         }
         .navigationTitle("Scripta")
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            ModelStatusFooter()
+            VStack(spacing: 0) {
+                UpdateFooter()
+                ModelStatusFooter()
+            }
         }
     }
 

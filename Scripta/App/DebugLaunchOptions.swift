@@ -13,9 +13,13 @@ import os
 /// - `-RecordTestMeeting`: like `-RecordTestTone`, but a meeting with two tone tracks.
 /// - `-ProbeSystemAudio`: builds (but doesn't start) the system audio tap and logs it.
 /// - `-AutoPlay <s>`: starts playback after the given delay and logs the player state.
+/// - `-SimulateUpdate <version>`: shows the update note as if GitHub had that release.
+/// - `-ShowSettings`: opens the settings view in a regular window (for `-UISnapshot`).
 @MainActor
 enum DebugLaunchOptions {
     private static let arguments = CommandLine.arguments
+    /// Keeps the `-ShowSettings` window alive.
+    private static var settingsWindow: NSWindow?
 
     static func apply(to model: AppModel) {
         let context = model.library.modelContext
@@ -74,6 +78,20 @@ enum DebugLaunchOptions {
             }
         }
 
+        if let version = value(after: "-SimulateUpdate").flatMap(AppVersion.init) {
+            model.updates.simulateUpdate(to: version)
+        }
+
+        if arguments.contains("-ShowSettings") {
+            Task {
+                // The Settings scene can't be opened from here; the same view in a window can.
+                let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView().environment(model)))
+                window.title = "Settings"
+                window.makeKeyAndOrderFront(nil)
+                settingsWindow = window
+            }
+        }
+
         if arguments.contains("-UISnapshot") {
             Task {
                 try? await Task.sleep(for: .seconds(2))
@@ -107,6 +125,9 @@ enum DebugLaunchOptions {
             }
             if model.recorder.isActive {
                 RecordingCapsuleView().frame(width: 360)
+            }
+            if model.updates.availableUpdate != nil {
+                UpdateFooter().frame(width: 240)
             }
         }
         .padding(28)

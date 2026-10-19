@@ -11,7 +11,8 @@
 	<!-- Remember a chosen storage folder across launches (security-scoped bookmark). -->
 	<key>com.apple.security.files.bookmarks.app-scope</key>
 	<true/>
-	<!-- Outgoing connections, used only to download the speech model once (Hugging Face). -->
+	<!-- Outgoing connections: the one-time speech model download (Hugging Face) and the
+	     optional daily update check (GitHub API). -->
 	<key>com.apple.security.network.client</key>
 	<true/>
 	<!-- Microphone recording (also required by the Hardened Runtime). -->

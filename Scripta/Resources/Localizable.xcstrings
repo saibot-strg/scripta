@@ -291,6 +291,16 @@
         }
       }
     },
+    "Auf GitHub wurde keine veröffentlichte Version gefunden." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No published version was found on GitHub."
+          }
+        }
+      }
+    },
     "Aufnahme" : {
       "localizations" : {
         "en" : {
@@ -477,6 +487,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Automatic"
+          }
+        }
+      }
+    },
+    "Automatisch nach Updates suchen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check for updates automatically"
           }
         }
       }
@@ -891,12 +911,42 @@
         }
       }
     },
+    "Download-Seite öffnen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Download Page"
+          }
+        }
+      }
+    },
     "Du kannst die App währenddessen normal weiter benutzen." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "You can keep using the app in the meantime."
+          }
+        }
+      }
+    },
+    "Du verwendest Version %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're using version %@."
+          }
+        }
+      }
+    },
+    "Du verwendest Version %@. Lade die neue Version herunter und ersetze Scripta im Programme-Ordner damit." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're using version %@. Download the new version and use it to replace Scripta in your Applications folder."
           }
         }
       }
@@ -1037,6 +1087,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appearance"
+          }
+        }
+      }
+    },
+    "Erst bei der nächsten Version wieder hinweisen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don't remind me until the next version"
           }
         }
       }
@@ -1251,12 +1311,32 @@
         }
       }
     },
+    "GitHub hat mit Fehler %lld geantwortet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub responded with error %lld."
+          }
+        }
+      }
+    },
     "Hell" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Light"
+          }
+        }
+      }
+    },
+    "Herunterladen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download"
           }
         }
       }
@@ -1437,6 +1517,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Download Now"
+          }
+        }
+      }
+    },
+    "Jetzt suchen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Now"
           }
         }
       }
@@ -1781,6 +1871,16 @@
         }
       }
     },
+    "Nach Updates suchen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check for Updates …"
+          }
+        }
+      }
+    },
     "Name" : {
       "localizations" : {
         "en" : {
@@ -2091,6 +2191,26 @@
         }
       }
     },
+    "Scripta %@ herunterladen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download Scripta %@ …"
+          }
+        }
+      }
+    },
+    "Scripta %@ ist verfügbar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scripta %@ is available"
+          }
+        }
+      }
+    },
     "Scripta arbeitet komplett lokal. Audio und Transkripte verlassen deinen Mac nicht." : {
       "localizations" : {
         "en" : {
@@ -2107,6 +2227,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quit Scripta"
+          }
+        }
+      }
+    },
+    "Scripta fragt einmal am Tag bei GitHub nach, ob es eine neue Version gibt. Daten über deine Aufnahmen oder deine Nutzung werden dabei nicht übertragen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scripta asks GitHub once a day whether a new version is available. No data about your recordings or your usage is sent."
+          }
+        }
+      }
+    },
+    "Scripta ist auf dem neuesten Stand" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scripta is up to date"
           }
         }
       }
@@ -2271,6 +2411,16 @@
         }
       }
     },
+    "Später" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        }
+      }
+    },
     "Standard (64 kbit/s)" : {
       "localizations" : {
         "en" : {
@@ -2317,6 +2467,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Status"
+          }
+        }
+      }
+    },
+    "Suche nach Updates fehlgeschlagen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't check for updates"
           }
         }
       }
@@ -2671,6 +2831,26 @@
         }
       }
     },
+    "Version %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@"
+          }
+        }
+      }
+    },
+    "Version %@ ist die aktuelle Version." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@ is the latest version."
+          }
+        }
+      }
+    },
     "Wie System" : {
       "localizations" : {
         "en" : {
@@ -2827,6 +3007,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About Scripta"
+          }
+        }
+      }
+    },
+    "Überspringen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
           }
         }
       }

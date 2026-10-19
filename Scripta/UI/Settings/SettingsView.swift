@@ -28,6 +28,8 @@ struct SettingsView: View {
 }
 
 private struct GeneralSettingsView: View {
+    @Environment(AppModel.self) private var appModel
+    @AppStorage(SettingsKey.checksForUpdates) private var checksForUpdates = true
     /// Off by default: recording and transcribing are separate steps.
     @AppStorage(SettingsKey.autoTranscribe) private var autoTranscribe = false
     @AppStorage(SettingsKey.appearance) private var appearance: AppAppearance = .system
@@ -63,10 +65,25 @@ private struct GeneralSettingsView: View {
                 Text("Praktisch für das Diktat: Das Tastenkürzel funktioniert, solange Scripta läuft.")
                     .foregroundStyle(.secondary)
             }
+            Section {
+                Toggle("Automatisch nach Updates suchen", isOn: $checksForUpdates)
+                    .onChange(of: checksForUpdates) { _, enabled in
+                        if enabled { Task { await appModel.updates.checkIfDue() } }
+                    }
+                LabeledContent("Version \(appModel.updates.currentVersion.description)") {
+                    Button("Jetzt suchen") {
+                        Task { await appModel.updates.checkNow() }
+                    }
+                    .disabled(appModel.updates.isChecking)
+                }
+            } footer: {
+                Text("Scripta fragt einmal am Tag bei GitHub nach, ob es eine neue Version gibt. Daten über deine Aufnahmen oder deine Nutzung werden dabei nicht übertragen.")
+                    .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
-        .frame(height: 330)
+        .frame(height: 430)
     }
 }
 

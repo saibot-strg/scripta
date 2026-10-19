@@ -164,9 +164,13 @@ Press **⇧⌘C** to copy the transcript to the clipboard.
 - Recordings, transcripts and the speech model are stored in the app's container:
   `~/Library/Containers/io.github.saibot-strg.Scripta/`
 - You can choose a different folder for recordings under **Settings → Recording → Storage Location**. Folders in iCloud Drive or on external drives work too.
-- Scripta runs in the macOS App Sandbox. Its only network connection is the one-time download of the speech model.
+- Scripta runs in the macOS App Sandbox. It connects to the internet for two things only: the one-time download of the speech model, and a daily check on GitHub for a new version. The update check sends no data about your recordings or your usage, and you can turn it off under **Settings → General → Check for updates automatically**.
 
 ## Updating
+
+Scripta checks GitHub once a day for a new version. When one is available, a note appears at the bottom of the sidebar and in the menu bar menu. You can also check yourself with **Scripta → Check for Updates …**. Scripta doesn't install updates by itself; the note takes you to the download page.
+
+To get an email for every new version, click **Watch → Custom → Releases** at the top of this repository (requires a GitHub account).
 
 Your recordings and settings are kept when you update.
 

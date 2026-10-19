@@ -13,6 +13,14 @@ enum SettingsKey {
     /// UID of the microphone ("" = system default).
     static let microphone = "recording.microphone"
     static let showsMenuBarIcon = "menuBar.visible"
+    /// Look for a new release on GitHub once a day (on by default).
+    static let checksForUpdates = "updates.automatic"
+    static let lastUpdateCheck = "updates.lastCheck"
+    /// Latest release seen on GitHub, so the update note survives a relaunch.
+    static let latestReleaseVersion = "updates.latestVersion"
+    static let latestReleasePage = "updates.latestPage"
+    /// Release the user chose to skip, e.g. "0.2.0".
+    static let skippedUpdateVersion = "updates.skippedVersion"
 }
 
 /// Light or dark appearance, independent of the system setting if wanted.

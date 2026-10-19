@@ -14,6 +14,7 @@ final class AppModel {
     let transcription: TranscriptionService
     let dictation: DictationController
     let player = PlayerModel()
+    let updates = UpdateChecker()
 
     var sidebarSelection: LibraryFilter? = .all
     /// Selection by the recording's own UUID. SwiftData's `persistentModelID`
@@ -76,6 +77,7 @@ final class AppModel {
         }
         transcription.resumePendingJobs()
         dictation.applySettings()
+        updates.startAutomaticChecks()
         await transcription.installModelIfNeeded()
     }
 

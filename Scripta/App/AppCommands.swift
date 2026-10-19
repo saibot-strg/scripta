@@ -13,6 +13,10 @@ struct AppCommands: Commands {
                 NSApp.orderFrontStandardAboutPanel(options: [.credits: AboutCredits.text])
                 NSApp.activate()
             }
+            Button("Nach Updates suchen …") {
+                Task { await appModel.updates.checkNow() }
+            }
+            .disabled(appModel.updates.isChecking)
         }
 
         CommandGroup(replacing: .newItem) {
