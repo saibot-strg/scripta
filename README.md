@@ -99,6 +99,8 @@ macOS asks for each permission the first time Scripta needs it. For an overview 
 
 ### Record
 
+
+
 Click **New Recording** (⌘N) in the toolbar. Press **⌘↩** to stop and save the recording. To pause, use the **File** menu. Scripta saves continuously while recording. If it gets interrupted, for example by a crash, the recording is recovered the next time Scripta launches.
 
 ### Record meetings
