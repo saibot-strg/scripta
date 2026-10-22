@@ -431,6 +431,16 @@
         }
       }
     },
+    "Anlegen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create"
+          }
+        }
+      }
+    },
     "Anzahl der Personen korrigieren" : {
       "localizations" : {
         "en" : {
@@ -647,6 +657,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ascending"
+          }
+        }
+      }
+    },
+    "Aus dem Ordner nehmen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from Folder"
           }
         }
       }
@@ -1097,6 +1117,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The recording file could not be created."
+          }
+        }
+      }
+    },
+    "Die Aufnahmen darin bleiben erhalten." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The recordings in it are kept."
           }
         }
       }
@@ -1791,6 +1821,16 @@
         }
       }
     },
+    "In Ordner" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move to Folder"
+          }
+        }
+      }
+    },
     "In Warteschlange" : {
       "localizations" : {
         "en" : {
@@ -2391,6 +2431,16 @@
         }
       }
     },
+    "Neuer Ordner" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Folder"
+          }
+        }
+      }
+    },
     "Neuer Sprecher" : {
       "localizations" : {
         "en" : {
@@ -2471,6 +2521,16 @@
         }
       }
     },
+    "Noch keine Ordner – lege sie links mit + an." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No folders yet – create them on the left with +."
+          }
+        }
+      }
+    },
     "Noch niemand. Benenne Sprecher in einem Transkript, dann merkt sich Scripta ihre Stimmen." : {
       "localizations" : {
         "en" : {
@@ -2511,12 +2571,82 @@
         }
       }
     },
+    "Ordner" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folders"
+          }
+        }
+      }
+    },
+    "Ordner anlegen mit +, dann Aufnahmen hineinziehen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create folders with +, then drag recordings onto them."
+          }
+        }
+      }
+    },
     "Ordner für neue Aufnahmen wählen" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choose a folder for new recordings"
+          }
+        }
+      }
+    },
+    "Ordner ist leer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder Is Empty"
+          }
+        }
+      }
+    },
+    "Ordner löschen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Folder"
+          }
+        }
+      }
+    },
+    "Ordner löschen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Folder …"
+          }
+        }
+      }
+    },
+    "Ordner umbenennen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename Folder"
+          }
+        }
+      }
+    },
+    "Ordner „%@“ löschen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete folder “%@”?"
           }
         }
       }
@@ -3607,6 +3737,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "While recording, audio is saved losslessly and crash-safe. Afterwards the file is stored in the chosen format. The format does not affect transcription."
+          }
+        }
+      }
+    },
+    "Zieh Aufnahmen aus „Alle Aufnahmen“ oder Audiodateien aus dem Finder auf diesen Ordner links." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag recordings from “All Recordings” or audio files from the Finder onto this folder on the left."
           }
         }
       }

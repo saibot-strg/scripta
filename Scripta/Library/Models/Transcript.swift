@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-extension LibrarySchemaV1 {
+extension LibrarySchemaV2 {
     /// The transcript of a recording: ordered segments plus the speakers in it.
     @Model
     final class Transcript {

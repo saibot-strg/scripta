@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-extension LibrarySchemaV1 {
+extension LibrarySchemaV2 {
     /// A recording or imported file in the library.
     ///
     /// Audio data never lives in the database. Each recording owns a folder named
@@ -31,6 +31,9 @@ extension LibrarySchemaV1 {
 
         @Relationship(deleteRule: .cascade, inverse: \Transcript.recording)
         var transcript: Transcript?
+
+        /// The sidebar folder it was filed in (since schema 2).
+        var folder: Folder?
 
         init(
             id: UUID = UUID(),

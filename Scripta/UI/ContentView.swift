@@ -18,7 +18,7 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 300)
         } content: {
             RecordingListView(
-                filter: appModel.sidebarSelection ?? .all,
+                item: appModel.sidebarSelection ?? .all,
                 sortField: $sortField,
                 sortAscending: $sortAscending,
                 searchText: appModel.searchText,

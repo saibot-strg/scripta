@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-extension LibrarySchemaV1 {
+extension LibrarySchemaV2 {
     /// A speaker within one transcript ("Ich", "Andere" or a diarized speaker).
     @Model
     final class SpeakerLabel {

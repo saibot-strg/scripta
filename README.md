@@ -8,6 +8,7 @@ Local transcription for the Mac. Scripta records voice notes and meetings, impor
 - **Transcribe** with NVIDIA Parakeet Ultra, which detects English, German and 23 other European languages automatically
 - **Tell speakers apart:** each voice in a meeting or recording gets its own label ("Speaker 1", "Speaker 2" …), which you can rename
 - **Dictate in any app:** hold a shortcut, speak, let go, and the text appears at your cursor
+- **Organize** recordings in folders: create them in the sidebar and drag recordings or audio files onto them; swipe left on a recording to delete it
 - **Export** as plain text, Markdown, subtitles (SRT, WebVTT) or JSON with timestamps
 
 ## Requirements

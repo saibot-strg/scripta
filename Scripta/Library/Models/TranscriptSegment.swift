@@ -9,7 +9,7 @@ struct WordTiming: Codable, Hashable, Sendable {
     var confidence: Float?
 }
 
-extension LibrarySchemaV1 {
+extension LibrarySchemaV2 {
     /// A timed section of a transcript (roughly a sentence or a speaker turn).
     @Model
     final class TranscriptSegment {
@@ -42,6 +42,13 @@ extension LibrarySchemaV1 {
 
 extension TranscriptSegment {
     var isEdited: Bool { originalText != nil }
+
+    /// When this was said, for recordings made in Scripta (they start at
+    /// `createdAt`). Nil for imports: their creation date is the import.
+    var spokenAt: Date? {
+        guard let recording = transcript?.recording, recording.source != .importedFile else { return nil }
+        return recording.createdAt.addingTimeInterval(start)
+    }
 
     var words: [WordTiming] {
         guard let wordsData else { return [] }

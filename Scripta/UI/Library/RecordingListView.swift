@@ -5,8 +5,9 @@ import SwiftUI
 struct RecordingListView: View {
     @Environment(AppModel.self) private var appModel
     @Query private var recordings: [Recording]
+    @Query(sort: [SortDescriptor(\Folder.name, comparator: .localizedStandard)]) private var folders: [Folder]
 
-    let filter: LibraryFilter
+    let item: SidebarItem
     @Binding var sortField: LibrarySortField
     @Binding var sortAscending: Bool
     let searchText: String
@@ -17,13 +18,13 @@ struct RecordingListView: View {
     @State private var deleteTarget: Recording?
 
     init(
-        filter: LibraryFilter,
+        item: SidebarItem,
         sortField: Binding<LibrarySortField>,
         sortAscending: Binding<Bool>,
         searchText: String,
         selection: Binding<UUID?>
     ) {
-        self.filter = filter
+        self.item = item
         _sortField = sortField
         _sortAscending = sortAscending
         self.searchText = searchText
@@ -34,12 +35,19 @@ struct RecordingListView: View {
     var body: some View {
         // Filtering happens in memory: it includes transcript text and keeps
         // sidebar counts and list contents on the same rules.
-        let visible = recordings.filter { filter.matches($0) && $0.matches(searchText: searchText) }
+        let visible = recordings.filter { item.matches($0) && $0.matches(searchText: searchText) }
 
         List(selection: $selection) {
             ForEach(visible) { recording in
                 RecordingRow(recording: recording)
                     .tag(recording.id)
+                    // Drag onto a folder in the sidebar to file it there.
+                    .draggable(recording.id.uuidString)
+                    // Not `role: .destructive`: that would hide the row before the user confirms.
+                    .swipeActions(edge: .trailing) {
+                        Button("Löschen", systemImage: "trash") { deleteTarget = recording }
+                            .tint(.red)
+                    }
             }
         }
         // Double-click or Return plays the recording.
@@ -72,7 +80,7 @@ struct RecordingListView: View {
         }
         .animation(.smooth, value: appModel.recorder.isActive || appModel.isSavingRecording)
         .animation(.smooth, value: appModel.importStatus)
-        .navigationTitle(Text(filter.title))
+        .navigationTitle(title)
         .navigationSubtitle(Text("\(visible.count) Aufnahmen"))
         .onDeleteCommand {
             deleteTarget = visible.first { $0.id == selection }
@@ -188,6 +196,19 @@ struct RecordingListView: View {
                 ExportMenuItems(recording: recording)
             }
         }
+        Menu("In Ordner", systemImage: "folder.badge.plus") {
+            ForEach(folders) { folder in
+                Button(folder.name) { appModel.move(recordingIDs: [recording.id], to: folder) }
+                    .disabled(recording.folder?.id == folder.id)
+            }
+            if recording.folder != nil {
+                Divider()
+                Button("Aus dem Ordner nehmen") { appModel.move(recordingIDs: [recording.id], to: nil) }
+            }
+            if folders.isEmpty {
+                Text("Noch keine Ordner – lege sie links mit + an.")
+            }
+        }
         Button("Im Finder zeigen", systemImage: "folder") {
             appModel.revealInFinder(recording)
         }
@@ -198,13 +219,26 @@ struct RecordingListView: View {
         }
     }
 
+    private var title: Text {
+        switch item {
+        case .filter(let filter): Text(filter.title)
+        case .folder(let id): Text(verbatim: folders.first { $0.id == id }?.name ?? "")
+        }
+    }
+
     // MARK: - Empty states
 
     @ViewBuilder
     private var emptyState: some View {
         if !searchText.trimmingCharacters(in: .whitespaces).isEmpty {
             ContentUnavailableView.search(text: searchText)
-        } else if filter == .all {
+        } else if case .folder = item {
+            ContentUnavailableView {
+                Label("Ordner ist leer", systemImage: "folder")
+            } description: {
+                Text("Zieh Aufnahmen aus „Alle Aufnahmen“ oder Audiodateien aus dem Finder auf diesen Ordner links.")
+            }
+        } else if item == .all {
             ContentUnavailableView {
                 Label("Noch keine Aufnahmen", systemImage: "waveform")
             } description: {
@@ -220,7 +254,7 @@ struct RecordingListView: View {
                 }
                 #endif
             }
-        } else {
+        } else if case .filter(let filter) = item {
             ContentUnavailableView {
                 Label { Text(filter.title) } icon: { Image(systemName: filter.systemImage) }
             } description: {

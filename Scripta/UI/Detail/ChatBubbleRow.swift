@@ -83,6 +83,11 @@ struct ChatBubbleRow: View {
             }
             .buttonStyle(.plain)
             .help("Zu dieser Stelle springen")
+            if let spokenAt = segment.spokenAt {
+                Text(verbatim: "· \(Formatters.clockTime(spokenAt))")
+                    .monospacedDigit()
+                    .foregroundStyle(.tertiary)
+            }
             if segment.isEdited {
                 EditedMarker()
             }

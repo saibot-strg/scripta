@@ -18,7 +18,7 @@ final class AppModel {
     let player = PlayerModel()
     let updates = UpdateChecker()
 
-    var sidebarSelection: LibraryFilter? = .all
+    var sidebarSelection: SidebarItem? = .all
     /// Selection by the recording's own UUID. SwiftData's `persistentModelID`
     /// changes when a new object is saved, so it can't identify fresh recordings.
     var selectedRecordingID: UUID? {
@@ -105,13 +105,14 @@ final class AppModel {
     private(set) var importStatus: ImportStatus?
 
     /// Imports files one after another; the file work runs off the main actor.
-    func importFiles(_ urls: [URL]) {
+    /// `folder`: files dropped onto a folder in the sidebar land there.
+    func importFiles(_ urls: [URL], into folder: Folder? = nil) {
         let files = urls.filter(\.isFileURL)
         guard !files.isEmpty else { return }
-        Task { await performImport(files) }
+        Task { await performImport(files, folderID: folder?.id) }
     }
 
-    private func performImport(_ urls: [URL]) async {
+    private func performImport(_ urls: [URL], folderID: UUID? = nil) async {
         let autoTranscribe = UserDefaults.standard.bool(forKey: SettingsKey.autoTranscribe)
         var status = ImportStatus(total: urls.count, isQueued: autoTranscribe)
         importStatus = status
@@ -125,6 +126,9 @@ final class AppModel {
                 let recording = try library.addRecording(
                     manifest: prepared.manifest, duration: prepared.duration, rootBookmark: bookmark
                 )
+                if let folder = folderID.flatMap(library.folder(withID:)) {
+                    try library.move([recording], to: folder)
+                }
                 status.importedIDs.append(recording.id)
                 if autoTranscribe { transcription.enqueue(recording) }
             } catch {
@@ -638,6 +642,31 @@ final class AppModel {
         move(segment, to: label)
     }
 
+    // MARK: - Folders
+
+    func createFolder(named name: String) {
+        perform {
+            let folder = try library.createFolder(named: name)
+            sidebarSelection = .folder(folder.id)
+        }
+    }
+
+    func rename(_ folder: Folder, to name: String) {
+        perform { try library.rename(folder, to: name) }
+    }
+
+    func delete(_ folder: Folder) {
+        if sidebarSelection == .folder(folder.id) { sidebarSelection = .all }
+        perform { try library.delete(folder) }
+    }
+
+    /// Files recordings by ID (drag and drop) in a folder, nil = out of any folder.
+    func move(recordingIDs: [UUID], to folder: Folder?) {
+        let recordings = recordingIDs.compactMap(library.recording(withID:))
+        guard !recordings.isEmpty else { return }
+        perform { try library.move(recordings, to: folder) }
+    }
+
     // MARK: - People
 
     /// Renames a known person and every speaker named after them.
@@ -691,7 +720,7 @@ final class AppModel {
 
     /// Selects a recording and widens filter and search so it is visible.
     func reveal(_ recording: Recording) {
-        if let filter = sidebarSelection, !filter.matches(recording) {
+        if let item = sidebarSelection, !item.matches(recording) {
             sidebarSelection = .all
         }
         if !recording.matches(searchText: searchText) {

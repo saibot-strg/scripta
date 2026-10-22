@@ -315,6 +315,13 @@ struct SpeakerAssignmentSheet: View {
                     TextField(speaker.defaultName, text: binding(for: speaker))
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 220)
+                        // "Jul" offers "Julian Zeder" instead of creating a second person.
+                        .textInputSuggestions {
+                            ForEach(completions(for: names[speaker.id] ?? "")) { person in
+                                Text(person.name)
+                                    .textInputCompletion(person.name)
+                            }
+                        }
                     choices(for: speaker, among: speakers)
                     if let name = status?.personName, status?.state == .suggested, names[speaker.id] != name {
                         Button("\(name)?") { names[speaker.id] = name }
@@ -375,8 +382,12 @@ struct SpeakerAssignmentSheet: View {
     /// meeting (choosing one merges). A known person who already is a speaker
     /// here appears only once, as a speaker: both would merge anyway.
     private func choices(for speaker: SpeakerLabel, among speakers: [SpeakerLabel]) -> some View {
-        let others = speakers.filter { $0.id != speaker.id }
-        let present = Set(others.map { (names[$0.id] ?? $0.displayName).lowercased() })
+        // Each name once: speakers with the same name are merged on "Fertig" anyway.
+        var seen: Set<String> = []
+        let others = speakers.filter { other in
+            other.id != speaker.id && seen.insert((names[other.id] ?? other.displayName).lowercased()).inserted
+        }
+        let present = seen
         let people = appModel.voices.people.filter { !present.contains($0.name.lowercased()) }
         return Menu {
             if !people.isEmpty {
@@ -401,6 +412,15 @@ struct SpeakerAssignmentSheet: View {
         .menuIndicator(.hidden)
         .fixedSize()
         .help("Bekannte Person oder anderen Sprecher wählen")
+    }
+
+    /// Known people whose name contains what was typed (not yet complete).
+    private func completions(for text: String) -> [PersonSummary] {
+        let typed = text.trimmingCharacters(in: .whitespaces)
+        guard !typed.isEmpty else { return [] }
+        return appModel.voices.people.filter {
+            $0.name.localizedStandardContains(typed) && $0.name.localizedCaseInsensitiveCompare(typed) != .orderedSame
+        }
     }
 
     private func binding(for speaker: SpeakerLabel) -> Binding<String> {

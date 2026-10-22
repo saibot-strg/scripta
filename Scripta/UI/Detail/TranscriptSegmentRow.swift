@@ -13,9 +13,16 @@ struct TranscriptSegmentRow: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 14) {
             Button(action: onSelect) {
-                Text(Formatters.timestamp(segment.start))
-                    .font(.callout.monospacedDigit())
-                    .foregroundStyle(isActive ? Color.accentColor : .secondary)
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text(Formatters.timestamp(segment.start))
+                        .font(.callout.monospacedDigit())
+                        .foregroundStyle(isActive ? Color.accentColor : .secondary)
+                    if let spokenAt = segment.spokenAt {
+                        Text(Formatters.clockTime(spokenAt))
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.tertiary)
+                    }
+                }
             }
             .buttonStyle(.plain)
             .frame(minWidth: 52, alignment: .trailing)

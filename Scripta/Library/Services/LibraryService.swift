@@ -108,6 +108,44 @@ final class LibraryService {
         }
     }
 
+    // MARK: - Folders
+
+    func folder(withID id: UUID) -> Folder? {
+        let descriptor = FetchDescriptor<Folder>(predicate: #Predicate { $0.id == id })
+        return try? modelContext.fetch(descriptor).first
+    }
+
+    @discardableResult
+    func createFolder(named name: String) throws(LibraryError) -> Folder {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let folder = Folder(name: trimmed.isEmpty ? String(localized: "Neuer Ordner") : trimmed)
+        modelContext.insert(folder)
+        try save()
+        return folder
+    }
+
+    /// Empty names are ignored.
+    func rename(_ folder: Folder, to newName: String) throws(LibraryError) {
+        let name = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty, name != folder.name else { return }
+        folder.name = name
+        try save()
+    }
+
+    /// Deletes the folder; its recordings stay in the library.
+    func delete(_ folder: Folder) throws(LibraryError) {
+        modelContext.delete(folder)
+        try save()
+    }
+
+    /// Files recordings in a folder (nil takes them out of their folder).
+    func move(_ recordings: [Recording], to folder: Folder?) throws(LibraryError) {
+        for recording in recordings {
+            recording.folder = folder
+        }
+        try save()
+    }
+
     func save() throws(LibraryError) {
         guard modelContext.hasChanges else { return }
         do {

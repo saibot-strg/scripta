@@ -58,6 +58,21 @@ enum LibraryFilter: String, CaseIterable, Identifiable, Hashable, Sendable {
     }
 }
 
+/// What the sidebar selects: a filter or one of the user's folders.
+enum SidebarItem: Hashable, Sendable {
+    case filter(LibraryFilter)
+    case folder(UUID)
+
+    static let all = SidebarItem.filter(.all)
+
+    func matches(_ recording: Recording) -> Bool {
+        switch self {
+        case .filter(let filter): filter.matches(recording)
+        case .folder(let id): recording.folder?.id == id
+        }
+    }
+}
+
 /// Sort options of the recording list.
 enum LibrarySortField: String, CaseIterable, Identifiable, Sendable {
     case date

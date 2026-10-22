@@ -14,6 +14,11 @@ enum Formatters {
         duration(seconds)
     }
 
+    /// Wall-clock time of a moment in a recording, e.g. "15:26".
+    static func clockTime(_ date: Date) -> String {
+        date.formatted(date: .omitted, time: .shortened)
+    }
+
     /// Spoken duration for VoiceOver, e.g. "2 Minuten, 34 Sekunden".
     static func spokenDuration(_ seconds: TimeInterval) -> String {
         Duration.seconds(max(0, seconds.rounded(.down)))
