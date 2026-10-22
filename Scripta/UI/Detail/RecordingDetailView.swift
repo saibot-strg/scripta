@@ -29,8 +29,7 @@ struct RecordingDetailView: View {
     @AppStorage("detail.transcriptStyle") private var transcriptStyle: TranscriptStyle = .bubbles
     @State private var timeline = TranscriptTimeline.empty
     @State private var activeSegmentID: UUID?
-    @State private var speakerToRename: SpeakerLabel?
-    @State private var speakerName = ""
+    @State private var isAssigningSpeakers = false
 
     var body: some View {
         let transcript = recording.transcript
@@ -50,6 +49,11 @@ struct RecordingDetailView: View {
                             .padding(.bottom, transcript == nil ? 0 : 28)
                     }
 
+                    if let transcript, recording.status == .done {
+                        SpeakerBanner(transcript: transcript) { isAssigningSpeakers = true }
+                            .padding(.bottom, 24)
+                    }
+
                     if let transcript {
                         TranscriptView(
                             transcript: transcript,
@@ -59,10 +63,7 @@ struct RecordingDetailView: View {
                                 appModel.player.seek(to: segment.start)
                                 if !appModel.player.isPlaying { appModel.player.play() }
                             },
-                            onRenameSpeaker: { speaker in
-                                speakerName = speaker.displayName
-                                speakerToRename = speaker
-                            }
+                            onRenameSpeaker: { _ in isAssigningSpeakers = true }
                         )
                     }
                 }
@@ -111,18 +112,10 @@ struct RecordingDetailView: View {
                 .help("Transkript exportieren, kopieren oder teilen")
             }
         }
-        .alert("Sprecher umbenennen", isPresented: Binding(
-            get: { speakerToRename != nil },
-            set: { if !$0 { speakerToRename = nil } }
-        )) {
-            TextField("Name", text: $speakerName)
-            Button("Umbenennen") {
-                if let speakerToRename { appModel.rename(speakerToRename, to: speakerName) }
+        .sheet(isPresented: $isAssigningSpeakers) {
+            if let transcript = recording.transcript {
+                SpeakerAssignmentSheet(recording: recording, transcript: transcript)
             }
-            .keyboardShortcut(.defaultAction)
-            Button("Abbrechen", role: .cancel) {}
-        } message: {
-            Text("Gilt für alle Abschnitte dieses Sprechers. Leer lassen für den Standardnamen.")
         }
         .task(id: recording.id) {
             appModel.loadPlayer(for: recording)

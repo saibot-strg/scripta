@@ -1,5 +1,6 @@
 import Accelerate
 import AVFoundation
+import os
 
 /// Mixes the separate meeting tracks into one file for playback.
 enum AudioMixer {
@@ -55,12 +56,29 @@ enum AudioMixer {
     }
 }
 
-/// Turns the captured tracks of a meeting into a playable recording.
-enum MeetingFinisher {
-    /// Mixes microphone and system track into the manifest's playback file.
-    static func mixTracks(of manifest: RecordingManifest, storage: RecordingStorage) async throws -> TimeInterval {
-        let inputs = manifest.capturedFileNames.map { storage.fileURL(for: manifest.id, fileName: $0) }
+/// Turns the captured tracks of a stopped recording into its final files:
+/// levels the microphone and, for meetings, mixes both tracks into the
+/// playback file.
+enum RecordingFinisher {
+    /// Returns the duration of the playback file.
+    /// - Parameter levelsMicrophone: Raise a quiet microphone track (setting).
+    static func finish(
+        _ manifest: RecordingManifest, storage: RecordingStorage,
+        levelsMicrophone: Bool = RecordingSettings.levelsMicrophone
+    ) async throws -> TimeInterval {
+        if levelsMicrophone, let fileName = manifest.microphoneTrackFileName {
+            do {
+                try await MicrophoneLeveler.levelFile(at: storage.fileURL(for: manifest.id, fileName: fileName))
+            } catch {
+                // The unlevelled track is still fine to keep.
+                Logger.recording.error("Levelling failed: \(error.localizedDescription, privacy: .public)")
+            }
+        }
         let output = storage.fileURL(for: manifest.id, fileName: manifest.fileName)
+        guard manifest.isMeeting else {
+            return AudioFileInfo.duration(of: output) ?? 0
+        }
+        let inputs = manifest.capturedFileNames.map { storage.fileURL(for: manifest.id, fileName: $0) }
         return try await AudioMixer.mix(inputs, into: output)
     }
 }

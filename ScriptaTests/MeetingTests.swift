@@ -61,7 +61,7 @@ struct MeetingTests {
         try await Task.sleep(for: .milliseconds(800))
         #expect(!model.recorder.systemLevels.isEmpty)
         #expect(!model.recorder.levels.isEmpty)
-        model.stopRecording()
+        await model.stopRecording()?.value
 
         // Mixing runs in the background.
         let deadline = ContinuousClock.now + .seconds(5)
@@ -76,6 +76,7 @@ struct MeetingTests {
             #expect(model.library.audioURL(for: recording, role: role) != nil, "missing \(role)")
         }
         #expect(!model.isSavingRecording)
+        try await model.waitForEncoding()
     }
 
     @Test("An interrupted meeting is mixed and recovered on the next launch")
@@ -111,8 +112,9 @@ struct MeetingTests {
             .recoverInterruptedRecordings(activeRecordingID: { model.recorder.activeRecordingID })
 
         #expect(recovered == 0)
-        model.stopRecording()
+        await model.stopRecording()?.value
         #expect(try container.mainContext.fetchCount(FetchDescriptor<Recording>()) == 1)
+        try await model.waitForEncoding()
     }
 
     @Test("Manifests written before meetings existed still decode")

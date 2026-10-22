@@ -9,12 +9,16 @@ struct ChatBubbleRow: View {
     var onSelect: () -> Void = {}
     var onRenameSpeaker: (SpeakerLabel) -> Void = { _ in }
     @State private var isEditing = false
+    @State private var isHovered = false
 
     private var isMe: Bool { segment.speaker?.isLocalUser ?? false }
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 0) {
-            if isMe { Spacer(minLength: 72) }
+        HStack(alignment: .bottom, spacing: 6) {
+            if isMe {
+                Spacer(minLength: 72)
+                speakerButton
+            }
 
             VStack(alignment: isMe ? .trailing : .leading, spacing: 3) {
                 if showsHeader || segment.isEdited {
@@ -42,17 +46,36 @@ struct ChatBubbleRow: View {
                     }
             }
 
-            if !isMe { Spacer(minLength: 72) }
+            if !isMe {
+                speakerButton
+                Spacer(minLength: 72)
+            }
         }
+        .onHover { isHovered = $0 }
         .animation(.smooth(duration: 0.25), value: isActive)
         .accessibilityElement(children: .combine)
+    }
+
+    /// Shown while hovering: who this bubble belongs to. Takes its space all
+    /// the time so the bubbles don't move.
+    private var speakerButton: some View {
+        SegmentSpeakerButton(segment: segment, onAssignAll: onRenameSpeaker)
+            .padding(.bottom, 6)
+            .opacity(isHovered && segment.speaker != nil && !isEditing ? 1 : 0)
+            .disabled(!isHovered)
     }
 
     private var header: some View {
         HStack(spacing: 6) {
             if let speaker = segment.speaker {
-                Text(speaker.displayName)
-                    .fontWeight(.semibold)
+                // Several remote voices look alike as gray bubbles; their colors tell them apart.
+                SpeakerNameButton(
+                    segment: segment,
+                    speaker: speaker,
+                    style: speaker.role == .diarized ? AnyShapeStyle(speaker.tint) : AnyShapeStyle(.secondary),
+                    onAssignAll: onRenameSpeaker
+                )
+                .fontWeight(.semibold)
             }
             Button(action: onSelect) {
                 Text(Formatters.timestamp(segment.start))

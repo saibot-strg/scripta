@@ -8,32 +8,29 @@ protocol AudioInputSource: AnyObject {
     func pause()
     func resume() async throws(RecordingError)
     func stop()
+    /// Moves a running capture to the microphone now chosen in the settings.
+    func switchMicrophone() throws(RecordingError)
 }
 
-/// The default system microphone via `AVAudioEngine`.
+extension AudioInputSource {
+    /// Sources other than the microphone keep their input.
+    func switchMicrophone() throws(RecordingError) {}
+}
+
+/// The microphone chosen in the settings (or the system default) via `AVAudioEngine`.
 @MainActor
 final class MicrophoneCapture: AudioInputSource {
     /// Called when the input fails after a device change.
     var onFailure: ((RecordingError) -> Void)?
 
-    private let engine = AVAudioEngine()
+    private var engine = AVAudioEngine()
     private var sink: (any AudioBufferReceiver)?
     private var isPaused = false
     private var configurationObserver: (any NSObjectProtocol)?
 
     func start(delivering sink: any AudioBufferReceiver) async throws(RecordingError) {
         self.sink = sink
-        selectInputDevice()
-        try installTap()
-        try startEngine()
-        // The engine stops itself when the input device changes (e.g. AirPods connect).
-        configurationObserver = NotificationCenter.default.addObserver(
-            forName: .AVAudioEngineConfigurationChange,
-            object: engine,
-            queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.handleConfigurationChange() }
-        }
+        try setUpEngine()
     }
 
     func pause() {
@@ -47,13 +44,53 @@ final class MicrophoneCapture: AudioInputSource {
     }
 
     func stop() {
+        tearDownEngine()
+        sink = nil
+    }
+
+    /// Continues on a fresh engine, so no format of the old device lingers.
+    /// The sink places buffers by capture time and fills the short
+    /// switch-over with silence.
+    func switchMicrophone() throws(RecordingError) {
+        guard sink != nil else { return }
+        tearDownEngine()
+        engine = AVAudioEngine()
+        do {
+            try setUpEngine()
+        } catch {
+            // The chosen microphone wouldn't start; the system default keeps the recording going.
+            Logger.recording.error("Switching microphone failed: \(error.localizedDescription, privacy: .public)")
+            tearDownEngine()
+            engine = AVAudioEngine()
+            try setUpEngine(selectingDevice: false)
+        }
+    }
+
+    private func setUpEngine(selectingDevice: Bool = true) throws(RecordingError) {
+        if selectingDevice {
+            selectInputDevice()
+        }
+        try installTap()
+        if !isPaused {
+            try startEngine()
+        }
+        // The engine stops itself when the input device changes (e.g. AirPods connect).
+        configurationObserver = NotificationCenter.default.addObserver(
+            forName: .AVAudioEngineConfigurationChange,
+            object: engine,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.handleConfigurationChange() }
+        }
+    }
+
+    private func tearDownEngine() {
         if let configurationObserver {
             NotificationCenter.default.removeObserver(configurationObserver)
         }
         configurationObserver = nil
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
-        sink = nil
     }
 
     /// Uses the microphone chosen in the settings; falls back to the system
@@ -101,7 +138,12 @@ final class MicrophoneCapture: AudioInputSource {
                 try startEngine()
             }
         } catch {
-            onFailure?(error)
+            // The device is gone (e.g. headset unplugged): carry on with the input that is left.
+            do {
+                try switchMicrophone()
+            } catch {
+                onFailure?(error)
+            }
         }
     }
 }

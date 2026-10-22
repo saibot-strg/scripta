@@ -22,7 +22,10 @@ struct ScriptaApp: App {
         }
         self.container = container
 
-        let model = AppModel(library: LibraryService(modelContext: container.mainContext, locations: StorageLocations()))
+        let model = AppModel(
+            library: LibraryService(modelContext: container.mainContext, locations: StorageLocations()),
+            voices: .makePersistent()
+        )
         if let startupError { model.presentedError = startupError }
         Task { await model.performStartupMaintenance() }
         #if DEBUG

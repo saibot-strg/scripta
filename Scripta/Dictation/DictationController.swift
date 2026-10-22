@@ -158,7 +158,7 @@ final class DictationController {
             defer { hotKeys.unregister(id: Self.cancelID) }
             try? await Task.sleep(for: Self.releaseTail)
             capture.stop()
-            let samples = buffer.finish()
+            var samples = buffer.finish()
             cleanUpCapture()
 
             let duration = Double(samples.count) / DictationAudioBuffer.sampleRate
@@ -167,6 +167,9 @@ final class DictationController {
                 phase = .idle
                 hud.hide()
                 return
+            }
+            if RecordingSettings.levelsMicrophone {
+                MicrophoneLeveler.level(&samples, sampleRate: DictationAudioBuffer.sampleRate)
             }
 
             do {

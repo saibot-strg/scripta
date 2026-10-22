@@ -31,7 +31,7 @@ struct RecordingFlowTests {
         await model.startRecording()
         #expect(model.recorder.state == .recording)
         try await Task.sleep(for: .milliseconds(700))
-        model.stopRecording()
+        await model.stopRecording()?.value
 
         // Regression: the fresh recording must resolve right after saving
         // (SwiftData's persistentModelID changes on save).
@@ -52,6 +52,7 @@ struct RecordingFlowTests {
         #expect(url.lastPathComponent == CaptureFormat.encodedFileName(for: CaptureFormat.fileName))
         // The player switched to the encoded file.
         #expect(model.player.loadedURL == url)
+        try await model.waitForEncoding()
     }
 
     @Test("Pause excludes time from the recorded duration")
@@ -72,11 +73,12 @@ struct RecordingFlowTests {
         }
         #expect(model.recorder.state == .recording)
         try await Task.sleep(for: .milliseconds(500))
-        model.stopRecording()
+        await model.stopRecording()?.value
 
         let recording = try #require(model.selectedRecording)
         // About 1 s recorded; the 0.8 s pause is not included.
         #expect(recording.duration > 0.7 && recording.duration < 1.5, "duration \(recording.duration)")
+        try await model.waitForEncoding()
     }
 
     @Test("Deleting the selected recording clears the selection and the player")
@@ -85,7 +87,7 @@ struct RecordingFlowTests {
         let model = makeAppModel()
         await model.startRecording()
         try await Task.sleep(for: .milliseconds(300))
-        model.stopRecording()
+        await model.stopRecording()?.value
         let recording = try #require(model.selectedRecording)
         model.loadPlayer(for: recording)
 
@@ -94,5 +96,6 @@ struct RecordingFlowTests {
         #expect(model.selectedRecordingID == nil)
         #expect(!model.player.isAvailable)
         #expect(try container.mainContext.fetchCount(FetchDescriptor<Recording>()) == 0)
+        try await model.waitForEncoding()
     }
 }

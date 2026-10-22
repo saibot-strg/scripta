@@ -30,6 +30,11 @@ struct MenuBarContent: View {
                 MeetingSourceMenu()
             }
         }
+        Menu("Mikrofon") {
+            MicrophonePicker()
+                .pickerStyle(.inline)
+                .labelsHidden()
+        }
 
         Divider()
         if DictationSettings.isEnabled {

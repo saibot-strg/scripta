@@ -14,12 +14,17 @@ import os
 /// - `-ProbeSystemAudio`: builds (but doesn't start) the system audio tap and logs it.
 /// - `-AutoPlay <s>`: starts playback after the given delay and logs the player state.
 /// - `-SimulateUpdate <version>`: shows the update note as if GitHub had that release.
-/// - `-ShowSettings`: opens the settings view in a regular window (for `-UISnapshot`).
+/// - `-ShowSettings [pane]`: opens the settings view in a regular window (for
+///   `-UISnapshot`), optionally on a pane such as `transcription`.
+/// - `-ShowSpeakerSheet`: opens the speaker assignment for a sample meeting
+///   (in memory, the library stays untouched) in a regular window.
 @MainActor
 enum DebugLaunchOptions {
     private static let arguments = CommandLine.arguments
-    /// Keeps the `-ShowSettings` window alive.
+    /// Keeps the `-ShowSettings` / `-ShowSpeakerSheet` windows alive.
     private static var settingsWindow: NSWindow?
+    private static var speakerWindow: NSWindow?
+    private static var sampleContainer: ModelContainer?
 
     static func apply(to model: AppModel) {
         let context = model.library.modelContext
@@ -85,10 +90,27 @@ enum DebugLaunchOptions {
         if arguments.contains("-ShowSettings") {
             Task {
                 // The Settings scene can't be opened from here; the same view in a window can.
-                let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView().environment(model)))
+                let pane = value(after: "-ShowSettings").flatMap(SettingsView.Pane.init) ?? .general
+                let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(pane: pane).environment(model)))
                 window.title = "Settings"
                 window.makeKeyAndOrderFront(nil)
                 settingsWindow = window
+            }
+        }
+
+        if arguments.contains("-ShowSpeakerSheet") {
+            let container = ModelContainerFactory.makeInMemory()
+            sampleContainer = container
+            let recording = Recording(title: "Team-Weekly", duration: 2_840, source: .meeting, status: .done, languageCode: "de")
+            container.mainContext.insert(recording)
+            SampleData.addMeetingTranscript(to: recording)
+            if let transcript = recording.transcript {
+                let window = NSWindow(contentViewController: NSHostingController(
+                    rootView: SpeakerAssignmentSheet(recording: recording, transcript: transcript).environment(model)
+                ))
+                window.title = "Speakers"
+                window.makeKeyAndOrderFront(nil)
+                speakerWindow = window
             }
         }
 

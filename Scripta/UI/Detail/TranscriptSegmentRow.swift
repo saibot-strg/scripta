@@ -24,9 +24,8 @@ struct TranscriptSegmentRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 if showsSpeaker, let speaker = segment.speaker {
-                    Text(speaker.displayName)
+                    SpeakerNameButton(segment: segment, speaker: speaker, style: AnyShapeStyle(speaker.tint), onAssignAll: onRenameSpeaker)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(speaker.tint)
                 }
                 EditableSegmentText(segment: segment, isEditing: $isEditing)
                     .font(.body)
@@ -34,6 +33,9 @@ struct TranscriptSegmentRow: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
+            if isHovered, segment.speaker != nil, !isEditing {
+                SegmentSpeakerButton(segment: segment, onAssignAll: onRenameSpeaker)
+            }
             if segment.isEdited || isHovered {
                 Button("Text bearbeiten", systemImage: "pencil") { isEditing = true }
                     .labelStyle(.iconOnly)
@@ -58,18 +60,15 @@ struct TranscriptSegmentRow: View {
 }
 
 extension SpeakerLabel {
-    /// Accent for "Ich", neutral for everyone else, distinct hues for diarized speakers.
+    private static let palette: [Color] = [.orange, .purple, .teal, .pink, .indigo, .brown]
+
+    /// Accent for "Ich", neutral for everyone else, distinct hues for diarized
+    /// speakers (repeating after six).
     var tint: Color {
         switch role {
         case .me: .accentColor
         case .others: .secondary
-        case .diarized: [.orange, .purple, .teal, .pink, .indigo, .brown][(number - 1).clamped(to: 0...5)]
+        case .diarized: Self.palette[(max(number, 1) - 1) % Self.palette.count]
         }
-    }
-}
-
-extension Comparable {
-    func clamped(to range: ClosedRange<Self>) -> Self {
-        min(max(self, range.lowerBound), range.upperBound)
     }
 }

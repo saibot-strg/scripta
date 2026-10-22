@@ -115,13 +115,18 @@ struct RecordingListView: View {
                 .foregroundStyle(.red)
                 .help("Aufnahme beenden und speichern (⌘↩)")
             } else {
-                Button("Neue Aufnahme", systemImage: "record.circle") {
+                Menu {
+                    MicrophoneMenuSection()
+                } label: {
+                    Label("Neue Aufnahme", systemImage: "record.circle")
+                } primaryAction: {
                     appModel.toggleRecording()
                 }
                 .help("Neue Aufnahme (⌘N)")
 
                 Menu {
                     MeetingSourceMenu()
+                    MicrophoneMenuSection(title: "Mikrofon („Ich“)")
                 } label: {
                     Label("Meeting aufnehmen", systemImage: "person.2.wave.2")
                 } primaryAction: {

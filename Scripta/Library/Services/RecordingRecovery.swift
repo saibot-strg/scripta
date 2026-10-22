@@ -50,15 +50,13 @@ struct RecordingRecovery {
         return recovered
     }
 
-    /// Duration of the playable file; meetings get their tracks mixed first.
+    /// Duration of the playable file, finished like after a normal stop
+    /// (microphone levelled, meeting tracks mixed).
     private func recoverableDuration(of manifest: RecordingManifest, in storage: RecordingStorage) async -> TimeInterval? {
-        guard manifest.isMeeting else {
-            return AudioFileInfo.duration(of: storage.fileURL(for: manifest.id, fileName: manifest.fileName))
-        }
         let hasAudio = manifest.capturedFileNames.contains { name in
             (AudioFileInfo.duration(of: storage.fileURL(for: manifest.id, fileName: name)) ?? 0) > 0
         }
         guard hasAudio else { return nil }
-        return try? await MeetingFinisher.mixTracks(of: manifest, storage: storage)
+        return try? await RecordingFinisher.finish(manifest, storage: storage)
     }
 }

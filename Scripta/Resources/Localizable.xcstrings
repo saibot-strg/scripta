@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ der Redezeit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ of the speaking time"
+          }
+        }
+      }
+    },
     "%@ nach dem Loslassen" : {
       "localizations" : {
         "en" : {
@@ -31,12 +41,32 @@
         }
       }
     },
+    "%@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@?"
+          }
+        }
+      }
+    },
     "%@×" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@×"
+          }
+        }
+      }
+    },
+    "%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
           }
         }
       }
@@ -121,6 +151,86 @@
         }
       }
     },
+    "%lld Namen vermutet" : {
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Name vermutet"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Namen vermutet"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld name guessed"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld names guessed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld Stimmen ohne Namen" : {
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimme ohne Namen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimmen ohne Namen"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld voice without a name"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld voices without names"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "15 Sekunden vor" : {
       "localizations" : {
         "en" : {
@@ -147,6 +257,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "AAC (compact)"
+          }
+        }
+      }
+    },
+    "Ab %lld bestätigten Stimmproben setzt Scripta den Namen selbst, vorher schlägt es ihn vor." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From %lld confirmed voice samples on, Scripta sets the name itself; before that, it suggests it."
           }
         }
       }
@@ -221,12 +341,62 @@
         }
       }
     },
+    "Alle Personen, Stimmproben und Stimm-Fingerabdrücke werden gelöscht. Namen in Transkripten bleiben stehen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All people, voice samples and voice fingerprints are deleted. Names in transcripts stay."
+          }
+        }
+      }
+    },
+    "Alle Stimmprofile löschen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete All Voice Profiles …"
+          }
+        }
+      }
+    },
+    "Alle Stimmprofile löschen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete all voice profiles?"
+          }
+        }
+      }
+    },
     "Alle ausstehenden transkribieren" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transcribe All Pending"
+          }
+        }
+      }
+    },
+    "Alle löschen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete All"
+          }
+        }
+      }
+    },
+    "Alle von „%@“ benennen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name All of “%@” …"
           }
         }
       }
@@ -257,6 +427,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Others"
+          }
+        }
+      }
+    },
+    "Anzahl der Personen korrigieren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct Number of People"
+          }
+        }
+      }
+    },
+    "Anzahl der anderen korrigieren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct Number of Others"
           }
         }
       }
@@ -431,6 +621,16 @@
         }
       }
     },
+    "Aufnahme wird gespeichert …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving recording …"
+          }
+        }
+      }
+    },
     "Aufnahmen" : {
       "localizations" : {
         "en" : {
@@ -447,6 +647,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ascending"
+          }
+        }
+      }
+    },
+    "Aus früheren Meetings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From Earlier Meetings"
+          }
+        }
+      }
+    },
+    "Aus: nur hier benennen, z. B. für Gäste" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off: name only here, e.g. for guests"
           }
         }
       }
@@ -581,6 +801,16 @@
         }
       }
     },
+    "Bekannte Person oder anderen Sprecher wählen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a known person or another speaker"
+          }
+        }
+      }
+    },
     "Berechtigung" : {
       "localizations" : {
         "en" : {
@@ -611,6 +841,16 @@
         }
       }
     },
+    "Bestätigte Stimmproben: %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmed voice samples: %lld"
+          }
+        }
+      }
+    },
     "Bibliothek" : {
       "localizations" : {
         "en" : {
@@ -627,6 +867,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Empty Library"
+          }
+        }
+      }
+    },
+    "Bringt deine Stimme nach der Aufnahme auf normale Lautstärke, etwa bei leisen Headsets." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brings your voice to a normal volume after recording, for example with quiet headsets."
           }
         }
       }
@@ -721,6 +971,16 @@
         }
       }
     },
+    "Das Transkript wird neu erstellt; Textkorrekturen und Namen in diesem Transkript gehen verloren. Bekannte Stimmen schlägt Scripta wieder vor." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The transcript is created again; text corrections and names in this transcript are lost. Scripta suggests known voices again."
+          }
+        }
+      }
+    },
     "Datum" : {
       "localizations" : {
         "en" : {
@@ -747,6 +1007,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Duration %@"
+          }
+        }
+      }
+    },
+    "Der Name ändert sich auch in allen Transkripten, in denen die Person erkannt oder benannt wurde." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The name also changes in every transcript in which the person was recognized or named."
           }
         }
       }
@@ -841,6 +1111,16 @@
         }
       }
     },
+    "Die Stimmproben werden gelöscht. Namen in Transkripten bleiben stehen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The voice samples are deleted. Names in transcripts stay."
+          }
+        }
+      }
+    },
     "Die Transkription ist fehlgeschlagen." : {
       "localizations" : {
         "en" : {
@@ -867,6 +1147,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The change could not be saved."
+          }
+        }
+      }
+    },
+    "Diese Sprechblase gehört zu" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This bubble belongs to"
           }
         }
       }
@@ -991,6 +1281,16 @@
         }
       }
     },
+    "Einschalten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On"
+          }
+        }
+      }
+    },
     "Einstellungen …" : {
       "localizations" : {
         "en" : {
@@ -1007,6 +1307,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Develop"
+          }
+        }
+      }
+    },
+    "Erkannt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognized"
           }
         }
       }
@@ -1211,6 +1521,16 @@
         }
       }
     },
+    "Für Meetings, in denen weitere Personen mit dir am Mac sitzen. Ist im Meeting niemand online zu hören, geschieht das automatisch." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For meetings where other people sit at your Mac with you. If no one can be heard online in the meeting, this happens automatically."
+          }
+        }
+      }
+    },
     "Für das Diktat: Text per ⌘V in andere Apps einfügen." : {
       "localizations" : {
         "en" : {
@@ -1301,16 +1621,6 @@
         }
       }
     },
-    "Gilt für alle Abschnitte dieses Sprechers. Leer lassen für den Standardnamen." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Applies to all sections of this speaker. Leave empty for the default name."
-          }
-        }
-      }
-    },
     "GitHub hat mit Fehler %lld geantwortet." : {
       "localizations" : {
         "en" : {
@@ -1367,6 +1677,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "High (128 kbit/s)"
+          }
+        }
+      }
+    },
+    "Hör kurz rein und gib jeder Stimme einen Namen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listen briefly and give each voice a name."
+          }
+        }
+      }
+    },
+    "Hör kurz rein und gib jeder Stimme einen Namen. Bekommen zwei Sprecher denselben Namen, werden sie zusammengeführt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listen briefly and give each voice a name. Two speakers with the same name are merged."
           }
         }
       }
@@ -1591,6 +1921,16 @@
         }
       }
     },
+    "Klingt nach %@ – klicken zum Übernehmen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sounds like %@ – click to accept"
+          }
+        }
+      }
+    },
     "Kürzel drücken …" : {
       "localizations" : {
         "en" : {
@@ -1627,6 +1967,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add a Space After the Text"
+          }
+        }
+      }
+    },
+    "Leises Mikrofon anheben" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boost Quiet Microphone"
           }
         }
       }
@@ -1801,6 +2151,16 @@
         }
       }
     },
+    "Mehrere Personen am Mikrofon" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Several People at the Microphone"
+          }
+        }
+      }
+    },
     "Mikrofon" : {
       "localizations" : {
         "en" : {
@@ -1811,12 +2171,72 @@
         }
       }
     },
+    "Mikrofon („Ich“)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone (“Me”)"
+          }
+        }
+      }
+    },
     "Mikrofon („Ich“) und Systemaudio („Andere“) werden als getrennte Spuren aufgenommen. Mit Kopfhörern bleiben die Spuren am saubersten getrennt." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Microphone (“Me”) and system audio (“Others”) are recorded as separate tracks. Headphones keep them cleanly apart."
+          }
+        }
+      }
+    },
+    "Mikrofon wechseln (aktiv: %@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch microphone (current: %@)"
+          }
+        }
+      }
+    },
+    "Mit %lld Stimmen neu erkennen?" : {
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mit %lld Stimme neu erkennen?"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mit %lld Stimmen neu erkennen?"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Detect again with %lld voice?"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Detect again with %lld voices?"
+                }
+              }
+            }
           }
         }
       }
@@ -1891,6 +2311,16 @@
         }
       }
     },
+    "Neu erkennen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detect Again"
+          }
+        }
+      }
+    },
     "Neu laden" : {
       "localizations" : {
         "en" : {
@@ -1961,6 +2391,16 @@
         }
       }
     },
+    "Neuer Sprecher" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Speaker"
+          }
+        }
+      }
+    },
     "Nicht alle Dateien konnten importiert werden" : {
       "localizations" : {
         "en" : {
@@ -2027,6 +2467,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Recordings Yet"
+          }
+        }
+      }
+    },
+    "Noch niemand. Benenne Sprecher in einem Transkript, dann merkt sich Scripta ihre Stimmen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one yet. Name speakers in a transcript and Scripta remembers their voices."
+          }
+        }
+      }
+    },
+    "Nur diesen Abschnitt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only This Passage"
           }
         }
       }
@@ -2111,6 +2571,26 @@
         }
       }
     },
+    "Person umbenennen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename Person"
+          }
+        }
+      }
+    },
+    "Personen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People"
+          }
+        }
+      }
+    },
     "Position" : {
       "localizations" : {
         "en" : {
@@ -2157,6 +2637,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Order"
+          }
+        }
+      }
+    },
+    "Reinhören (jeder Klick spielt eine andere Stelle)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listen (each click plays another passage)"
           }
         }
       }
@@ -2247,6 +2737,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scripta is up to date"
+          }
+        }
+      }
+    },
+    "Scripta kann sich die Stimmen merken, die du benennst, und schlägt die Namen in späteren Aufnahmen vor. Stimmprofile sind biometrische Daten: Sie bleiben auf diesem Mac und lassen sich in den Einstellungen jederzeit löschen. Frag die Personen, ob das für sie in Ordnung ist." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scripta can remember the voices you name and suggest the names in later recordings. Voice profiles are biometric data: they stay on this Mac and can be deleted in Settings at any time. Ask the people whether they are fine with it."
+          }
+        }
+      }
+    },
+    "Scripta merkt sich die Stimmen der Personen, die du in Transkripten benennst, und erkennt sie in späteren Aufnahmen wieder." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scripta remembers the voices of the people you name in transcripts and recognizes them in later recordings."
           }
         }
       }
@@ -2381,6 +2891,16 @@
         }
       }
     },
+    "Sprecher" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speakers"
+          }
+        }
+      }
+    },
     "Sprecher %lld" : {
       "localizations" : {
         "en" : {
@@ -2391,12 +2911,42 @@
         }
       }
     },
-    "Sprecher umbenennen" : {
+    "Sprecher benennen oder zusammenführen" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rename Speaker"
+            "value" : "Name or merge speaker"
+          }
+        }
+      }
+    },
+    "Sprecher dieser Sprechblase" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speaker of This Bubble"
+          }
+        }
+      }
+    },
+    "Sprecher unterscheiden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tell Speakers Apart"
+          }
+        }
+      }
+    },
+    "Sprechertrennung: pyannote community-1 mit WeSpeaker ResNet34 (CC BY 4.0), CoreML-Fassung von FluidInference." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speaker separation: pyannote community-1 with WeSpeaker ResNet34 (CC BY 4.0), CoreML conversion by FluidInference."
           }
         }
       }
@@ -2467,6 +3017,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Status"
+          }
+        }
+      }
+    },
+    "Stimme merken" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remember Voice"
+          }
+        }
+      }
+    },
+    "Stimmen wiedererkennen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognize Voices"
+          }
+        }
+      }
+    },
+    "Stimmprofile sind biometrische Daten. Sie bleiben auf diesem Mac und lassen sich hier jederzeit löschen. Frag die Personen, ob das für sie in Ordnung ist." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice profiles are biometric data. They stay on this Mac and can be deleted here at any time. Ask the people whether they are fine with it."
           }
         }
       }
@@ -2547,6 +3127,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "System Default"
+          }
+        }
+      }
+    },
+    "Systemstandard (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Default (%@)"
           }
         }
       }
@@ -2761,6 +3351,16 @@
         }
       }
     },
+    "Trennt die Stimmen in Meetings und Aufnahmen („Sprecher 1“, „Sprecher 2“ …); deine eigene Stimme im Meeting bleibt „Ich“. Modell: pyannote community-1 mit WeSpeaker (CC BY 4.0), CoreML-Fassung von FluidInference. Läuft ebenfalls lokal." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separates the voices in meetings and recordings (“Speaker 1”, “Speaker 2” …); your own voice in a meeting stays “Me”. Model: pyannote community-1 with WeSpeaker (CC BY 4.0), CoreML conversion by FluidInference. Also runs locally."
+          }
+        }
+      }
+    },
     "Umbenennen" : {
       "localizations" : {
         "en" : {
@@ -2831,6 +3431,36 @@
         }
       }
     },
+    "Vermutet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guessed"
+          }
+        }
+      }
+    },
+    "Vermutet – klicken zum Bestätigen, auf den Namen klicken zum Ändern" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guessed – click to confirm, click the name to change it"
+          }
+        }
+      }
+    },
+    "Vermutete Namen sind mit „?“ markiert. Hör rein und bestätige oder korrigiere sie." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guessed names are marked with “?”. Listen and confirm or correct them."
+          }
+        }
+      }
+    },
     "Version %@" : {
       "localizations" : {
         "en" : {
@@ -2851,12 +3481,52 @@
         }
       }
     },
+    "Wem gehört diese Sprechblase?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who does this bubble belong to?"
+          }
+        }
+      }
+    },
+    "Wer spricht hier?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who Is Speaking?"
+          }
+        }
+      }
+    },
     "Wie System" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Match System"
+          }
+        }
+      }
+    },
+    "Wie viele Personen außer dir waren zu hören? Das Transkript wird mit genau so vielen Stimmen neu erstellt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How many people besides you could be heard? The transcript is created again with exactly that many voices."
+          }
+        }
+      }
+    },
+    "Wie viele Personen waren zu hören? Das Transkript wird mit genau so vielen Stimmen neu erstellt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How many people could be heard? The transcript is created again with exactly that many voices."
           }
         }
       }
@@ -2981,6 +3651,46 @@
         }
       }
     },
+    "Zuordnen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assign …"
+          }
+        }
+      }
+    },
+    "Zusammenführen mit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge With"
+          }
+        }
+      }
+    },
+    "wird automatisch erkannt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "recognized automatically"
+          }
+        }
+      }
+    },
+    "wird vorgeschlagen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "suggested"
+          }
+        }
+      }
+    },
     "Ändern …" : {
       "localizations" : {
         "en" : {
@@ -3021,6 +3731,26 @@
         }
       }
     },
+    "„%@“" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@”"
+          }
+        }
+      }
+    },
+    "„%@“ bestätigen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm “%@”"
+          }
+        }
+      }
+    },
     "„%@“ enthält keine Tonspur." : {
       "localizations" : {
         "en" : {
@@ -3041,6 +3771,16 @@
         }
       }
     },
+    "„%@“ löschen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete “%@”?"
+          }
+        }
+      }
+    },
     "„%@“ umbenennen …" : {
       "localizations" : {
         "en" : {
@@ -3057,6 +3797,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“%@” will be permanently deleted along with its transcript and audio files."
+          }
+        }
+      }
+    },
+    "„%@“ zuordnen zu" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assign “%@” To"
           }
         }
       }

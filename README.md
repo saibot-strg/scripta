@@ -6,6 +6,7 @@ Local transcription for the Mac. Scripta records voice notes and meetings, impor
 - **Record meetings** with your microphone ("Me") and system audio ("Others") on separate tracks, e.g. for Zoom, Teams or browser meetings
 - **Import** audio and video files from the menu or by dragging them into the window
 - **Transcribe** with NVIDIA Parakeet Ultra, which detects English, German and 23 other European languages automatically
+- **Tell speakers apart:** each voice in a meeting or recording gets its own label ("Speaker 1", "Speaker 2" …), which you can rename
 - **Dictate in any app:** hold a shortcut, speak, let go, and the text appears at your cursor
 - **Export** as plain text, Markdown, subtitles (SRT, WebVTT) or JSON with timestamps
 
@@ -105,7 +106,13 @@ Click **New Recording** (⌘N) in the toolbar. Press **⌘↩** to stop and save
 
 ### Record meetings
 
-Click **Record Meeting** (⇧⌘N). Scripta records two separate tracks: your microphone as "Me" and your Mac's audio as "Others". The transcript shows the conversation like a chat.
+Click **Record Meeting** (⇧⌘N). Scripta records two separate tracks: your microphone as "Me" and your Mac's audio for everyone else. The transcript shows the conversation like a chat.
+
+When transcribing, Scripta tells the voices apart: each remote participant becomes "Speaker 1", "Speaker 2" and so on. Your own voice stays "Me". If other people sit at your Mac with you, turn on **Several People at the Microphone** in Settings → Transcription; in a meeting where no one can be heard online, Scripta does this on its own. To give a speaker a name, right-click one of their passages and choose **Rename**. If one person was split into several speakers, give them all the same name (or one speaker another speaker's name, e.g. "Me") and they are merged. You can turn this off under Settings → Transcription → Speakers.
+
+If two people ended up as one speaker, choose **Correct Number of Others** in the same window to detect the voices again with the right number, or click the name above a single bubble (or the person button that appears when you point at it) to give just that bubble to another speaker.
+
+**Recognize people.** Click **Assign …** above the transcript (or a speaker's name) to listen to each voice and name it. Turn on **Recognize Voices** there or in Settings → People, and Scripta remembers the voices you name: next time it fills in its guess, marked with "?" until you confirm or correct it, and after three confirmations it names the person with confidence. Voice profiles stay on your Mac; Settings → People lists them and deletes them. Ask people before you keep their voice profile.
 
 - Use the small arrow next to the button to record either **All System Audio** or **Only One App** (e.g. Zoom, Teams or your browser).
 - **Wear headphones.** That keeps the other people's voices out of your microphone, so the tracks stay cleanly separated.
@@ -235,4 +242,5 @@ To publish a release, push a version tag such as `git tag v0.2.0 && git push ori
 ## Acknowledgments
 
 - Speech recognition: [Parakeet Ultra](https://huggingface.co/moondream/parakeet-ultra) by moondream, a post-training of [NVIDIA Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3). Both are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Scripta uses the [CoreML conversion by FluidInference](https://huggingface.co/FluidInference/parakeet-ultra-coreml).
+- Speaker separation: [pyannote speaker-diarization-community-1](https://huggingface.co/pyannote/speaker-diarization-community-1) with the [WeSpeaker ResNet34](https://huggingface.co/pyannote/wespeaker-voxceleb-resnet34-LM) voice embedding, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Scripta uses the [CoreML conversion by FluidInference](https://huggingface.co/FluidInference/speaker-diarization-coreml).
 - [FluidAudio](https://github.com/FluidInference/FluidAudio) by FluidInference, Apache License 2.0

@@ -5,21 +5,34 @@ import SwiftUI
 
 /// Settings window. Recording settings since milestone 2; completed in milestone 6.
 struct SettingsView: View {
+    enum Pane: String, Hashable {
+        case general, recording, transcription, people, dictation, permissions
+    }
+
+    @State private var pane: Pane
+
+    init(pane: Pane = .general) {
+        _pane = State(initialValue: pane)
+    }
+
     var body: some View {
-        TabView {
-            Tab("Allgemein", systemImage: "gearshape") {
+        TabView(selection: $pane) {
+            Tab("Allgemein", systemImage: "gearshape", value: .general) {
                 GeneralSettingsView()
             }
-            Tab("Aufnahme", systemImage: "mic") {
+            Tab("Aufnahme", systemImage: "mic", value: .recording) {
                 RecordingSettingsView()
             }
-            Tab("Transkription", systemImage: "text.bubble") {
+            Tab("Transkription", systemImage: "text.bubble", value: .transcription) {
                 TranscriptionSettingsView()
             }
-            Tab("Diktat", systemImage: "mic.badge.plus") {
+            Tab("Personen", systemImage: "person.2", value: .people) {
+                PeopleSettingsView()
+            }
+            Tab("Diktat", systemImage: "mic.badge.plus", value: .dictation) {
                 DictationSettingsView()
             }
-            Tab("Berechtigungen", systemImage: "lock.shield") {
+            Tab("Berechtigungen", systemImage: "lock.shield", value: .permissions) {
                 PermissionsSettingsView()
             }
         }
@@ -92,20 +105,17 @@ private struct RecordingSettingsView: View {
     @AppStorage(SettingsKey.recordingFormat) private var format: RecordingFileFormat = .aac
     @AppStorage(SettingsKey.recordingQuality) private var quality: RecordingQuality = .standard
     @AppStorage(SettingsKey.meetingSource) private var meetingSource = ""
-    @AppStorage(SettingsKey.microphone) private var microphone = ""
+    @AppStorage(SettingsKey.levelsMicrophone) private var levelsMicrophone = true
     @State private var apps: [MeetingApp] = []
-    @State private var inputs: [AudioInputDevice] = []
 
     var body: some View {
         let locations = appModel.library.locations
         Form {
             Section {
-                Picker("Mikrofon", selection: $microphone) {
-                    Text("Systemstandard").tag("")
-                    if !microphone.isEmpty, !inputs.contains(where: { $0.uid == microphone }) {
-                        Text("Nicht verbunden").tag(microphone)
-                    }
-                    ForEach(inputs) { Text($0.name).tag($0.uid) }
+                MicrophonePicker()
+                Toggle(isOn: $levelsMicrophone) {
+                    Text("Leises Mikrofon anheben")
+                    Text("Bringt deine Stimme nach der Aufnahme auf normale Lautstärke, etwa bei leisen Headsets.")
                 }
             } footer: {
                 Text("Gilt für Aufnahmen, Meetings („Ich“) und das Diktat.")
@@ -174,14 +184,116 @@ private struct RecordingSettingsView: View {
         .frame(height: 560)
         .task {
             apps = AudioAppCatalog.availableApps()
-            inputs = AudioInputDevices.available()
+            appModel.refreshMicrophones()
         }
+    }
+}
+
+/// Voice recognition: opt-in, known people, deleting voice profiles.
+private struct PeopleSettingsView: View {
+    @Environment(AppModel.self) private var appModel
+    @AppStorage(SettingsKey.recognizesVoices) private var recognizesVoices = false
+    @State private var personToRename: PersonSummary?
+    @State private var newName = ""
+    @State private var personToDelete: PersonSummary?
+    @State private var isConfirmingDeleteAll = false
+
+    var body: some View {
+        let people = appModel.voices.people
+        Form {
+            Section {
+                Toggle(isOn: $recognizesVoices) {
+                    Text("Stimmen wiedererkennen")
+                    Text("Scripta merkt sich die Stimmen der Personen, die du in Transkripten benennst, und erkennt sie in späteren Aufnahmen wieder.")
+                }
+            } footer: {
+                Text("Stimmprofile sind biometrische Daten. Sie bleiben auf diesem Mac und lassen sich hier jederzeit löschen. Frag die Personen, ob das für sie in Ordnung ist.")
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                if people.isEmpty {
+                    Text("Noch niemand. Benenne Sprecher in einem Transkript, dann merkt sich Scripta ihre Stimmen.")
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(people) { person in
+                    LabeledContent {
+                        Menu {
+                            Button("Umbenennen …") {
+                                newName = person.name
+                                personToRename = person
+                            }
+                            Button("Löschen …", role: .destructive) { personToDelete = person }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                        }
+                        .menuStyle(.borderlessButton)
+                        .menuIndicator(.hidden)
+                        .fixedSize()
+                    } label: {
+                        Text(person.name)
+                        Text(details(of: person))
+                    }
+                }
+            } header: {
+                Text("Personen")
+            } footer: {
+                Text("Ab \(VoiceMatcher.confirmedSamplesForAutomatic) bestätigten Stimmproben setzt Scripta den Namen selbst, vorher schlägt es ihn vor.")
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Button("Alle Stimmprofile löschen …", role: .destructive) { isConfirmingDeleteAll = true }
+                    .disabled(people.isEmpty && appModel.voices.statuses.isEmpty)
+            }
+        }
+        .formStyle(.grouped)
+        .frame(height: 520)
+        .alert("Person umbenennen", isPresented: Binding(
+            get: { personToRename != nil },
+            set: { if !$0 { personToRename = nil } }
+        )) {
+            TextField("Name", text: $newName)
+            Button("Umbenennen") {
+                if let personToRename { appModel.renamePerson(personToRename.id, to: newName) }
+            }
+            .keyboardShortcut(.defaultAction)
+            Button("Abbrechen", role: .cancel) {}
+        } message: {
+            Text("Der Name ändert sich auch in allen Transkripten, in denen die Person erkannt oder benannt wurde.")
+        }
+        .confirmationDialog(
+            "„\(personToDelete?.name ?? "")“ löschen?",
+            isPresented: Binding(get: { personToDelete != nil }, set: { if !$0 { personToDelete = nil } })
+        ) {
+            Button("Löschen", role: .destructive) {
+                if let personToDelete { appModel.deletePerson(personToDelete.id) }
+            }
+        } message: {
+            Text("Die Stimmproben werden gelöscht. Namen in Transkripten bleiben stehen.")
+        }
+        .confirmationDialog("Alle Stimmprofile löschen?", isPresented: $isConfirmingDeleteAll) {
+            Button("Alle löschen", role: .destructive) { appModel.deleteAllVoiceProfiles() }
+        } message: {
+            Text("Alle Personen, Stimmproben und Stimm-Fingerabdrücke werden gelöscht. Namen in Transkripten bleiben stehen.")
+        }
+    }
+
+    private func details(of person: PersonSummary) -> String {
+        let confirmed = String(localized: "Bestätigte Stimmproben: \(person.confirmedSamples)")
+        let mode = person.confirmedSamples >= VoiceMatcher.confirmedSamplesForAutomatic
+            ? String(localized: "wird automatisch erkannt")
+            : String(localized: "wird vorgeschlagen")
+        return "\(confirmed) · \(mode)"
     }
 }
 
 private struct TranscriptionSettingsView: View {
     @Environment(AppModel.self) private var appModel
+    @AppStorage(SettingsKey.separatesSpeakers) private var separatesSpeakers = true
+    @AppStorage(SettingsKey.separatesRoomSpeakers) private var separatesRoomSpeakers = false
     @State private var modelSize: Int64?
+    @State private var diarizerSize: Int64?
     @State private var isConfirmingDelete = false
 
     var body: some View {
@@ -234,10 +346,51 @@ private struct TranscriptionSettingsView: View {
                 Text("Läuft auf der Neural Engine dieses Macs. Das Modell wird einmalig von Hugging Face geladen; danach arbeitet Scripta komplett offline. Modell: Parakeet Ultra von moondream auf Basis von NVIDIA Parakeet TDT 0.6B v3 (CC BY 4.0), CoreML-Fassung von FluidInference.")
                     .foregroundStyle(.secondary)
             }
+
+            Section {
+                Toggle("Sprecher unterscheiden", isOn: $separatesSpeakers)
+                if separatesSpeakers {
+                    Toggle(isOn: $separatesRoomSpeakers) {
+                        Text("Mehrere Personen am Mikrofon")
+                        Text("Für Meetings, in denen weitere Personen mit dir am Mac sitzen. Ist im Meeting niemand online zu hören, geschieht das automatisch.")
+                    }
+                    LabeledContent("Status") {
+                        modelStatus(service.diarizerState)
+                    }
+                    if let diarizerSize {
+                        LabeledContent("Speicherbedarf") {
+                            Text(diarizerSize, format: .byteCount(style: .file))
+                        }
+                    }
+                    HStack {
+                        if service.isDiarizerInstalled {
+                            Button("Löschen", role: .destructive) {
+                                Task {
+                                    await service.deleteDiarizer()
+                                    updateSize()
+                                }
+                            }
+                        } else {
+                            Button("Jetzt laden") {
+                                Task {
+                                    try? await service.prepareDiarizer()
+                                    updateSize()
+                                }
+                            }
+                        }
+                    }
+                    .disabled(service.isBusy)
+                }
+            } header: {
+                Text("Sprecher")
+            } footer: {
+                Text("Trennt die Stimmen in Meetings und Aufnahmen („Sprecher 1“, „Sprecher 2“ …); deine eigene Stimme im Meeting bleibt „Ich“. Modell: pyannote community-1 mit WeSpeaker (CC BY 4.0), CoreML-Fassung von FluidInference. Läuft ebenfalls lokal.")
+                    .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
-        .frame(height: 400)
+        .frame(height: 750)
         .task { updateSize() }
         .confirmationDialog("Modell löschen?", isPresented: $isConfirmingDelete) {
             Button("Löschen", role: .destructive) {
@@ -276,7 +429,9 @@ private struct TranscriptionSettingsView: View {
     }
 
     private func updateSize() {
-        modelSize = appModel.transcription.isModelInstalled ? ParakeetEngine.modelDirectory.directorySize : nil
+        let service = appModel.transcription
+        modelSize = service.isModelInstalled ? ParakeetEngine.modelDirectory.directorySize : nil
+        diarizerSize = service.isDiarizerInstalled ? SpeakerDiarizer.modelDirectory.directorySize : nil
     }
 }
 

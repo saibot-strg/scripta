@@ -25,6 +25,11 @@ struct RecordingManifest: Codable, Sendable, Equatable {
     var capturedFileNames: [String] {
         isMeeting ? [microphoneFileName, systemFileName].compactMap { $0 } : [fileName]
     }
+
+    /// The microphone ("Ich") track; a microphone recording has no other.
+    var microphoneTrackFileName: String? {
+        isMeeting ? microphoneFileName : fileName
+    }
 }
 
 extension RecordingStorage {

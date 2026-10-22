@@ -149,4 +149,29 @@ struct TranscriptEditingTests {
         model.rename(others, to: "  ")
         #expect(others.customName == nil)
     }
+
+    @Test("Giving a speaker another speaker's name merges them")
+    func mergeSpeakers() throws {
+        let (model, recording) = makeModelWithTranscript()
+        let transcript = try #require(recording.transcript)
+        let others = try #require(transcript.speakers.first { $0.role == .others })
+        let me = try #require(transcript.speakers.first { $0.role == .me })
+
+        model.rename(others, to: "ich") // case-insensitive, matches "Ich"
+        #expect(transcript.speakers.map(\.id) == [me.id])
+        #expect(transcript.orderedSegments.allSatisfy { $0.speaker?.id == me.id })
+        #expect(!transcript.hasSpeakers)
+    }
+
+    @Test("Assigning a speaker to another one merges them")
+    func assignSpeaker() throws {
+        let (model, recording) = makeModelWithTranscript()
+        let transcript = try #require(recording.transcript)
+        let others = try #require(transcript.speakers.first { $0.role == .others })
+        let me = try #require(transcript.speakers.first { $0.role == .me })
+
+        model.merge(me, into: others)
+        #expect(transcript.speakers.map(\.id) == [others.id])
+        #expect(transcript.orderedSegments.allSatisfy { $0.speaker?.id == others.id })
+    }
 }

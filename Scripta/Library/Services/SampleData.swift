@@ -70,22 +70,23 @@ enum SampleData {
         transcript.rebuildFullText()
     }
 
-    /// Meeting transcript with "Ich" / "Andere" speaker labels.
-    private static func addMeetingTranscript(to recording: Recording) {
+    /// Meeting transcript with "Ich" and two diarized remote speakers.
+    static func addMeetingTranscript(to recording: Recording) {
         let transcript = Transcript(languageCode: "de", engineIdentifier: "sample")
         recording.transcript = transcript
         let me = SpeakerLabel(role: .me)
-        let others = SpeakerLabel(role: .others)
-        transcript.speakers.append(contentsOf: [me, others])
+        let lead = SpeakerLabel(role: .diarized, number: 1)
+        let colleague = SpeakerLabel(role: .diarized, number: 2)
+        transcript.speakers.append(contentsOf: [me, lead, colleague])
 
         let turns: [(SpeakerLabel, String)] = [
-            (others, "Guten Morgen zusammen! Können mich alle hören?"),
+            (lead, "Guten Morgen zusammen! Können mich alle hören?"),
             (me, "Ja, laut und deutlich. Guten Morgen!"),
-            (others, "Super. Dann starten wir mit dem Stand zum Release."),
-            (me, "Die Aufnahme-Funktion ist fertig, die Tests laufen. Offen ist noch der Export als SRT."),
-            (others, "Wie lange brauchst du dafür ungefähr?"),
+            (colleague, "Hier auch. Sollen wir mit dem Stand zum Release anfangen?"),
+            (lead, "Gern. Die Aufnahme-Funktion ist fertig, die Tests laufen. Offen ist noch der Export als SRT."),
+            (colleague, "Wie lange brauchst du dafür ungefähr?"),
             (me, "Ich denke, bis Donnerstag ist das erledigt."),
-            (others, "Passt. Dann sprechen wir als Nächstes über die Einstellungen."),
+            (lead, "Passt. Dann sprechen wir als Nächstes über die Einstellungen."),
         ]
         var start: TimeInterval = 1.2
         for (index, turn) in turns.enumerated() {

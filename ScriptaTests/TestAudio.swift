@@ -65,3 +65,14 @@ enum TestStore {
         }
     }
 }
+
+extension AppModel {
+    /// Waits until background AAC encoding is done, so it doesn't touch the
+    /// test's SwiftData container after the test has released it.
+    func waitForEncoding() async throws {
+        let deadline = ContinuousClock.now + .seconds(5)
+        while !encodingIDs.isEmpty, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+    }
+}

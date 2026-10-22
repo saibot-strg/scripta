@@ -4,6 +4,7 @@ import SwiftUI
 /// Floating Liquid Glass controls for the active recording.
 struct RecordingCapsuleView: View {
     @Environment(AppModel.self) private var appModel
+    @AppStorage(SettingsKey.microphone) private var microphone = ""
 
     var body: some View {
         let recorder = appModel.recorder
@@ -26,6 +27,7 @@ struct RecordingCapsuleView: View {
                             .glassEffect(.regular, in: .capsule)
 
                         if recorder.state == .recording || recorder.state == .paused {
+                            microphoneMenu
                             pauseButton(isPaused: recorder.state == .paused)
                         }
                     }
@@ -45,7 +47,7 @@ struct RecordingCapsuleView: View {
     private func status(recorder: AudioRecorder) -> some View {
         if appModel.isSavingRecording {
             Label {
-                Text("Meeting wird gespeichert …")
+                Text(appModel.savingSources.contains(.meeting) ? "Meeting wird gespeichert …" : "Aufnahme wird gespeichert …")
             } icon: {
                 ProgressView().controlSize(.small)
             }
@@ -100,6 +102,24 @@ struct RecordingCapsuleView: View {
     }
 
     // MARK: - Buttons
+
+    /// Switches the microphone without stopping the recording.
+    private var microphoneMenu: some View {
+        Menu {
+            MicrophoneMenuSection()
+        } label: {
+            Label("Mikrofon", systemImage: "waveform.and.mic")
+                .labelStyle(.iconOnly)
+                .frame(width: 22, height: 22)
+        }
+        .menuStyle(.button)
+        .menuIndicator(.hidden)
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .controlSize(.large)
+        .fixedSize()
+        .help("Mikrofon wechseln (aktiv: \(appModel.microphoneName(forUID: microphone) ?? "–"))")
+    }
 
     private func pauseButton(isPaused: Bool) -> some View {
         Button {

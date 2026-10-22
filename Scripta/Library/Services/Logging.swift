@@ -11,4 +11,5 @@ extension Logger {
     static let playback = Logger(subsystem: subsystem, category: "Playback")
     static let transcription = Logger(subsystem: subsystem, category: "Transcription")
     static let dictation = Logger(subsystem: subsystem, category: "Dictation")
+    static let voices = Logger(subsystem: subsystem, category: "Voices")
 }

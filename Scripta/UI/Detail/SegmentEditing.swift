@@ -26,8 +26,9 @@ struct EditableSegmentText: View {
                 }
                 .accessibilityLabel(Text("Abschnitt bearbeiten"))
         } else {
+            // Not selectable: selectable text answers a right-click with the
+            // system text menu, which hides the segment menu (rename, assign).
             Text(segment.text)
-                .textSelection(.enabled)
                 .simultaneousGesture(TapGesture(count: 2).onEnded { isEditing = true })
         }
     }
@@ -63,6 +64,25 @@ struct SegmentContextMenu: View {
             Divider()
             Button("„\(speaker.displayName)“ umbenennen …", systemImage: "person.text.rectangle") {
                 onRenameSpeaker(speaker)
+            }
+            let others = (speaker.transcript?.speakers ?? [])
+                .filter { $0.id != speaker.id }
+                // "Ich" first, then "Andere" and the numbered speakers.
+                .sorted { ($0.role == .me ? 0 : 1, $0.number) < ($1.role == .me ? 0 : 1, $1.number) }
+            if !others.isEmpty {
+                Menu("„\(speaker.displayName)“ zuordnen zu", systemImage: "person.2") {
+                    ForEach(others) { other in
+                        Button(other.displayName) { appModel.merge(speaker, into: other) }
+                    }
+                }
+            }
+            // Two people in one voice: move single passages out.
+            Menu("Nur diesen Abschnitt", systemImage: "arrow.turn.down.right") {
+                ForEach(others) { other in
+                    Button(other.displayName) { appModel.move(segment, to: other) }
+                }
+                if !others.isEmpty { Divider() }
+                Button("Neuer Sprecher", systemImage: "person.badge.plus") { appModel.moveToNewSpeaker(segment) }
             }
         }
     }

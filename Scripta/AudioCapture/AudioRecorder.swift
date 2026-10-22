@@ -209,6 +209,17 @@ final class AudioRecorder {
         state = .recording
     }
 
+    /// Moves the running recording to the microphone now chosen in the
+    /// settings. The microphone track keeps its timeline, so it stays in sync
+    /// with the system track.
+    func switchMicrophone() throws(RecordingError) {
+        guard let session else { return }
+        for track in session.tracks where track.role != .system {
+            try track.source.switchMicrophone()
+        }
+        Logger.recording.info("Recording \(session.manifest.id, privacy: .public) switched microphone")
+    }
+
     /// Stops recording and closes all files.
     func stop() -> FinishedRecording? {
         guard let session else { return nil }

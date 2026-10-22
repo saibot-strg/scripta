@@ -12,7 +12,16 @@ enum SettingsKey {
     static let appearance = "appearance"
     /// UID of the microphone ("" = system default).
     static let microphone = "recording.microphone"
+    /// Raise quiet microphone recordings to a normal speech level (on by default).
+    static let levelsMicrophone = "recording.levelMicrophone"
     static let showsMenuBarIcon = "menuBar.visible"
+    /// Tell speakers apart by their voices when transcribing (on by default).
+    static let separatesSpeakers = "transcription.separateSpeakers"
+    /// Remember voices and recognize people in later recordings (opt-in: voice
+    /// profiles are biometric data).
+    static let recognizesVoices = "voices.recognize"
+    /// Meetings: also split the microphone track (several people in the room; off by default).
+    static let separatesRoomSpeakers = "transcription.separateRoomSpeakers"
     /// Look for a new release on GitHub once a day (on by default).
     static let checksForUpdates = "updates.automatic"
     static let lastUpdateCheck = "updates.lastCheck"
@@ -68,9 +77,27 @@ enum RecordingSettings {
         return value.isEmpty ? nil : value
     }
 
+    static var levelsMicrophone: Bool {
+        UserDefaults.standard.object(forKey: SettingsKey.levelsMicrophone) as? Bool ?? true
+    }
+
     static var meetingSourceBundleID: String? {
         let value = UserDefaults.standard.string(forKey: SettingsKey.meetingSource) ?? ""
         return value.isEmpty ? nil : value
+    }
+}
+
+enum TranscriptionSettings {
+    static var separatesSpeakers: Bool {
+        UserDefaults.standard.object(forKey: SettingsKey.separatesSpeakers) as? Bool ?? true
+    }
+
+    static var separatesRoomSpeakers: Bool {
+        UserDefaults.standard.bool(forKey: SettingsKey.separatesRoomSpeakers)
+    }
+
+    static var recognizesVoices: Bool {
+        UserDefaults.standard.bool(forKey: SettingsKey.recognizesVoices)
     }
 }
 

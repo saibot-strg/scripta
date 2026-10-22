@@ -5,7 +5,7 @@ import Synchronization
 import Testing
 @testable import Scripta
 
-/// 60-minute transcription benchmark. Opt-in because it takes a while:
+/// 60-minute transcription and diarization benchmarks. Opt-in because they take a while:
 ///
 ///     TEST_RUNNER_SCRIPTA_BENCHMARK=1 xcodebuild test -only-testing:ScriptaTests/TranscriptionBenchmarkTests …
 @Suite(
@@ -50,9 +50,46 @@ struct TranscriptionBenchmarkTests {
         #expect(growthMB < 1_500, "memory grew by \(growthMB) MB")
     }
 
-    /// Repeats the German test speech into one long PCM file (16 kHz mono).
-    private func makeLongFile(at url: URL, minutes: Double) throws -> TimeInterval {
-        let source = try AVAudioFile(forReading: Bundle(for: Token.self).url(forResource: "speech-de", withExtension: "m4a")!)
+    @Test("60 minutes of a dialogue: speakers are separated quickly", .enabled(if: SpeakerDiarizer.isModelInstalled))
+    func sixtyMinutesDiarization() async throws {
+        let folder = TestAudio.temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appending(path: "60min-dialogue.caf")
+        let duration = try makeLongFile(at: url, minutes: 60, resource: "speakers-en")
+
+        let diarizer = SpeakerDiarizer()
+        try await diarizer.prepare { _ in }
+        let memoryBefore = residentMemory()
+        let peak = PeakMemory()
+        let sampler = Task {
+            while !Task.isCancelled {
+                peak.record(residentMemory())
+                try? await Task.sleep(for: .milliseconds(250))
+            }
+        }
+
+        let clock = ContinuousClock()
+        let start = clock.now
+        let result = try await diarizer.diarize(fileURL: url) { _ in }
+        let elapsed = start.duration(to: clock.now)
+        sampler.cancel()
+
+        let seconds = Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18
+        let growthMB = Double(peak.value - memoryBefore) / 1_048_576
+        let report = String(
+            format: "60 min dialogue diarized in %.1f s (%.0fx real time), %d speakers, %d turns, peak memory growth %.0f MB",
+            seconds, duration / seconds, result.speakers.count, result.turns.count, growthMB
+        )
+        print("BENCHMARK \(report)")
+
+        #expect(result.speakers.count == 2, "\(result.speakers)")
+        #expect(seconds < 120)
+        #expect(growthMB < 1_500, "memory grew by \(growthMB) MB")
+    }
+
+    /// Repeats a test recording into one long PCM file (16 kHz mono).
+    private func makeLongFile(at url: URL, minutes: Double, resource: String = "speech-de") throws -> TimeInterval {
+        let source = try AVAudioFile(forReading: Bundle(for: Token.self).url(forResource: resource, withExtension: "m4a")!)
         let format = AVAudioFormat(standardFormatWithSampleRate: 16_000, channels: 1)!
         let converter = AVAudioConverter(from: source.processingFormat, to: format)!
         let input = AVAudioPCMBuffer(pcmFormat: source.processingFormat, frameCapacity: AVAudioFrameCount(source.length))!
