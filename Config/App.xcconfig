@@ -6,7 +6,7 @@ PRODUCT_MODULE_NAME = Scripta
 // Debug builds use their own bundle ID (".debug"), so development data and
 // permissions stay separate from the installed app in /Applications.
 PRODUCT_BUNDLE_IDENTIFIER = io.github.saibot-strg.Scripta$(BUNDLE_ID_SUFFIX)
-MARKETING_VERSION = 0.2.0
+MARKETING_VERSION = 0.3.0
 CURRENT_PROJECT_VERSION = 1
 
 // Generated Info.plist; usage descriptions are added with the features that need them.
