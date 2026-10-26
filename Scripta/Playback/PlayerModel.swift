@@ -96,6 +96,13 @@ final class PlayerModel {
 
     // MARK: Scrubbing
 
+    /// For the position slider: while dragging it only moves the display,
+    /// otherwise it seeks.
+    var position: TimeInterval {
+        get { currentTime }
+        set { isScrubbing ? scrub(to: newValue) : seek(to: newValue) }
+    }
+
     func beginScrubbing() {
         isScrubbing = true
     }

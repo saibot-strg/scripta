@@ -42,6 +42,10 @@ final class TranscriptionService {
     /// The loaded model takes several hundred MB; free it after this idle time.
     static let idleUnloadDelay: Duration = .seconds(300)
 
+    /// Called after a transcript was replaced by a new one (its old segments
+    /// and speakers are gone).
+    @ObservationIgnored var onTranscriptReplaced: () -> Void = {}
+
     /// Keeps the model in memory (dictation needs it instantly).
     var keepsModelLoaded = false {
         didSet {
@@ -399,6 +403,7 @@ final class TranscriptionService {
             voices?.forget(labelIDs: old.speakers.map(\.id))
             recording.transcript = nil
             library.modelContext.delete(old)
+            onTranscriptReplaced()
         }
         let text = drafts.map(\.text).joined(separator: " ")
         let transcript = Transcript(

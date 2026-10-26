@@ -45,6 +45,12 @@ extension Transcript {
         Set(segments.compactMap { $0.speaker?.id }).count > 1
     }
 
+    /// True if a new transcription would discard work: corrected text or
+    /// names given to speakers.
+    var hasManualChanges: Bool {
+        segments.contains(where: \.isEdited) || speakers.contains { $0.customName != nil }
+    }
+
     /// Rebuilds `fullText` after segments were added or edited.
     func rebuildFullText() {
         fullText = orderedSegments.map(\.text).joined(separator: "\n")

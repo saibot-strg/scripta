@@ -17,6 +17,10 @@ final class AppModel {
     let dictation: DictationController
     let player = PlayerModel()
     let updates = UpdateChecker()
+    /// ⌘Z for the user's own edits (see `UndoCoordinator`).
+    let undo: UndoCoordinator
+    /// Asked before the first meeting recording.
+    var meetingNotice = MeetingNotice()
 
     var sidebarSelection: SidebarItem? = .all
     /// Selection by the recording's own UUID. SwiftData's `persistentModelID`
@@ -32,6 +36,9 @@ final class AppModel {
 
     /// Error or notice shown in the main window's alert.
     var presentedError: PresentableError?
+    /// A recording with corrections the user asked to transcribe again; the
+    /// main window asks first, because the corrections would be lost.
+    var retranscriptionRequest: Recording?
 
     /// Recordings currently being encoded to AAC.
     private(set) var encodingIDs: Set<UUID> = []
@@ -46,6 +53,8 @@ final class AppModel {
         })
         transcription = TranscriptionService(library: library, diarizer: SpeakerDiarizer(), voices: voices)
         dictation = DictationController(transcription: transcription)
+        undo = UndoCoordinator()
+        transcription.onTranscriptReplaced = { [weak self] in self?.undo.clear() }
         recorder.onFailure = { [weak self] error in
             self?.stopRecording()
             self?.presentedError = PresentableError(error)
@@ -173,17 +182,26 @@ final class AppModel {
     func edit(_ segment: TranscriptSegment, text: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, trimmed != segment.text else { return }
-        segment.applyEdit(trimmed)
-        segment.transcript?.rebuildFullText()
-        perform { try library.save() }
+        setText(of: segment, to: trimmed, original: segment.originalText ?? segment.text, actionName: String(localized: "Text bearbeiten"))
     }
 
     func restoreOriginalText(of segment: TranscriptSegment) {
         guard let original = segment.originalText else { return }
-        segment.text = original
-        segment.originalText = nil
+        setText(of: segment, to: original, original: nil, actionName: String(localized: "Originaltext wiederherstellen"))
+    }
+
+    /// Sets a segment's text and engine text; undo sets the previous pair.
+    private func setText(of segment: TranscriptSegment, to text: String, original: String?, actionName: String) {
+        let previous = (text: segment.text, original: segment.originalText)
+        let id = segment.id
+        segment.text = text
+        segment.originalText = original
         segment.transcript?.rebuildFullText()
         perform { try library.save() }
+        undo.register(actionName) { [weak self] in
+            guard let self, let segment = library.segment(withID: id) else { return }
+            setText(of: segment, to: previous.text, original: previous.original, actionName: actionName)
+        }
     }
 
     /// An empty name restores the default ("Ich", "Andere", "Sprecher 2").
@@ -200,9 +218,9 @@ final class AppModel {
             merge(speaker, into: existing)
             return
         }
-        setName(trimmed, of: speaker, remember: remember)
-        transcript.rebuildFullText()
-        perform { try library.save() }
+        changeSpeakers(of: transcript, actionName: String(localized: "Sprecher umbenennen")) {
+            setName(trimmed, of: speaker, remember: remember)
+        }
     }
 
     /// One name given in the assignment sheet.
@@ -216,31 +234,32 @@ final class AppModel {
     /// up with the same name are merged; a name that only matches another
     /// speaker's *old* name is not (e.g. two guessed names swapped).
     func assignNames(_ assignments: [NameAssignment], in transcript: Transcript) {
-        func key(_ name: String) -> String { name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
-        var finalNames = Dictionary(uniqueKeysWithValues: transcript.speakers.map { ($0.id, key($0.displayName)) })
-        for assignment in assignments {
-            let name = key(assignment.name)
-            finalNames[assignment.speaker.id] = name.isEmpty ? key(assignment.speaker.defaultName) : name
-        }
-        // Speakers named in the sheet first, so they keep their passages' label.
-        let named = assignments.map(\.speaker)
-        let ordered = named + transcript.speakers.filter { speaker in !named.contains { $0.id == speaker.id } }
-        var survivors: [String: SpeakerLabel] = [:]
-        var merged: Set<UUID> = []
-        for speaker in ordered {
-            guard let name = finalNames[speaker.id] else { continue }
-            if let target = survivors[name] {
-                merge(speaker, into: target)
-                merged.insert(speaker.id)
-            } else {
-                survivors[name] = speaker
+        guard !assignments.isEmpty else { return }
+        changeSpeakers(of: transcript, actionName: String(localized: "Namen zuordnen")) {
+            func key(_ name: String) -> String { name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+            var finalNames = Dictionary(uniqueKeysWithValues: transcript.speakers.map { ($0.id, key($0.displayName)) })
+            for assignment in assignments {
+                let name = key(assignment.name)
+                finalNames[assignment.speaker.id] = name.isEmpty ? key(assignment.speaker.defaultName) : name
+            }
+            // Speakers named in the sheet first, so they keep their passages' label.
+            let named = assignments.map(\.speaker)
+            let ordered = named + transcript.speakers.filter { speaker in !named.contains { $0.id == speaker.id } }
+            var survivors: [String: SpeakerLabel] = [:]
+            var merged: Set<UUID> = []
+            for speaker in ordered {
+                guard let name = finalNames[speaker.id] else { continue }
+                if let target = survivors[name] {
+                    mergeSpeaker(speaker, into: target, in: transcript)
+                    merged.insert(speaker.id)
+                } else {
+                    survivors[name] = speaker
+                }
+            }
+            for assignment in assignments where !merged.contains(assignment.speaker.id) {
+                setName(assignment.name.trimmingCharacters(in: .whitespacesAndNewlines), of: assignment.speaker, remember: assignment.remember)
             }
         }
-        for assignment in assignments where !merged.contains(assignment.speaker.id) {
-            setName(assignment.name.trimmingCharacters(in: .whitespacesAndNewlines), of: assignment.speaker, remember: assignment.remember)
-        }
-        transcript.rebuildFullText()
-        perform { try library.save() }
     }
 
     /// Sets the name without looking at other speakers. An empty or default
@@ -265,14 +284,39 @@ final class AppModel {
     /// removes `speaker`: one person the diarization split into several voices.
     func merge(_ speaker: SpeakerLabel, into target: SpeakerLabel) {
         guard let transcript = speaker.transcript, target.transcript?.id == transcript.id, target.id != speaker.id else { return }
+        changeSpeakers(of: transcript, actionName: String(localized: "Sprecher zusammenführen")) {
+            mergeSpeaker(speaker, into: target, in: transcript)
+        }
+    }
+
+    private func mergeSpeaker(_ speaker: SpeakerLabel, into target: SpeakerLabel, in transcript: Transcript) {
         voices.merge(labelID: speaker.id, into: target.id)
         for segment in Array(speaker.segments) {
             segment.speaker = target
         }
         transcript.speakers.removeAll { $0.id == speaker.id }
         library.modelContext.delete(speaker)
+    }
+
+    /// Runs a change to a transcript's speakers (names, merges, moved
+    /// passages) as one undo step that restores the speakers as they were.
+    private func changeSpeakers(of transcript: Transcript, actionName: String, _ change: () -> Void) {
+        let before = SpeakerSnapshot(transcript, voices: voices)
+        change()
         transcript.rebuildFullText()
         perform { try library.save() }
+        registerRestore(of: before, actionName: actionName)
+    }
+
+    private func registerRestore(of snapshot: SpeakerSnapshot, actionName: String) {
+        undo.register(actionName) { [weak self] in
+            guard let self, let transcript = library.transcript(withID: snapshot.transcriptID) else { return }
+            let current = SpeakerSnapshot(transcript, voices: voices)
+            snapshot.restore(into: transcript, context: library.modelContext, voices: voices)
+            transcript.rebuildFullText()
+            perform { try library.save() }
+            registerRestore(of: current, actionName: actionName)
+        }
     }
 
     // MARK: - Export
@@ -282,6 +326,7 @@ final class AppModel {
     private var toastTask: Task<Void, Never>?
 
     func showToast(_ message: String) {
+        AccessibilityNotification.Announcement(message).post()
         toast = message
         toastTask?.cancel()
         toastTask = Task {
@@ -347,18 +392,28 @@ final class AppModel {
         transcription.enqueue(recording, speakerCount: speakerCount)
     }
 
-    /// Queues every recording without a transcript (batch transcription).
-    func transcribeAllPending() {
-        let all = (try? library.modelContext.fetch(FetchDescriptor<Recording>(sortBy: [SortDescriptor(\.createdAt)]))) ?? []
-        for recording in all where (recording.status == .notTranscribed || recording.status == .failed)
-            && library.audioURL(for: recording) != nil {
-            transcription.enqueue(recording)
+    /// "Transkribieren" from a button or menu: asks first (in the main
+    /// window) when a new transcript would discard the user's corrections.
+    func requestTranscription(of recording: Recording) {
+        if recording.transcript?.hasManualChanges == true {
+            retranscriptionRequest = recording
+        } else {
+            transcribe(recording)
         }
     }
 
-    var pendingTranscriptionCount: Int {
-        let all = (try? library.modelContext.fetch(FetchDescriptor<Recording>())) ?? []
-        return all.count { ($0.status == .notTranscribed || $0.status == .failed) && library.audioURL(for: $0) != nil }
+    /// Queues every recording without a transcript (batch transcription).
+    func transcribeAllPending() {
+        let all = (try? library.modelContext.fetch(FetchDescriptor<Recording>(sortBy: [SortDescriptor(\.createdAt)]))) ?? []
+        let pending = all.filter {
+            ($0.status == .notTranscribed || $0.status == .failed) && library.audioURL(for: $0) != nil
+        }
+        for recording in pending {
+            transcription.enqueue(recording)
+        }
+        showToast(pending.isEmpty
+                  ? String(localized: "Keine Aufnahmen zum Transkribieren")
+                  : String(localized: "\(pending.count) Aufnahmen in der Warteschlange"))
     }
 
     func cancelTranscription(of recording: Recording) {
@@ -368,9 +423,19 @@ final class AppModel {
     // MARK: - Recording
 
     /// Stopped recordings whose files are still being finished (levelling,
-    /// mixing), by kind for the status text.
-    private(set) var savingSources: [RecordingSource] = []
-    var isSavingRecording: Bool { !savingSources.isEmpty }
+    /// mixing) before they are added to the library.
+    private(set) var savingRecordings: [LiveRecording] = []
+    var isSavingRecording: Bool { !savingRecordings.isEmpty }
+
+    /// The running recording and the ones being saved, newest first, for
+    /// the top of the recording list.
+    var liveRecordings: [LiveRecording] {
+        var items = savingRecordings.reversed() as [LiveRecording]
+        if let id = recorder.activeRecordingID {
+            items.insert(LiveRecording(id: id, title: recorder.title, source: recorder.isMeeting ? .meeting : .microphone), at: 0)
+        }
+        return items
+    }
     /// Apps that can be recorded on their own in a meeting.
     private(set) var meetingApps: [MeetingApp] = []
     /// Inputs for the microphone menus, kept current as devices come and go.
@@ -402,6 +467,13 @@ final class AppModel {
     /// Records microphone and system audio as separate tracks.
     /// - Parameter target: nil uses the default source from the settings.
     func startMeeting(_ target: SystemAudioTarget? = nil) async {
+        guard !recorder.isActive else { return }
+        #if DEBUG
+        let asksFirst = !recorder.usesTestTone
+        #else
+        let asksFirst = true
+        #endif
+        if asksFirst, await !meetingNotice.confirm() { return }
         guard !recorder.isActive else { return }
         do {
             try ensureFreeSpace()
@@ -495,11 +567,11 @@ final class AppModel {
     @discardableResult
     func stopRecording() -> Task<Void, Never>? {
         guard let finished = recorder.stop() else { return nil }
-        let source = finished.manifest.source
-        savingSources.append(source)
+        let manifest = finished.manifest
+        savingRecordings.append(LiveRecording(id: manifest.id, title: manifest.title, source: manifest.source, isSaving: true))
         return Task {
             defer {
-                if let index = savingSources.firstIndex(of: source) { savingSources.remove(at: index) }
+                savingRecordings.removeAll { $0.id == manifest.id }
             }
             do {
                 let duration = try await RecordingFinisher.finish(finished.manifest, storage: finished.storage)
@@ -597,9 +669,18 @@ final class AppModel {
     }
 
     func rename(_ recording: Recording, to title: String) {
+        let previous = recording.title
         perform { try library.rename(recording, to: title) }
+        guard recording.title != previous else { return }
+        let id = recording.id
+        undo.register(String(localized: "Aufnahme umbenennen")) { [weak self] in
+            guard let self, let recording = library.recording(withID: id) else { return }
+            rename(recording, to: previous)
+        }
     }
 
+    /// Deletes a recording; its audio files go to the Trash. Not undoable,
+    /// so older undo steps (which may point into it) are dropped.
     func delete(_ recording: Recording) {
         if selectedRecordingID == recording.id {
             selectedRecordingID = nil
@@ -607,6 +688,7 @@ final class AppModel {
         transcription.cancel(recording)
         voices.forgetRecording(recording.id)
         perform { try library.delete(recording) }
+        undo.clear()
     }
 
     /// Moves one passage to another speaker of the same transcript: the
@@ -616,6 +698,29 @@ final class AppModel {
     func move(_ segment: TranscriptSegment, to target: SpeakerLabel) {
         guard let source = segment.speaker, source.id != target.id,
               let transcript = segment.transcript, target.transcript?.id == transcript.id else { return }
+        changeSpeakers(of: transcript, actionName: String(localized: "Abschnitt verschieben")) {
+            moveSegment(segment, from: source, to: target, in: transcript)
+        }
+    }
+
+    /// Moves one passage to a new numbered speaker ("Sprecher 4"), named
+    /// `name` if given (a known person not yet in this transcript). If a
+    /// speaker already has that name, the passage goes there.
+    func moveToNewSpeaker(_ segment: TranscriptSegment, named name: String? = nil) {
+        guard let transcript = segment.transcript, let source = segment.speaker else { return }
+        if let name, let existing = transcript.speakers.first(where: { $0.displayName.localizedCaseInsensitiveCompare(name) == .orderedSame }) {
+            move(segment, to: existing)
+            return
+        }
+        changeSpeakers(of: transcript, actionName: String(localized: "Abschnitt verschieben")) {
+            let number = (transcript.speakers.filter { $0.role == .diarized }.map(\.number).max() ?? 0) + 1
+            let label = SpeakerLabel(role: .diarized, number: number, customName: name)
+            transcript.speakers.append(label)
+            moveSegment(segment, from: source, to: label, in: transcript)
+        }
+    }
+
+    private func moveSegment(_ segment: TranscriptSegment, from source: SpeakerLabel, to target: SpeakerLabel, in transcript: Transcript) {
         let sourceKeepsPassages = source.segments.contains { $0.id != segment.id }
         voices.discardVoice(labelID: source.id)
         segment.speaker = target
@@ -623,23 +728,6 @@ final class AppModel {
             transcript.speakers.removeAll { $0.id == source.id }
             library.modelContext.delete(source)
         }
-        transcript.rebuildFullText()
-        perform { try library.save() }
-    }
-
-    /// Moves one passage to a new numbered speaker ("Sprecher 4"), named
-    /// `name` if given (a known person not yet in this transcript). If a
-    /// speaker already has that name, the passage goes there.
-    func moveToNewSpeaker(_ segment: TranscriptSegment, named name: String? = nil) {
-        guard let transcript = segment.transcript else { return }
-        if let name, let existing = transcript.speakers.first(where: { $0.displayName.localizedCaseInsensitiveCompare(name) == .orderedSame }) {
-            move(segment, to: existing)
-            return
-        }
-        let number = (transcript.speakers.filter { $0.role == .diarized }.map(\.number).max() ?? 0) + 1
-        let label = SpeakerLabel(role: .diarized, number: number, customName: name)
-        transcript.speakers.append(label)
-        move(segment, to: label)
     }
 
     // MARK: - Folders
@@ -648,23 +736,67 @@ final class AppModel {
         perform {
             let folder = try library.createFolder(named: name)
             sidebarSelection = .folder(folder.id)
+            let id = folder.id
+            undo.register(String(localized: "Neuer Ordner")) { [weak self] in
+                self?.removeFolder(id: id, actionName: String(localized: "Neuer Ordner"))
+            }
         }
     }
 
     func rename(_ folder: Folder, to name: String) {
+        let previous = folder.name
         perform { try library.rename(folder, to: name) }
+        guard folder.name != previous else { return }
+        let id = folder.id
+        undo.register(String(localized: "Ordner umbenennen")) { [weak self] in
+            guard let self, let folder = library.folder(withID: id) else { return }
+            rename(folder, to: previous)
+        }
     }
 
     func delete(_ folder: Folder) {
-        if sidebarSelection == .folder(folder.id) { sidebarSelection = .all }
+        removeFolder(id: folder.id, actionName: String(localized: "Ordner löschen"))
+    }
+
+    /// Deletes a folder (its recordings stay); undo brings it back with the
+    /// same recordings in it.
+    private func removeFolder(id: UUID, actionName: String) {
+        guard let folder = library.folder(withID: id) else { return }
+        let name = folder.name
+        let members = folder.recordings.map(\.id)
+        if sidebarSelection == .folder(id) { sidebarSelection = .all }
         perform { try library.delete(folder) }
+        undo.register(actionName) { [weak self] in
+            self?.recreateFolder(id: id, name: name, recordingIDs: members, actionName: actionName)
+        }
+    }
+
+    private func recreateFolder(id: UUID, name: String, recordingIDs: [UUID], actionName: String) {
+        perform {
+            let folder = try library.createFolder(named: name, id: id)
+            try library.move(recordingIDs.compactMap(library.recording(withID:)), to: folder)
+        }
+        undo.register(actionName) { [weak self] in
+            self?.removeFolder(id: id, actionName: actionName)
+        }
     }
 
     /// Files recordings by ID (drag and drop) in a folder, nil = out of any folder.
     func move(recordingIDs: [UUID], to folder: Folder?) {
-        let recordings = recordingIDs.compactMap(library.recording(withID:))
-        guard !recordings.isEmpty else { return }
+        moveRecordings(recordingIDs, toFolderID: folder?.id, actionName: String(localized: "In Ordner verschieben"))
+    }
+
+    private func moveRecordings(_ ids: [UUID], toFolderID folderID: UUID?, actionName: String) {
+        let recordings = ids.compactMap(library.recording(withID:))
+        let folder = folderID.flatMap(library.folder(withID:))
+        guard !recordings.isEmpty, folderID == nil || folder != nil else { return }
+        let previous = Dictionary(grouping: recordings) { $0.folder?.id }.mapValues { $0.map(\.id) }
         perform { try library.move(recordings, to: folder) }
+        undo.register(actionName) { [weak self] in
+            for (folderID, ids) in previous {
+                self?.moveRecordings(ids, toFolderID: folderID, actionName: actionName)
+            }
+        }
     }
 
     // MARK: - People
@@ -672,7 +804,7 @@ final class AppModel {
     /// Renames a known person and every speaker named after them.
     func renamePerson(_ id: UUID, to name: String) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty, let previous = voices.people.first(where: { $0.id == id })?.name, previous != trimmed else { return }
         var transcripts: [UUID: Transcript] = [:]
         for labelID in voices.rename(personID: id, to: trimmed) {
             let descriptor = FetchDescriptor<SpeakerLabel>(predicate: #Predicate { $0.id == labelID })
@@ -682,14 +814,54 @@ final class AppModel {
         }
         for transcript in transcripts.values { transcript.rebuildFullText() }
         perform { try library.save() }
+        undo.register(String(localized: "Person umbenennen")) { [weak self] in
+            self?.renamePerson(id, to: previous)
+        }
     }
 
+    /// Voice profiles are biometric data: deleting them is final, also for undo.
     func deletePerson(_ id: UUID) {
         voices.delete(personID: id)
+        undo.clear()
     }
 
     func deleteAllVoiceProfiles() {
         voices.deleteAll()
+        undo.clear()
+    }
+
+    // MARK: - Undo
+
+    /// Undo steps go to the main window's undo manager (Edit menu).
+    func attachUndoManager(_ manager: UndoManager?) {
+        undo.attach(manager)
+    }
+
+    // MARK: - Language
+
+    /// Whether quitting now would interrupt something (recording, saving).
+    var canRelaunch: Bool {
+        !recorder.isActive && !isSavingRecording
+    }
+
+    /// Starts a new instance of Scripta, then quits this one: the language
+    /// setting only applies at launch.
+    func relaunch() {
+        guard canRelaunch else { return }
+        // Frees the dictation shortcut for the new instance.
+        dictation.setShortcutSuspended(true)
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.createsNewApplicationInstance = true
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { [weak self] _, error in
+            Task { @MainActor in
+                if let error {
+                    self?.dictation.setShortcutSuspended(false)
+                    self?.presentedError = PresentableError(error)
+                } else {
+                    NSApp.terminate(nil)
+                }
+            }
+        }
     }
 
     // MARK: - Storage location

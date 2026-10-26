@@ -180,6 +180,29 @@ final class VoiceLibrary {
         save()
     }
 
+    /// Puts a speaker's voice back to an earlier status (undoing a naming):
+    /// the sample it gave goes back to the person it belonged to, or away,
+    /// so an undone naming leaves no voice in the wrong profile. A person
+    /// left without samples and speakers by this (created by the naming) is
+    /// removed.
+    func restore(labelID: UUID, to status: VoiceStatus?) {
+        guard let row = voice(ofLabel: labelID) else { return }
+        let previousPersonID = row.personID
+        removeSample(of: row)
+        let person = status?.personID.flatMap(person(withID:))
+        row.personID = person?.id
+        row.score = person == nil ? nil : status?.score
+        row.state = person == nil ? .unknown : status?.state ?? .unknown
+        if let person, row.state == .confirmed || row.state == .automatic {
+            row.sampleID = addSample(to: person, from: row, isConfirmed: row.state == .confirmed)
+        }
+        if let previousPersonID, previousPersonID != row.personID, let previous = self.person(withID: previousPersonID),
+           previous.samples.isEmpty, !allVoices().contains(where: { $0.personID == previousPersonID }) {
+            modelContext.delete(previous)
+        }
+        save()
+    }
+
     /// Two speakers of a transcript are one person: the merged speaker's voice
     /// becomes another sample of the target's person, but only if it sounds
     /// like that person. Merging is also how users clean up a mix-up, and a
@@ -347,8 +370,8 @@ final class VoiceLibrary {
         refresh()
     }
 
-    /// Rebuilds the observable snapshots.
-    private func refresh() {
+    /// Rebuilds the observable snapshots (also after undo and redo).
+    func refresh() {
         let everyone = allPeople()
         people = everyone
             .map { person in

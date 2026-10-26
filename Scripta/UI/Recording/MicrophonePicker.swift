@@ -8,6 +8,7 @@ struct MicrophonePicker: View {
     @AppStorage(SettingsKey.microphone) private var microphone = ""
 
     var body: some View {
+        // A custom binding on purpose: choosing also switches a running recording.
         Picker("Mikrofon", selection: Binding(get: { microphone }, set: { appModel.selectMicrophone($0) })) {
             if let name = appModel.defaultMicrophone?.name {
                 Text("Systemstandard (\(name))").tag("")
@@ -18,19 +19,6 @@ struct MicrophonePicker: View {
                 Text("Nicht verbunden").tag(microphone)
             }
             ForEach(appModel.microphones) { Text($0.name).tag($0.uid) }
-        }
-    }
-}
-
-/// The microphone choice as a menu section with a checkmark on the current one.
-struct MicrophoneMenuSection: View {
-    var title: LocalizedStringKey = "Mikrofon"
-
-    var body: some View {
-        Section(title) {
-            MicrophonePicker()
-                .pickerStyle(.inline)
-                .labelsHidden()
         }
     }
 }

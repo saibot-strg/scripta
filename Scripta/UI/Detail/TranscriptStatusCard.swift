@@ -5,6 +5,7 @@ import SwiftUI
 struct TranscriptStatusCard: View {
     @Environment(AppModel.self) private var appModel
     let recording: Recording
+    let hasAudio: Bool
 
     var body: some View {
         let status = recording.status
@@ -12,7 +13,8 @@ struct TranscriptStatusCard: View {
 
         VStack(spacing: 14) {
             Image(systemName: status == .notTranscribed ? "text.bubble" : status.systemImage)
-                .font(.system(size: 34, weight: .regular))
+                .font(.largeTitle)
+                .imageScale(.large)
                 .foregroundStyle(status == .notTranscribed ? Color.accentColor : status.tint)
                 .symbolEffect(.variableColor.iterative, isActive: status == .running)
 
@@ -37,26 +39,34 @@ struct TranscriptStatusCard: View {
         }
         .padding(32)
         .frame(maxWidth: .infinity)
-        .background(.background.secondary, in: .rect(cornerRadius: 20, style: .continuous))
+        .background(.background.secondary, in: .rect(cornerRadius: 20))
     }
 
     @ViewBuilder
     private func actions(status: TranscriptionStatus) -> some View {
         switch status {
         case .notTranscribed, .done:
-            Button("Transkribieren") { appModel.transcribe(recording) }
+            Button("Transkribieren", action: transcribe)
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .disabled(appModel.library.audioURL(for: recording) == nil)
+                .disabled(!hasAudio)
         case .failed:
-            Button("Erneut versuchen") { appModel.transcribe(recording) }
+            Button("Erneut versuchen", action: transcribe)
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .disabled(appModel.library.audioURL(for: recording) == nil)
+                .disabled(!hasAudio)
         case .queued, .running:
-            Button("Abbrechen") { appModel.cancelTranscription(of: recording) }
+            Button("Abbrechen", action: cancel)
                 .controlSize(.large)
         }
+    }
+
+    private func transcribe() {
+        appModel.requestTranscription(of: recording)
+    }
+
+    private func cancel() {
+        appModel.cancelTranscription(of: recording)
     }
 
     private var title: LocalizedStringKey {
@@ -71,7 +81,7 @@ struct TranscriptStatusCard: View {
     private func message(modelState: TranscriptionService.ModelState) -> String {
         switch recording.status {
         case .notTranscribed, .done:
-            if appModel.library.audioURL(for: recording) == nil {
+            if !hasAudio {
                 return String(localized: "Für diese Aufnahme gibt es keine Audiodatei.")
             }
             return String(localized: "Das Transkript wird lokal auf diesem Mac erstellt. Audio und Text verlassen deinen Mac nicht.")

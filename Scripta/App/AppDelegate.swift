@@ -7,6 +7,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppAppearance.current.apply()
+        // Remember the language this instance runs in, before the settings change it.
+        _ = AppLanguage.atLaunch
         // Scripta keeps working without a window (dictation shortcut, menu bar,
         // recordings), so macOS must not quit it when it looks idle.
         ProcessInfo.processInfo.disableAutomaticTermination("Dictation and recordings run in the background")

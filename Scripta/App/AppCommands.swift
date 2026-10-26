@@ -75,15 +75,17 @@ struct AppCommands: Commands {
 
         CommandMenu("Transkription") {
             Button("Ausgewählte transkribieren", systemImage: "text.bubble") {
-                if let recording = appModel.selectedRecording { appModel.transcribe(recording) }
+                if let recording = appModel.selectedRecording { appModel.requestTranscription(of: recording) }
             }
             .keyboardShortcut("t")
             .disabled(appModel.selectedRecording.map { $0.status.isInProgress || appModel.library.audioURL(for: $0) == nil } ?? true)
+            // Always enabled: counting would mean a database query and a file
+            // check per recording on every menu update. A note says when
+            // there is nothing to do.
             Button("Alle ausstehenden transkribieren", systemImage: "text.bubble.fill") {
                 appModel.transcribeAllPending()
             }
             .keyboardShortcut("t", modifiers: [.command, .shift])
-            .disabled(appModel.pendingTranscriptionCount == 0)
         }
 
         // Placed before the standard text editing group so ⌘F always reaches the library search.

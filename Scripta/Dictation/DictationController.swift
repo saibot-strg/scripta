@@ -130,6 +130,7 @@ final class DictationController {
         levels = []
         phase = .recording
         hud.show(self)
+        if DictationSettings.playsSounds { DictationSound.start.play() }
         try? hotKeys.register(.escape, id: Self.cancelID, onPress: { [weak self] in self?.cancel() })
 
         levelTask = Task { [weak self] in
@@ -158,6 +159,7 @@ final class DictationController {
             defer { hotKeys.unregister(id: Self.cancelID) }
             try? await Task.sleep(for: Self.releaseTail)
             capture.stop()
+            if DictationSettings.playsSounds { DictationSound.stop.play() }
             var samples = buffer.finish()
             cleanUpCapture()
 
@@ -243,27 +245,4 @@ private extension Duration {
 
 extension KeyShortcut {
     static let escape = KeyShortcut(keyCode: 53, carbonModifiers: 0)
-}
-
-/// Dictation preferences (UserDefaults).
-enum DictationSettings {
-    static let enabledKey = "dictation.enabled"
-    static let modeKey = "dictation.mode"
-    static let shortcutKey = "dictation.shortcut"
-    static let appendsSpaceKey = "dictation.appendsSpace"
-
-    static var isEnabled: Bool { UserDefaults.standard.bool(forKey: enabledKey) }
-
-    static var mode: DictationController.Mode {
-        UserDefaults.standard.string(forKey: modeKey).flatMap(DictationController.Mode.init) ?? .hold
-    }
-
-    static var shortcut: KeyShortcut {
-        get { KeyShortcut.load(forKey: shortcutKey) ?? .defaultDictation }
-        set { newValue.save(forKey: shortcutKey) }
-    }
-
-    static var appendsSpace: Bool {
-        UserDefaults.standard.object(forKey: appendsSpaceKey) as? Bool ?? true
-    }
 }

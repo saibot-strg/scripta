@@ -5,12 +5,16 @@ import SwiftUI
 struct MenuBarContent: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.openWindow) private var openWindow
+    // Observed so the dictation line follows changes in the settings.
+    @AppStorage(DictationSettings.enabledKey) private var isDictationEnabled = false
+    @AppStorage(DictationSettings.shortcutKey) private var shortcutData: Data?
 
     var body: some View {
         let recorder = appModel.recorder
 
         if recorder.isActive {
-            let duration = Formatters.duration(recorder.duration)
+            // Whole seconds: the menu is rebuilt on every change it reads.
+            let duration = Formatters.duration(TimeInterval(recorder.elapsedSeconds))
             Text(recorder.isMeeting ? "Meeting läuft · \(duration)" : "Aufnahme läuft · \(duration)")
             Button(recorder.state == .paused ? "Aufnahme fortsetzen" : "Aufnahme pausieren") {
                 appModel.togglePause()
@@ -37,8 +41,8 @@ struct MenuBarContent: View {
         }
 
         Divider()
-        if DictationSettings.isEnabled {
-            Text("Diktat: \(DictationSettings.shortcut.displayString) halten")
+        if isDictationEnabled {
+            Text("Diktat: \(shortcut.displayString) halten")
         } else {
             Text("Diktat ist ausgeschaltet")
         }
@@ -61,14 +65,8 @@ struct MenuBarContent: View {
             NSApp.terminate(nil)
         }
     }
-}
 
-/// The icon shows when something is being recorded.
-struct MenuBarLabel: View {
-    let recorder: AudioRecorder
-
-    var body: some View {
-        Image(systemName: recorder.isActive ? "record.circle" : "waveform")
-            .accessibilityLabel(Text(recorder.isActive ? "Scripta – Aufnahme läuft" : "Scripta"))
+    private var shortcut: KeyShortcut {
+        shortcutData.flatMap { try? JSONDecoder().decode(KeyShortcut.self, from: $0) } ?? .defaultDictation
     }
 }

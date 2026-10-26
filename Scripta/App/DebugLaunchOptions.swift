@@ -11,6 +11,8 @@ import os
 /// - `-RecordTestTone`: starts a recording from a synthetic tone (no microphone),
 ///   e.g. to test crash recovery with `kill -9`. `-StopRecordingAfter <s>` stops it.
 /// - `-RecordTestMeeting`: like `-RecordTestTone`, but a meeting with two tone tracks.
+///   `-SelectLiveRecording` then selects it, to show the live detail view.
+/// - `-ShowMeetingNotice`: shows the notice before a first meeting (stores nothing).
 /// - `-ProbeSystemAudio`: builds (but doesn't start) the system audio tap and logs it.
 /// - `-AutoPlay <s>`: starts playback after the given delay and logs the player state.
 /// - `-SimulateUpdate <version>`: shows the update note as if GitHub had that release.
@@ -47,11 +49,21 @@ enum DebugLaunchOptions {
                 } else {
                     await model.startRecording()
                 }
+                if arguments.contains("-SelectLiveRecording") {
+                    model.selectedRecordingID = model.recorder.activeRecordingID
+                }
                 // `-StopRecordingAfter <seconds>` ends the test recording like the stop button.
                 if let seconds = value(after: "-StopRecordingAfter").flatMap(Double.init) {
                     try? await Task.sleep(for: .seconds(seconds))
                     model.stopRecording()
                 }
+            }
+        }
+
+        if arguments.contains("-ShowMeetingNotice") {
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                _ = await MeetingNotice.showAlert()
             }
         }
 
@@ -136,16 +148,18 @@ enum DebugLaunchOptions {
             if let recording = model.selectedRecording {
                 DetailHeaderView(recording: recording)
                 if let transcript = recording.transcript {
+                    let rows = TranscriptLayout(transcript).rows
                     VStack(alignment: .leading, spacing: 0) {
-                        TranscriptView(transcript: transcript, style: .bubbles)
+                        TranscriptView(rows: rows, style: .bubbles)
                     }
                     VStack(alignment: .leading, spacing: 0) {
-                        TranscriptView(transcript: transcript, style: .text)
+                        TranscriptView(rows: rows, style: .text)
                     }
                 }
                 PlayerBarView()
             }
             if model.recorder.isActive {
+                ForEach(model.liveRecordings) { LiveRecordingRow(item: $0).frame(width: 340) }
                 RecordingCapsuleView().frame(width: 360)
             }
             if model.updates.availableUpdate != nil {
@@ -181,8 +195,7 @@ enum DebugLaunchOptions {
                   let graphics = NSGraphicsContext(bitmapImageRep: bitmap) else { continue }
             // Layer rendering also captures layer-hosted content (lists, SwiftUI text),
             // which `cacheDisplay` skips. Glass and vibrancy still render flat.
-            let scale = bitmap.size.width > 0 ? CGFloat(bitmap.pixelsWide) / bitmap.size.width : 1
-            graphics.cgContext.scaleBy(x: scale, y: scale)
+            // The context of a Retina bitmap already maps points to pixels.
             layer.render(in: graphics.cgContext)
             let url = URL.temporaryDirectory.appending(path: "ui-snapshot-\(index).png")
             do {

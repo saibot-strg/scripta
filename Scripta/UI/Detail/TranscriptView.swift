@@ -1,52 +1,43 @@
 import SwiftUI
 
-/// Renders transcript segments as plain timed text or as chat bubbles.
+/// Renders transcript rows as plain timed text or as chat bubbles.
 ///
 /// Emits rows directly into the parent's lazy stack (no own container), so
-/// only visible segments are built.
+/// only visible segments are built. The style is chosen outside the
+/// `ForEach`, so every element yields the same kind of view and the lazy
+/// stack can identify rows without evaluating them.
 struct TranscriptView: View {
-    let transcript: Transcript
+    let rows: [TranscriptLayout.Row]
     let style: TranscriptStyle
-    /// Segment currently playing (wired to the player in milestone 3).
+    /// Segment currently playing.
     var activeSegmentID: UUID?
     var onSelect: (TranscriptSegment) -> Void = { _ in }
     var onRenameSpeaker: (SpeakerLabel) -> Void = { _ in }
 
     var body: some View {
-        let segments = transcript.orderedSegments
-        ForEach(Array(segments.enumerated()), id: \.element.id) { offset, segment in
-            let previousSpeaker = offset > 0 ? segments[offset - 1].speaker?.id : nil
-            let isNewSpeaker = offset == 0 || previousSpeaker != segment.speaker?.id
-
-            Group {
-                switch style {
-                case .text:
-                    TranscriptSegmentRow(
-                        segment: segment,
-                        showsSpeaker: isNewSpeaker,
-                        isActive: segment.id == activeSegmentID,
-                        onSelect: { onSelect(segment) },
-                        onRenameSpeaker: onRenameSpeaker
-                    )
-                case .bubbles:
-                    ChatBubbleRow(
-                        segment: segment,
-                        showsHeader: isNewSpeaker,
-                        isActive: segment.id == activeSegmentID,
-                        onSelect: { onSelect(segment) },
-                        onRenameSpeaker: onRenameSpeaker
-                    )
-                }
+        switch style {
+        case .text:
+            ForEach(rows) { row in
+                TranscriptSegmentRow(
+                    segment: row.segment,
+                    showsSpeaker: row.isNewSpeaker,
+                    isActive: row.id == activeSegmentID,
+                    onSelect: { onSelect(row.segment) },
+                    onRenameSpeaker: onRenameSpeaker
+                )
+                .padding(.top, row.topSpacing(for: .text))
             }
-            .padding(.top, rowSpacing(isNewSpeaker: isNewSpeaker, isFirst: offset == 0))
-        }
-    }
-
-    private func rowSpacing(isNewSpeaker: Bool, isFirst: Bool) -> CGFloat {
-        guard !isFirst else { return 0 }
-        return switch style {
-        case .text: isNewSpeaker ? 14 : 4
-        case .bubbles: isNewSpeaker ? 14 : 3
+        case .bubbles:
+            ForEach(rows) { row in
+                ChatBubbleRow(
+                    segment: row.segment,
+                    showsHeader: row.isNewSpeaker,
+                    isActive: row.id == activeSegmentID,
+                    onSelect: { onSelect(row.segment) },
+                    onRenameSpeaker: onRenameSpeaker
+                )
+                .padding(.top, row.topSpacing(for: .bubbles))
+            }
         }
     }
 }

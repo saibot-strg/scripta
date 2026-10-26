@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 /// Messages-style bubble: "Ich" on the right in the accent color, others on the left.
@@ -31,18 +30,15 @@ struct ChatBubbleRow: View {
                     .frame(minWidth: isEditing ? 240 : nil, alignment: .leading)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-                    .background(bubbleFill, in: .rect(cornerRadius: 18, style: .continuous))
+                    .background(bubbleFill, in: .rect(cornerRadius: 18))
                     .overlay {
-                        if isActive || isEditing {
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .strokeBorder(Color.accentColor, lineWidth: 2)
-                                .padding(-3)
-                        }
+                        RoundedRectangle(cornerRadius: 18)
+                            .strokeBorder(Color.accentColor, lineWidth: 2)
+                            .padding(-3)
+                            .opacity(isActive || isEditing ? 1 : 0)
                     }
                     .contextMenu {
-                        SegmentContextMenu(
-                            segment: segment, onEdit: { isEditing = true }, onPlay: onSelect, onRenameSpeaker: onRenameSpeaker
-                        )
+                        SegmentContextMenu(segment: segment, onEdit: startEditing, onPlay: onSelect, onRenameSpeaker: onRenameSpeaker)
                     }
             }
 
@@ -54,6 +50,13 @@ struct ChatBubbleRow: View {
         .onHover { isHovered = $0 }
         .animation(.smooth(duration: 0.25), value: isActive)
         .accessibilityElement(children: .combine)
+        // The hover buttons are out of reach for VoiceOver and Voice Control.
+        .accessibilityAction(named: Text("Text bearbeiten"), startEditing)
+        .accessibilityAction(named: Text("Ab hier abspielen"), onSelect)
+    }
+
+    private func startEditing() {
+        isEditing = true
     }
 
     /// Shown while hovering: who this bubble belongs to. Takes its space all
@@ -69,7 +72,7 @@ struct ChatBubbleRow: View {
         HStack(spacing: 6) {
             if let speaker = segment.speaker {
                 // Several remote voices look alike as gray bubbles; their colors tell them apart.
-                SpeakerNameButton(
+                SpeakerNameMenu(
                     segment: segment,
                     speaker: speaker,
                     style: speaker.role == .diarized ? AnyShapeStyle(speaker.tint) : AnyShapeStyle(.secondary),
@@ -98,6 +101,6 @@ struct ChatBubbleRow: View {
     }
 
     private var bubbleFill: AnyShapeStyle {
-        isMe ? AnyShapeStyle(Color.accentColor.gradient) : AnyShapeStyle(Color(nsColor: .secondarySystemFill))
+        isMe ? AnyShapeStyle(Color.accentColor.gradient) : AnyShapeStyle(.fill.secondary)
     }
 }

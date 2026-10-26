@@ -11,7 +11,7 @@ struct DetailHeaderView: View {
                 SourceIcon(source: recording.source, size: 44)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(recording.title)
-                        .font(.largeTitle.weight(.bold))
+                        .font(.largeTitle.bold())
                         .lineLimit(2)
                         .textSelection(.enabled)
                     Text(recording.createdAt.formatted(date: .complete, time: .shortened))
@@ -38,25 +38,5 @@ struct DetailHeaderView: View {
                 StatusBadge(status: recording.status, progress: appModel.transcription.progress[recording.id] ?? 0)
             }
         }
-    }
-}
-
-/// Small rounded label for a single piece of metadata.
-struct MetadataChip<Content: View>: View {
-    let systemImage: String
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        Label {
-            content
-        } icon: {
-            Image(systemName: systemImage)
-        }
-        .font(.caption.weight(.medium))
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(.fill.tertiary, in: .capsule)
-        .accessibilityElement(children: .combine)
     }
 }

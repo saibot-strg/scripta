@@ -1,6 +1,5 @@
 import SwiftData
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// Sidebar with library, source and status filters, the user's folders and
 /// live counts.
@@ -50,10 +49,7 @@ struct SidebarView: View {
                 HStack {
                     Text("Ordner")
                     Spacer()
-                    Button("Neuer Ordner", systemImage: "plus") {
-                        folderName = ""
-                        isCreatingFolder = true
-                    }
+                    Button("Neuer Ordner", systemImage: "plus", action: startCreatingFolder)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
                     .help("Neuer Ordner")
@@ -73,28 +69,30 @@ struct SidebarView: View {
                 .keyboardShortcut(.defaultAction)
             Button("Abbrechen", role: .cancel) {}
         }
-        .alert("Ordner umbenennen", isPresented: Binding(
-            get: { folderToRename != nil },
-            set: { if !$0 { folderToRename = nil } }
-        )) {
+        .alert("Ordner umbenennen", item: $folderToRename) { folder in
             TextField("Name", text: $folderName)
             Button("Umbenennen") {
-                if let folderToRename { appModel.rename(folderToRename, to: folderName) }
+                appModel.rename(folder, to: folderName)
             }
             .keyboardShortcut(.defaultAction)
             Button("Abbrechen", role: .cancel) {}
         }
         .confirmationDialog(
             "Ordner „\(folderToDelete?.name ?? "")“ löschen?",
-            isPresented: Binding(get: { folderToDelete != nil }, set: { if !$0 { folderToDelete = nil } }),
+            item: $folderToDelete,
             titleVisibility: .visible
-        ) {
+        ) { folder in
             Button("Ordner löschen", role: .destructive) {
-                if let folderToDelete { appModel.delete(folderToDelete) }
+                appModel.delete(folder)
             }
-        } message: {
+        } message: { _ in
             Text("Die Aufnahmen darin bleiben erhalten.")
         }
+    }
+
+    private func startCreatingFolder() {
+        folderName = ""
+        isCreatingFolder = true
     }
 
     private func row(for filter: LibraryFilter) -> some View {
@@ -105,49 +103,5 @@ struct SidebarView: View {
         }
         .badge(recordings.count(where: filter.matches))
         .tag(SidebarItem.filter(filter))
-    }
-}
-
-/// A folder in the sidebar. Recordings dragged from the list are filed in it,
-/// audio files dragged from the Finder are imported into it.
-private struct FolderRow: View {
-    @Environment(AppModel.self) private var appModel
-    let folder: Folder
-    let count: Int
-    @State private var isTargeted = false
-
-    var body: some View {
-        Label(folder.name, systemImage: isTargeted ? "folder.fill" : "folder")
-            .badge(count)
-            .dropDestination(for: LibraryDrop.self) { items, _ in
-                let recordingIDs = items.compactMap(\.recordingID)
-                let files = items.compactMap(\.fileURL)
-                appModel.move(recordingIDs: recordingIDs, to: folder)
-                appModel.importFiles(files, into: folder)
-                return !items.isEmpty
-            } isTargeted: { isTargeted = $0 }
-    }
-}
-
-/// What can be dropped on a folder: a recording from the list (its ID as
-/// text) or a file from the Finder.
-enum LibraryDrop: Transferable {
-    case recording(UUID)
-    case file(URL)
-
-    var recordingID: UUID? {
-        if case .recording(let id) = self { id } else { nil }
-    }
-
-    var fileURL: URL? {
-        if case .file(let url) = self { url } else { nil }
-    }
-
-    static var transferRepresentation: some TransferRepresentation {
-        ProxyRepresentation(importing: { (url: URL) in LibraryDrop.file(url) })
-        ProxyRepresentation(importing: { (text: String) in
-            guard let id = UUID(uuidString: text) else { throw CocoaError(.fileReadCorruptFile) }
-            return LibraryDrop.recording(id)
-        })
     }
 }

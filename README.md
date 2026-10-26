@@ -7,9 +7,11 @@ Local transcription for the Mac. Scripta records voice notes and meetings, impor
 - **Import** audio and video files from the menu or by dragging them into the window
 - **Transcribe** with NVIDIA Parakeet Ultra, which detects English, German and 23 other European languages automatically
 - **Tell speakers apart:** each voice in a meeting or recording gets its own label ("Speaker 1", "Speaker 2" …), which you can rename
+- **Correct** transcripts: fix the text, rename or merge speakers, and undo any change with ⌘Z
 - **Dictate in any app:** hold a shortcut, speak, let go, and the text appears at your cursor
-- **Organize** recordings in folders: create them in the sidebar and drag recordings or audio files onto them; swipe left on a recording to delete it
+- **Organize** recordings in folders: create them in the sidebar and drag recordings or audio files onto them; swipe left on a recording to delete it (its audio goes to the Trash)
 - **Export** as plain text, Markdown, subtitles (SRT, WebVTT) or JSON with timestamps
+- **English or German:** Scripta follows your system language, or you choose one under Settings → General → Language
 
 ## Requirements
 
@@ -103,7 +105,7 @@ macOS asks for each permission the first time Scripta needs it. For an overview 
 
 
 
-Click **New Recording** (⌘N) in the toolbar. Press **⌘↩** to stop and save the recording. To pause, use the **File** menu. Scripta saves continuously while recording. If it gets interrupted, for example by a crash, the recording is recovered the next time Scripta launches.
+Click **New Recording** (⌘N) in the toolbar. Press **⌘↩** to stop and save the recording. While you record, the recording appears at the top of the list: select it to see the timer and levels, or to pause and stop. Scripta saves continuously while recording. If it gets interrupted, for example by a crash, the recording is recovered the next time Scripta launches.
 
 ### Record meetings
 
@@ -115,6 +117,7 @@ If two people ended up as one speaker, choose **Correct Number of Others** in th
 
 **Recognize people.** Click **Assign …** above the transcript (or a speaker's name) to listen to each voice and name it. Turn on **Recognize Voices** there or in Settings → People, and Scripta remembers the voices you name: next time it fills in its guess, marked with "?" until you confirm or correct it, and after three confirmations it names the person with confidence. Voice profiles stay on your Mac; Settings → People lists them and deletes them. Ask people before you keep their voice profile.
 
+- Before your first meeting, Scripta reminds you to tell the other people that you're recording. In many countries, recording a conversation without consent is against the law.
 - Use the small arrow next to the button to record either **All System Audio** or **Only One App** (e.g. Zoom, Teams or your browser).
 - **Wear headphones.** That keeps the other people's voices out of your microphone, so the tracks stay cleanly separated.
 
@@ -127,6 +130,8 @@ Click **Import** (⌘I) or drag audio or video files into the Scripta window.
 Select a recording and click **Transcribe** (⌘T). Press **⇧⌘T** to transcribe everything that's still pending. The language is detected automatically.
 
 To have new recordings and imports transcribed right away, turn on **Settings → General → Transcribe automatically**.
+
+Transcribing a recording again replaces its transcript. If you corrected the text or named speakers, Scripta asks first.
 
 ### Dictate in any app
 
@@ -163,6 +168,7 @@ Press **⇧⌘C** to copy the transcript to the clipboard.
 | ⌘T | Transcribe selected recording |
 | ⇧⌘T | Transcribe all pending |
 | ⇧⌘C | Copy transcript |
+| ⌘Z | Undo an edit (text, speakers, folders) |
 | ⌘F | Search library |
 | Space | Play / pause |
 | ⌃⌥ Space (hold) | Dictate in any app |
@@ -172,6 +178,7 @@ Press **⇧⌘C** to copy the transcript to the clipboard.
 - Recordings, transcripts and the speech model are stored in the app's container:
   `~/Library/Containers/io.github.saibot-strg.Scripta/`
 - You can choose a different folder for recordings under **Settings → Recording → Storage Location**. Folders in iCloud Drive or on external drives work too.
+- Deleting a recording moves its audio files to the Trash, in a folder named after the recording, so you can still get them back in the Finder.
 - Scripta runs in the macOS App Sandbox. It connects to the internet for two things only: the one-time download of the speech model, and a daily check on GitHub for a new version. The update check sends no data about your recordings or your usage, and you can turn it off under **Settings → General → Check for updates automatically**.
 
 ## Updating

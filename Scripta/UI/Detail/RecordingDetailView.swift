@@ -1,40 +1,25 @@
 import SwiftUI
 
-/// How a transcript with speakers is shown.
-enum TranscriptStyle: String, CaseIterable, Identifiable {
-    case text
-    case bubbles
-
-    var id: String { rawValue }
-
-    var label: LocalizedStringResource {
-        switch self {
-        case .text: "Text"
-        case .bubbles: "Sprechblasen"
-        }
-    }
-
-    var systemImage: String {
-        switch self {
-        case .text: "text.alignleft"
-        case .bubbles: "bubble.left.and.bubble.right"
-        }
-    }
-}
-
 /// Detail column: header, transcript (or its status) and the floating player.
 struct RecordingDetailView: View {
     @Environment(AppModel.self) private var appModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let recording: Recording
     @AppStorage("detail.transcriptStyle") private var transcriptStyle: TranscriptStyle = .bubbles
-    @State private var timeline = TranscriptTimeline.empty
+    @State private var layout = TranscriptLayout.empty
     @State private var activeSegmentID: UUID?
     @State private var isAssigningSpeakers = false
+    /// Checked once per recording (the files may be on a slow or unavailable
+    /// volume); assumed until then, so no "no audio file" note flashes up.
+    @State private var hasAudio = true
 
     var body: some View {
         let transcript = recording.transcript
         let hasSpeakers = transcript?.hasSpeakers ?? false
         let showsStatus = transcript == nil || recording.status != .done
+        // Right after an edit the cached layout is one step behind; build
+        // a fresh one for this pass instead of showing stale rows.
+        let rows = transcript.map { layout.isCurrent(for: $0) ? layout.rows : TranscriptLayout($0).rows } ?? []
 
         ScrollViewReader { proxy in
             ScrollView {
@@ -45,7 +30,7 @@ struct RecordingDetailView: View {
                         .padding(.bottom, 28)
 
                     if showsStatus {
-                        TranscriptStatusCard(recording: recording)
+                        TranscriptStatusCard(recording: recording, hasAudio: hasAudio)
                             .padding(.bottom, transcript == nil ? 0 : 28)
                     }
 
@@ -54,18 +39,13 @@ struct RecordingDetailView: View {
                             .padding(.bottom, 24)
                     }
 
-                    if let transcript {
-                        TranscriptView(
-                            transcript: transcript,
-                            style: hasSpeakers ? transcriptStyle : .text,
-                            activeSegmentID: activeSegmentID,
-                            onSelect: { segment in
-                                appModel.player.seek(to: segment.start)
-                                if !appModel.player.isPlaying { appModel.player.play() }
-                            },
-                            onRenameSpeaker: { _ in isAssigningSpeakers = true }
-                        )
-                    }
+                    TranscriptView(
+                        rows: rows,
+                        style: hasSpeakers ? transcriptStyle : .text,
+                        activeSegmentID: activeSegmentID,
+                        onSelect: play,
+                        onRenameSpeaker: { _ in isAssigningSpeakers = true }
+                    )
                 }
                 .frame(maxWidth: 760, alignment: .leading)
                 .padding(.horizontal, 32)
@@ -76,11 +56,11 @@ struct RecordingDetailView: View {
             .onChange(of: activeSegmentID) { _, id in
                 // Follow playback, but leave the scroll position alone when paused.
                 guard let id, appModel.player.isPlaying else { return }
-                withAnimation(.smooth) { proxy.scrollTo(id, anchor: .center) }
+                withAnimation(reduceMotion ? nil : .smooth) { proxy.scrollTo(id, anchor: .center) }
             }
         }
         .background {
-            PlaybackFollower(timeline: timeline, activeSegmentID: $activeSegmentID)
+            PlaybackFollower(timeline: layout.timeline, activeSegmentID: $activeSegmentID)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             PlayerBarView()
@@ -89,7 +69,7 @@ struct RecordingDetailView: View {
         }
         .toolbar {
             ToolbarItem {
-                transcribeButton
+                TranscribeToolbarButton(recording: recording, hasAudio: hasAudio)
             }
             if hasSpeakers {
                 ToolbarItem {
@@ -108,7 +88,7 @@ struct RecordingDetailView: View {
                 Menu("Exportieren", systemImage: "square.and.arrow.up") {
                     ExportMenuItems(recording: recording)
                 }
-                .disabled(transcript?.segments.isEmpty ?? true)
+                .disabled(rows.isEmpty)
                 .help("Transkript exportieren, kopieren oder teilen")
             }
         }
@@ -118,36 +98,19 @@ struct RecordingDetailView: View {
             }
         }
         .task(id: recording.id) {
+            hasAudio = appModel.library.audioURL(for: recording) != nil
             appModel.loadPlayer(for: recording)
         }
         .task(id: transcript?.modifiedAt) {
-            timeline = TranscriptTimeline(recording.transcript)
+            layout = recording.transcript.map(TranscriptLayout.init) ?? .empty
         }
         // Reset scroll position and local state when the selection changes.
         .id(recording.id)
     }
 
-    @ViewBuilder
-    private var transcribeButton: some View {
-        switch recording.status {
-        case .queued, .running:
-            Button("Transkription abbrechen", systemImage: "xmark.circle") {
-                appModel.cancelTranscription(of: recording)
-            }
-            .help("Transkription abbrechen")
-        case .done:
-            Button("Erneut transkribieren", systemImage: "arrow.clockwise") {
-                appModel.transcribe(recording)
-            }
-            .help("Transkript neu erstellen (Korrekturen gehen verloren)")
-            .disabled(appModel.library.audioURL(for: recording) == nil)
-        case .notTranscribed, .failed:
-            Button("Transkribieren", systemImage: "text.bubble") {
-                appModel.transcribe(recording)
-            }
-            .help("Lokal mit Parakeet transkribieren")
-            .disabled(appModel.library.audioURL(for: recording) == nil)
-        }
+    private func play(_ segment: TranscriptSegment) {
+        appModel.player.seek(to: segment.start)
+        if !appModel.player.isPlaying { appModel.player.play() }
     }
 }
 

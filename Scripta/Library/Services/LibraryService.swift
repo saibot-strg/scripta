@@ -93,15 +93,16 @@ final class LibraryService {
         try save()
     }
 
-    /// Deletes a recording, its transcript and its audio files.
+    /// Deletes a recording and its transcript; its audio files go to the Trash.
     func delete(_ recording: Recording) throws(LibraryError) {
         let id = recording.id
+        let title = recording.title
         let storage = storage(for: recording)
         modelContext.delete(recording)
         try save()
         // Files go last: if saving fails, the recording stays intact and playable.
         do {
-            try storage.removeFolder(for: id)
+            try storage.trashFolder(for: id, title: title)
         } catch {
             Logger.storage.error("Could not remove files of \(id, privacy: .public): \(error.localizedDescription, privacy: .public)")
             throw .fileRemovalFailed(underlying: error)
@@ -110,15 +111,29 @@ final class LibraryService {
 
     // MARK: - Folders
 
+    func transcript(withID id: UUID) -> Transcript? {
+        var descriptor = FetchDescriptor<Transcript>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try? modelContext.fetch(descriptor).first
+    }
+
+    func segment(withID id: UUID) -> TranscriptSegment? {
+        var descriptor = FetchDescriptor<TranscriptSegment>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try? modelContext.fetch(descriptor).first
+    }
+
     func folder(withID id: UUID) -> Folder? {
         let descriptor = FetchDescriptor<Folder>(predicate: #Predicate { $0.id == id })
         return try? modelContext.fetch(descriptor).first
     }
 
+    /// `id` brings back a folder that was deleted (undo).
     @discardableResult
-    func createFolder(named name: String) throws(LibraryError) -> Folder {
+    func createFolder(named name: String, id: UUID? = nil) throws(LibraryError) -> Folder {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let folder = Folder(name: trimmed.isEmpty ? String(localized: "Neuer Ordner") : trimmed)
+        if let id { folder.id = id }
         modelContext.insert(folder)
         try save()
         return folder

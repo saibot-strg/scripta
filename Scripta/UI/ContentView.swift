@@ -5,6 +5,8 @@ import SwiftUI
 /// Main window: sidebar (filters), recording list and detail, like Mail or Notes.
 struct ContentView: View {
     @Environment(AppModel.self) private var appModel
+    @Environment(\.undoManager) private var undoManager
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("library.sortField") private var sortField: LibrarySortField = .date
     @AppStorage("library.sortAscending") private var sortAscending = false
     @FocusState private var isSearchFieldFocused: Bool
@@ -26,15 +28,7 @@ struct ContentView: View {
             )
             .navigationSplitViewColumnWidth(min: 300, ideal: 350, max: 500)
         } detail: {
-            if let recording = appModel.selectedRecording {
-                RecordingDetailView(recording: recording)
-            } else {
-                ContentUnavailableView(
-                    "Keine Aufnahme ausgewählt",
-                    systemImage: "waveform",
-                    description: Text("Wähle eine Aufnahme aus der Liste.")
-                )
-            }
+            DetailColumn()
         }
         .searchable(text: $appModel.searchText, prompt: Text("Titel und Transkripte"))
         .searchFocused($isSearchFieldFocused)
@@ -63,19 +57,14 @@ struct ContentView: View {
             if let toast = appModel.toast {
                 ToastView(message: toast)
                     .padding(.bottom, 90)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(reduceMotion ? AnyTransition.opacity : .move(edge: .bottom).combined(with: .opacity))
             }
         }
         .animation(.smooth(duration: 0.25), value: appModel.toast)
         .animation(.smooth(duration: 0.2), value: isDropTargeted)
-        .alert(
-            appModel.presentedError?.title ?? "",
-            isPresented: Binding(
-                get: { appModel.presentedError != nil },
-                set: { if !$0 { appModel.presentedError = nil } }
-            ),
-            presenting: appModel.presentedError
-        ) { error in
+        .onAppear { appModel.attachUndoManager(undoManager) }
+        .onChange(of: undoManager) { _, manager in appModel.attachUndoManager(manager) }
+        .alert(appModel.presentedError?.title ?? "", item: $appModel.presentedError) { error in
             if let url = error.settingsURL {
                 Button("Systemeinstellungen öffnen") {
                     NSWorkspace.shared.open(url)
@@ -88,6 +77,13 @@ struct ContentView: View {
             if let message = error.message {
                 Text(message)
             }
+        }
+        .confirmationDialog("Erneut transkribieren?", item: $appModel.retranscriptionRequest, titleVisibility: .visible) { recording in
+            Button("Erneut transkribieren", role: .destructive) {
+                appModel.transcribe(recording)
+            }
+        } message: { recording in
+            Text("Das Transkript von „\(recording.title)“ wird neu erstellt. Deine Textkorrekturen und vergebenen Namen gehen dabei verloren; bekannte Stimmen schlägt Scripta wieder vor.")
         }
     }
 }

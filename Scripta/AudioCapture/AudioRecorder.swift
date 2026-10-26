@@ -34,8 +34,11 @@ final class AudioRecorder {
     }
 
     private(set) var state: State = .idle
-    /// Recorded duration (pauses excluded).
+    /// Recorded duration (pauses excluded), updated 20 times per second.
     private(set) var duration: TimeInterval = 0
+    /// Whole seconds of `duration`: changes once per second, so timers and
+    /// menus that only show seconds don't re-render 20 times per second.
+    private(set) var elapsedSeconds = 0
     /// Recent microphone levels (0...1, newest last), 20 per second.
     private(set) var levels: [Float] = []
     /// Meeting only: recent system audio levels.
@@ -126,6 +129,7 @@ final class AudioRecorder {
         isMeeting = manifest.isMeeting
         isSystemAudioMissing = false
         duration = 0
+        elapsedSeconds = 0
         levels = []
         systemLevels = []
 
@@ -239,6 +243,7 @@ final class AudioRecorder {
         levels = []
         systemLevels = []
         duration = 0
+        elapsedSeconds = 0
         Logger.recording.info("Recording \(session.manifest.id, privacy: .public) stopped after \(recordedDuration, format: .fixed(precision: 1)) s")
         return FinishedRecording(
             manifest: session.manifest, duration: recordedDuration,
@@ -256,6 +261,8 @@ final class AudioRecorder {
                 if newLevels.contains(where: { $0 > 0 }) { isSystemAudioMissing = false }
             } else {
                 duration = newDuration
+                let seconds = Int(newDuration)
+                if seconds != elapsedSeconds { elapsedSeconds = seconds }
                 Self.append(newLevels, to: &levels)
             }
         case .failed(let message):

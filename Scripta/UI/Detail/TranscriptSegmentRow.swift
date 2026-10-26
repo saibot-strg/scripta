@@ -11,6 +11,9 @@ struct TranscriptSegmentRow: View {
     @State private var isHovered = false
 
     var body: some View {
+        let showsSpeakerButton = isHovered && !isEditing
+        let showsEditButton = !isEditing && (isHovered || segment.isEdited)
+
         HStack(alignment: .firstTextBaseline, spacing: 14) {
             Button(action: onSelect) {
                 VStack(alignment: .trailing, spacing: 1) {
@@ -31,7 +34,7 @@ struct TranscriptSegmentRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 if showsSpeaker, let speaker = segment.speaker {
-                    SpeakerNameButton(segment: segment, speaker: speaker, style: AnyShapeStyle(speaker.tint), onAssignAll: onRenameSpeaker)
+                    SpeakerNameMenu(segment: segment, speaker: speaker, style: AnyShapeStyle(speaker.tint), onAssignAll: onRenameSpeaker)
                         .font(.subheadline.weight(.semibold))
                 }
                 EditableSegmentText(segment: segment, isEditing: $isEditing)
@@ -40,42 +43,36 @@ struct TranscriptSegmentRow: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            if isHovered, segment.speaker != nil, !isEditing {
+            // The buttons keep their space while hidden, so the text doesn't
+            // re-wrap when the pointer moves over the row.
+            if segment.speaker != nil {
                 SegmentSpeakerButton(segment: segment, onAssignAll: onRenameSpeaker)
+                    .opacity(showsSpeakerButton ? 1 : 0)
+                    .disabled(!showsSpeakerButton)
             }
-            if segment.isEdited || isHovered {
-                Button("Text bearbeiten", systemImage: "pencil") { isEditing = true }
-                    .labelStyle(.iconOnly)
-                    .buttonStyle(.borderless)
-                    .foregroundStyle(segment.isEdited && !isHovered ? .tertiary : .secondary)
-                    .help(segment.isEdited ? "Bearbeitet – klicken zum erneuten Bearbeiten" : "Text bearbeiten")
-                    .opacity(isEditing ? 0 : 1)
-            }
+            Button("Text bearbeiten", systemImage: "pencil", action: startEditing)
+                .labelStyle(.iconOnly)
+                .buttonStyle(.borderless)
+                .foregroundStyle(segment.isEdited && !isHovered ? .tertiary : .secondary)
+                .help(segment.isEdited ? "Bearbeitet – klicken zum erneuten Bearbeiten" : "Text bearbeiten")
+                .opacity(showsEditButton ? 1 : 0)
+                .disabled(!showsEditButton)
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 10)
-        .background(isActive ? Color.accentColor.opacity(0.12) : .clear, in: .rect(cornerRadius: 10, style: .continuous))
+        .background(isActive ? Color.accentColor.opacity(0.12) : .clear, in: .rect(cornerRadius: 10))
         .contentShape(.rect)
         .onHover { isHovered = $0 }
         .contextMenu {
-            SegmentContextMenu(
-                segment: segment, onEdit: { isEditing = true }, onPlay: onSelect, onRenameSpeaker: onRenameSpeaker
-            )
+            SegmentContextMenu(segment: segment, onEdit: startEditing, onPlay: onSelect, onRenameSpeaker: onRenameSpeaker)
         }
+        // The hover buttons are out of reach for VoiceOver and Voice Control.
+        .accessibilityAction(named: Text("Text bearbeiten"), startEditing)
+        .accessibilityAction(named: Text("Ab hier abspielen"), onSelect)
         .animation(.smooth(duration: 0.25), value: isActive)
     }
-}
 
-extension SpeakerLabel {
-    private static let palette: [Color] = [.orange, .purple, .teal, .pink, .indigo, .brown]
-
-    /// Accent for "Ich", neutral for everyone else, distinct hues for diarized
-    /// speakers (repeating after six).
-    var tint: Color {
-        switch role {
-        case .me: .accentColor
-        case .others: .secondary
-        case .diarized: Self.palette[(max(number, 1) - 1) % Self.palette.count]
-        }
+    private func startEditing() {
+        isEditing = true
     }
 }
