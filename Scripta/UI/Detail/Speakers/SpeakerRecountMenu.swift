@@ -22,7 +22,7 @@ struct SpeakerRecountMenu: View {
               ? "Wie viele Personen außer dir waren zu hören? Das Transkript wird mit genau so vielen Stimmen neu erstellt."
               : "Wie viele Personen waren zu hören? Das Transkript wird mit genau so vielen Stimmen neu erstellt.")
         .disabled(!hasAudio)
-        .confirmationDialog("Mit \(correctedCount ?? 0) Stimmen neu erkennen?", item: $correctedCount) { count in
+        .confirmationDialog("Mit \(correctedCount ?? 0) Stimmen neu erkennen?", isPresented: $correctedCount.isPresent, presenting: correctedCount) { count in
             Button("Neu erkennen") {
                 appModel.transcribe(recording, speakerCount: count)
                 onRecount()

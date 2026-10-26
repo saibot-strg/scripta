@@ -99,7 +99,7 @@ struct RecordingListView: View {
         }
         .toolbar { RecordingListToolbar(sortField: $sortField, sortAscending: $sortAscending) }
         .task { appModel.refreshMeetingApps() }
-        .alert("Aufnahme umbenennen", item: $renameTarget) { recording in
+        .alert("Aufnahme umbenennen", isPresented: $renameTarget.isPresent, presenting: renameTarget) { recording in
             TextField("Titel", text: $renameText)
             Button("Umbenennen") {
                 appModel.rename(recording, to: renameText)
@@ -107,7 +107,7 @@ struct RecordingListView: View {
             .keyboardShortcut(.defaultAction)
             Button("Abbrechen", role: .cancel) {}
         }
-        .confirmationDialog("Aufnahme löschen?", item: $deleteTarget, titleVisibility: .visible) { recording in
+        .confirmationDialog("Aufnahme löschen?", isPresented: $deleteTarget.isPresent, titleVisibility: .visible, presenting: deleteTarget) { recording in
             Button("Löschen", role: .destructive) {
                 appModel.delete(recording)
             }

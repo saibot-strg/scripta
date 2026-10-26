@@ -64,7 +64,7 @@ struct ContentView: View {
         .animation(.smooth(duration: 0.2), value: isDropTargeted)
         .onAppear { appModel.attachUndoManager(undoManager) }
         .onChange(of: undoManager) { _, manager in appModel.attachUndoManager(manager) }
-        .alert(appModel.presentedError?.title ?? "", item: $appModel.presentedError) { error in
+        .alert(appModel.presentedError?.title ?? "", isPresented: $appModel.presentedError.isPresent, presenting: appModel.presentedError) { error in
             if let url = error.settingsURL {
                 Button("Systemeinstellungen öffnen") {
                     NSWorkspace.shared.open(url)
@@ -78,7 +78,7 @@ struct ContentView: View {
                 Text(message)
             }
         }
-        .confirmationDialog("Erneut transkribieren?", item: $appModel.retranscriptionRequest, titleVisibility: .visible) { recording in
+        .confirmationDialog("Erneut transkribieren?", isPresented: $appModel.retranscriptionRequest.isPresent, titleVisibility: .visible, presenting: appModel.retranscriptionRequest) { recording in
             Button("Erneut transkribieren", role: .destructive) {
                 appModel.transcribe(recording)
             }

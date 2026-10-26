@@ -69,7 +69,7 @@ struct SidebarView: View {
                 .keyboardShortcut(.defaultAction)
             Button("Abbrechen", role: .cancel) {}
         }
-        .alert("Ordner umbenennen", item: $folderToRename) { folder in
+        .alert("Ordner umbenennen", isPresented: $folderToRename.isPresent, presenting: folderToRename) { folder in
             TextField("Name", text: $folderName)
             Button("Umbenennen") {
                 appModel.rename(folder, to: folderName)
@@ -79,8 +79,9 @@ struct SidebarView: View {
         }
         .confirmationDialog(
             "Ordner „\(folderToDelete?.name ?? "")“ löschen?",
-            item: $folderToDelete,
-            titleVisibility: .visible
+            isPresented: $folderToDelete.isPresent,
+            titleVisibility: .visible,
+            presenting: folderToDelete
         ) { folder in
             Button("Ordner löschen", role: .destructive) {
                 appModel.delete(folder)

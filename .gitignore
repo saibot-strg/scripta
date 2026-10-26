@@ -17,3 +17,6 @@ Config/Local.xcconfig
 /logo
 # Release packaging (Scripts/package-release.sh)
 dist/
+
+# Private plans and notes (never published)
+/plans/

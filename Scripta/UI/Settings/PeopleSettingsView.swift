@@ -59,7 +59,7 @@ struct PeopleSettingsView: View {
         }
         .formStyle(.grouped)
         .frame(height: 520)
-        .alert("Person umbenennen", item: $personToRename) { person in
+        .alert("Person umbenennen", isPresented: $personToRename.isPresent, presenting: personToRename) { person in
             TextField("Name", text: $newName)
             Button("Umbenennen") {
                 appModel.renamePerson(person.id, to: newName)
@@ -69,7 +69,7 @@ struct PeopleSettingsView: View {
         } message: { _ in
             Text("Der Name ändert sich auch in allen Transkripten, in denen die Person erkannt oder benannt wurde.")
         }
-        .confirmationDialog("„\(personToDelete?.name ?? "")“ löschen?", item: $personToDelete) { person in
+        .confirmationDialog("„\(personToDelete?.name ?? "")“ löschen?", isPresented: $personToDelete.isPresent, presenting: personToDelete) { person in
             Button("Löschen", role: .destructive) {
                 appModel.deletePerson(person.id)
             }

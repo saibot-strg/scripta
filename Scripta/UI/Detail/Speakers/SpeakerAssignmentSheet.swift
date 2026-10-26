@@ -65,7 +65,7 @@ struct SpeakerAssignmentSheet: View {
             .padding(16)
         }
         .frame(width: 620)
-        .alert("Reinhören nicht möglich", item: Bindable(excerpts).failure) { _ in
+        .alert("Reinhören nicht möglich", isPresented: Bindable(excerpts).failure.isPresent, presenting: excerpts.failure) { _ in
             Button("OK") {}
         } message: { message in
             Text(message)

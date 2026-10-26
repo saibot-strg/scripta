@@ -73,7 +73,7 @@ struct GeneralSettingsView: View {
         }
         .formStyle(.grouped)
         .frame(height: 520)
-        .alert("„Beim Anmelden starten“ ließ sich nicht ändern", item: $loginItemError) { _ in
+        .alert("„Beim Anmelden starten“ ließ sich nicht ändern", isPresented: $loginItemError.isPresent, presenting: loginItemError) { _ in
             Button("OK") {}
         } message: { message in
             Text(message)
