@@ -13,7 +13,7 @@ struct SpeakerAssignmentSheet: View {
     @State private var names: [UUID: String] = [:]
     @State private var remembers: [UUID: Bool] = [:]
     @State private var excerpts = ExcerptPlayer()
-    @State private var audioURL: URL?
+    @State private var hasAudio = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -54,7 +54,7 @@ struct SpeakerAssignmentSheet: View {
             .frame(height: min(CGFloat(speakers.count) * 104, 470))
 
             HStack {
-                SpeakerRecountMenu(recording: recording, hasAudio: audioURL != nil, onRecount: { dismiss() })
+                SpeakerRecountMenu(recording: recording, hasAudio: hasAudio, onRecount: { dismiss() })
                 Spacer()
                 Button("Abbrechen", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
@@ -76,7 +76,7 @@ struct SpeakerAssignmentSheet: View {
 
     private func load() {
         appModel.player.pause()
-        audioURL = appModel.library.audioURL(for: recording)
+        hasAudio = appModel.library.audioURL(for: recording) != nil
         (speakers, overviews) = SpeakerOverview.make(for: transcript)
         for speaker in speakers {
             names[speaker.id] = speaker.displayName
@@ -86,7 +86,8 @@ struct SpeakerAssignmentSheet: View {
 
     private func play(_ speaker: SpeakerLabel) {
         appModel.player.pause()
-        excerpts.toggle(speaker.id, url: audioURL, excerpts: overviews[speaker.id]?.excerpts ?? [])
+        // Looked up now: renaming the recording also renames its file.
+        excerpts.toggle(speaker.id, url: appModel.library.audioURL(for: recording), excerpts: overviews[speaker.id]?.excerpts ?? [])
     }
 
     private func finish() {

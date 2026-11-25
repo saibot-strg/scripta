@@ -34,8 +34,10 @@ struct RecordingLibraryTests {
 
         #expect(recording.status == .notTranscribed)
         #expect(recording.source == .microphone)
-        #expect(recording.primaryTrack?.fileName == CaptureFormat.fileName)
-        #expect(library.audioURL(for: recording) != nil)
+        // Folder and file are named after the title.
+        #expect(recording.folderName == "Notiz")
+        #expect(recording.primaryTrack?.fileName == "Notiz.caf")
+        #expect(library.audioURL(for: recording) == root.appending(path: "Notiz/Notiz.caf"))
         #expect(!FileManager.default.fileExists(atPath: storage.manifestURL(for: manifest.id).path(percentEncoded: false)))
     }
 
@@ -82,14 +84,15 @@ struct RecordingLibraryTests {
         defer { try? FileManager.default.removeItem(at: root) }
         let manifest = try makeInterruptedRecording(duration: 1)
         let recording = try library.addRecording(manifest: manifest, duration: 1)
-        let encodedName = CaptureFormat.encodedFileName(for: CaptureFormat.fileName)
-        let newURL = storage.fileURL(for: manifest.id, fileName: encodedName)
-        try Data("m4a".utf8).write(to: newURL)
+        let track = try #require(recording.primaryTrack)
+        let oldURL = try #require(library.fileURL(for: recording, fileName: track.fileName))
+        let encodedName = CaptureFormat.encodedFileName(for: track.fileName)
+        try Data("m4a".utf8).write(to: try #require(library.fileURL(for: recording, fileName: encodedName)))
 
-        try library.replaceFile(of: try #require(recording.primaryTrack), in: recording, with: encodedName)
+        try library.replaceFile(of: track, in: recording, with: encodedName)
 
-        #expect(recording.primaryTrack?.fileName == encodedName)
-        #expect(!FileManager.default.fileExists(atPath: storage.fileURL(for: manifest.id, fileName: CaptureFormat.fileName).path(percentEncoded: false)))
+        #expect(recording.primaryTrack?.fileName == "Notiz.m4a")
+        #expect(!FileManager.default.fileExists(atPath: oldURL.path(percentEncoded: false)))
     }
 
     @Test("Player loads a recording, seeks and clamps skips")

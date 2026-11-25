@@ -22,8 +22,9 @@ final class LibraryService {
         self.init(modelContext: modelContext, locations: StorageLocations(fixed: storage))
     }
 
-    /// Where a recording's files are (its location at recording time).
-    func storage(for recording: Recording) -> RecordingStorage {
+    /// Where a recording's files are (its location at recording time); nil if
+    /// that location can't be reached (external disk not connected).
+    func storage(for recording: Recording) -> RecordingStorage? {
         locations.storage(forBookmark: recording.storageRootBookmark)
     }
 
@@ -50,11 +51,12 @@ final class LibraryService {
         recording.tracks.append(AudioTrack(role: .primary, fileName: manifest.fileName, duration: duration))
         let separateTracks: [(TrackRole, String?)] = [(.microphone, manifest.microphoneFileName), (.system, manifest.systemFileName)]
         for case let (role, fileName?) in separateTracks {
-            let url = storage.fileURL(for: manifest.id, fileName: fileName)
-            recording.tracks.append(AudioTrack(role: role, fileName: fileName, duration: AudioFileInfo.duration(of: url) ?? duration))
+            let trackDuration = storage.flatMap { AudioFileInfo.duration(of: $0.fileURL(for: manifest.id, fileName: fileName)) }
+            recording.tracks.append(AudioTrack(role: role, fileName: fileName, duration: trackDuration ?? duration))
         }
         try save()
-        storage.removeManifest(for: manifest.id)
+        storage?.removeManifest(for: manifest.id)
+        nameFiles(of: recording)
         return recording
     }
 
@@ -71,38 +73,153 @@ final class LibraryService {
 
     /// URL of a track's file, if it exists on disk.
     func audioURL(for recording: Recording, role: TrackRole) -> URL? {
-        guard let track = recording.tracks.first(where: { $0.role == role }) else { return nil }
-        let url = storage(for: recording).fileURL(for: recording.id, fileName: track.fileName)
+        guard let track = recording.tracks.first(where: { $0.role == role }),
+              let url = fileURL(for: recording, fileName: track.fileName) else { return nil }
         return FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) ? url : nil
+    }
+
+    /// The recording's folder on disk (named after its title, or its ID);
+    /// nil if its location can't be reached.
+    func folderURL(for recording: Recording) -> URL? {
+        storage(for: recording)?.folderURL(for: recording.id, named: recording.folderName)
+    }
+
+    func fileURL(for recording: Recording, fileName: String) -> URL? {
+        folderURL(for: recording)?.appending(path: fileName, directoryHint: .notDirectory)
     }
 
     /// Points a track to a new file (e.g. after AAC encoding) and deletes the old one.
     func replaceFile(of track: AudioTrack, in recording: Recording, with fileName: String) throws(LibraryError) {
         guard track.fileName != fileName else { return }
-        let oldURL = storage(for: recording).fileURL(for: recording.id, fileName: track.fileName)
+        let oldURL = fileURL(for: recording, fileName: track.fileName)
         track.fileName = fileName
         try save()
-        try? FileManager.default.removeItem(at: oldURL)
+        if let oldURL { try? FileManager.default.removeItem(at: oldURL) }
     }
 
-    /// Renames a recording. Empty titles are ignored.
+    /// Renames a recording and its folder and files. Empty titles are ignored.
     func rename(_ recording: Recording, to newTitle: String) throws(LibraryError) {
         let title = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty, title != recording.title else { return }
         recording.title = title
         try save()
+        nameFiles(of: recording)
+    }
+
+    // MARK: - Folder and file names
+
+    /// Recordings whose files a job outside the library reads or writes right
+    /// now (AAC encoding); set by the app. A running transcription is known
+    /// from the status.
+    var isUsingFiles: (UUID) -> Bool = { _ in false }
+
+    /// Names the recording's folder and audio files after its title
+    /// (`Weekly/Weekly.m4a`, see `RecordingFileNames`).
+    ///
+    /// Waits while a transcription or encoding uses the files (they are
+    /// opened by path more than once): call it again when the job ends. Does
+    /// nothing if the folder is missing (e.g. external disk not connected).
+    /// If a step fails, everything keeps its old name.
+    func nameFiles(of recording: Recording) {
+        guard !isBusy(recording), let storage = storage(for: recording) else { return }
+        relocate(recording, from: storage, to: storage, bookmark: recording.storageRootBookmark)
+    }
+
+    /// Moves the recording's folder to another location (`bookmark` is the
+    /// target's, nil = default), naming it after the title on the way. Same
+    /// volume: a rename; another volume: copied, then the original removed.
+    /// - Returns: Whether the recording is in `target` now. False while a job
+    ///   uses its files, if its location can't be reached or if a step failed
+    ///   (then everything stays where it was).
+    @discardableResult
+    func moveFiles(of recording: Recording, to target: RecordingStorage, bookmark: Data?) -> Bool {
+        guard !isBusy(recording), let source = storage(for: recording) else { return false }
+        return relocate(recording, from: source, to: target, bookmark: bookmark)
+    }
+
+    /// Recordings stored somewhere other than the location for new recordings.
+    func recordingsElsewhere() -> [Recording] {
+        let all = (try? modelContext.fetch(FetchDescriptor<Recording>(sortBy: [SortDescriptor(\.createdAt)]))) ?? []
+        return all.filter { $0.storageRootBookmark != locations.currentBookmark }
+    }
+
+    private func isBusy(_ recording: Recording) -> Bool {
+        recording.status == .running || isUsingFiles(recording.id)
+    }
+
+    @discardableResult
+    private func relocate(_ recording: Recording, from source: RecordingStorage, to target: RecordingStorage, bookmark: Data?) -> Bool {
+        let fileManager = FileManager.default
+        let folder = source.folderURL(for: recording.id, named: recording.folderName)
+        guard fileManager.fileExists(atPath: folder.path(percentEncoded: false)) else { return false }
+        try? fileManager.createDirectory(at: target.rootURL, withIntermediateDirectories: true)
+        let sameRoot = source.rootURL.standardizedFileURL.path(percentEncoded: false) == target.rootURL.standardizedFileURL.path(percentEncoded: false)
+            || FileMoves.isSameItem(source.rootURL, target.rootURL)
+        // A title without usable characters keeps its folder name, also when moving.
+        guard let baseName = RecordingFileNames.baseName(for: recording.title, strict: target.needsStrictNames)
+                ?? (sameRoot ? nil : folder.lastPathComponent),
+              let folderName = target.folderName(for: baseName, keeping: sameRoot ? folder : nil) else { return false }
+
+        let destination = target.folderURL(for: recording.id, named: folderName)
+        var moves = FileMoves()
+        var fileNames: [(AudioTrack, String)] = []
+        do {
+            if !sameRoot || folderName != folder.lastPathComponent {
+                try moves.move(folder, to: destination)
+            }
+            for track in recording.tracks {
+                let fileName = RecordingFileNames.fileName(
+                    for: track.role, folderName: folderName, pathExtension: (track.fileName as NSString).pathExtension
+                )
+                let file = destination.appending(path: track.fileName, directoryHint: .notDirectory)
+                guard fileName != track.fileName, fileManager.fileExists(atPath: file.path(percentEncoded: false)) else { continue }
+                try moves.move(file, to: destination.appending(path: fileName, directoryHint: .notDirectory))
+                fileNames.append((track, fileName))
+            }
+        } catch {
+            moves.revert()
+            Logger.storage.error("Could not rename or move files of \(recording.id, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+        let isUnchanged = recording.folderName == folderName && fileNames.isEmpty && recording.storageRootBookmark == bookmark
+        guard !isUnchanged else { return true }
+        recording.folderName = folderName
+        recording.storageRootBookmark = bookmark
+        for (track, fileName) in fileNames {
+            track.fileName = fileName
+        }
+        do {
+            try save()
+            Logger.storage.info("Files of \(recording.id, privacy: .public) named after the title\(sameRoot ? "" : " and moved", privacy: .public)")
+            return true
+        } catch {
+            // The context was rolled back to the old names.
+            moves.revert()
+            return false
+        }
+    }
+
+    /// `nameFiles(of:)` for the recording, if it still exists.
+    func nameFiles(ofRecordingWithID id: UUID) {
+        guard let recording = recording(withID: id) else { return }
+        nameFiles(of: recording)
     }
 
     /// Deletes a recording and its transcript; its audio files go to the Trash.
     func delete(_ recording: Recording) throws(LibraryError) {
         let id = recording.id
         let title = recording.title
+        let folderName = recording.folderName
         let storage = storage(for: recording)
         modelContext.delete(recording)
         try save()
+        guard let storage else {
+            Logger.storage.notice("Files of \(id, privacy: .public) stay in their unreachable location")
+            return
+        }
         // Files go last: if saving fails, the recording stays intact and playable.
         do {
-            try storage.trashFolder(for: id, title: title)
+            try storage.trashFolder(for: id, named: folderName, title: title)
         } catch {
             Logger.storage.error("Could not remove files of \(id, privacy: .public): \(error.localizedDescription, privacy: .public)")
             throw .fileRemovalFailed(underlying: error)

@@ -1,14 +1,16 @@
 import Foundation
 import SwiftData
 
-extension LibrarySchemaV2 {
+extension LibrarySchemaV3 {
     /// A recording or imported file in the library.
     ///
-    /// Audio data never lives in the database. Each recording owns a folder named
-    /// after its `id` inside a storage root; tracks reference files in that folder.
+    /// Audio data never lives in the database. Each recording owns a folder
+    /// inside a storage root, named after its title (`folderName`); tracks
+    /// reference files in that folder.
     @Model
     final class Recording {
-        /// Stable identifier; also the name of the recording's folder on disk.
+        /// Stable identifier. Names the folder while recording and for
+        /// recordings whose folder was not renamed yet (`folderName` nil).
         @Attribute(.unique) var id: UUID
         var title: String
         var createdAt: Date
@@ -34,6 +36,10 @@ extension LibrarySchemaV2 {
 
         /// The sidebar folder it was filed in (since schema 2).
         var folder: Folder?
+
+        /// Name of its folder on disk, from the title ("Weekly", "Weekly 2");
+        /// nil = the folder is named after `id` (since schema 3).
+        var folderName: String?
 
         init(
             id: UUID = UUID(),

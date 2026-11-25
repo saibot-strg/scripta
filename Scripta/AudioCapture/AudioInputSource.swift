@@ -154,11 +154,15 @@ final class MicrophoneCapture: AudioInputSource {
 @MainActor
 final class TestToneSource: AudioInputSource {
     private let frequency: Double
+    private let chunkDuration: Double
     private var sink: (any AudioBufferReceiver)?
     private var task: Task<Void, Never>?
 
-    init(frequency: Double = 220) {
+    /// - Parameter chunkDuration: Seconds per buffer: the microphone delivers
+    ///   100 ms, system audio about 10 ms.
+    init(frequency: Double = 220, chunkDuration: Double = 0.1) {
         self.frequency = frequency
+        self.chunkDuration = chunkDuration
     }
 
     func start(delivering sink: any AudioBufferReceiver) async throws(RecordingError) {
@@ -184,15 +188,16 @@ final class TestToneSource: AudioInputSource {
     private func startGenerating() {
         guard let sink else { return }
         let frequency = frequency
-        task = Task.detached { await Self.generate(into: sink, frequency: frequency) }
+        let chunkDuration = chunkDuration
+        task = Task.detached { await Self.generate(into: sink, frequency: frequency, chunkDuration: chunkDuration) }
     }
 
-    private nonisolated static func generate(into sink: any AudioBufferReceiver, frequency: Double) async {
+    private nonisolated static func generate(into sink: any AudioBufferReceiver, frequency: Double, chunkDuration: Double) async {
         let sampleRate = 44_100.0
         guard let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 2) else { return }
         var time = 0.0
         while !Task.isCancelled {
-            let frames = AVAudioFrameCount(sampleRate / 10)
+            let frames = AVAudioFrameCount(sampleRate * chunkDuration)
             guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames),
                   let channels = buffer.floatChannelData else { return }
             buffer.frameLength = frames
@@ -205,7 +210,7 @@ final class TestToneSource: AudioInputSource {
                 time += 1 / sampleRate
             }
             sink.append(buffer)
-            try? await Task.sleep(for: .milliseconds(100))
+            try? await Task.sleep(for: .seconds(chunkDuration))
         }
     }
 }

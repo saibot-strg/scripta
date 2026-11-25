@@ -18,6 +18,8 @@ struct TranscriptDocument: Sendable, Equatable {
     var languageCode: String?
     var engine: String
     var segments: [Segment]
+    /// Summary by a language model (Markdown), included in the Markdown export.
+    var summary: String?
 
     var hasSpeakers: Bool { Set(segments.compactMap(\.speaker)).count > 1 }
 }
@@ -120,7 +122,11 @@ enum TranscriptExporter {
     static func markdown(_ document: TranscriptDocument) -> String {
         var lines = ["# \(document.title)", ""]
         lines += headerDetails(document).map { "- \($0)" }
-        lines += ["", "---", ""]
+        if let summary = document.summary {
+            lines += ["", summary, "", "---", "", "## " + String(localized: "Transkript"), ""]
+        } else {
+            lines += ["", "---", ""]
+        }
         var previousSpeaker: String?
         for segment in document.segments {
             let time = "`\(Formatters.timestamp(segment.start))`"

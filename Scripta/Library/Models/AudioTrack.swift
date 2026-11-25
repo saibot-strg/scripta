@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-extension LibrarySchemaV2 {
+extension LibrarySchemaV3 {
     /// One audio file belonging to a recording (e.g. the meeting mix, or the
     /// separate microphone and system tracks used for "Ich" / "Andere").
     @Model

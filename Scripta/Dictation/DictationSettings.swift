@@ -8,6 +8,11 @@ enum DictationSettings {
     static let appendsSpaceKey = "dictation.appendsSpace"
     /// A short sound when dictation starts and stops (off by default).
     static let playsSoundsKey = "dictation.sounds"
+    /// Leaves the dictated text on the clipboard instead of restoring the
+    /// previous contents, so it isn't lost when no text field had focus (off by default).
+    static let keepsOnClipboardKey = "dictation.keepsOnClipboard"
+    /// Spoken punctuation and line breaks ("Komma", "neue Zeile", "question mark"), on by default.
+    static let usesVoiceCommandsKey = "dictation.voiceCommands"
 
     static var isEnabled: Bool { UserDefaults.standard.bool(forKey: enabledKey) }
 
@@ -25,4 +30,10 @@ enum DictationSettings {
     }
 
     static var playsSounds: Bool { UserDefaults.standard.bool(forKey: playsSoundsKey) }
+
+    static var keepsOnClipboard: Bool { UserDefaults.standard.bool(forKey: keepsOnClipboardKey) }
+
+    static var usesVoiceCommands: Bool {
+        UserDefaults.standard.object(forKey: usesVoiceCommandsKey) as? Bool ?? true
+    }
 }

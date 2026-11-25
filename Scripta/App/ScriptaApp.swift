@@ -12,6 +12,8 @@ struct ScriptaApp: App {
     init() {
         let container: ModelContainer
         var startupError: PresentableError?
+        // Before the store is opened (and migrated) for the first time with named folders.
+        LibraryBackup.makeIfNeeded()
         do {
             container = try ModelContainerFactory.makePersistent()
         } catch {
@@ -24,7 +26,8 @@ struct ScriptaApp: App {
 
         let model = AppModel(
             library: LibraryService(modelContext: container.mainContext, locations: StorageLocations()),
-            voices: .makePersistent()
+            voices: .makePersistent(),
+            languageModels: LanguageModelService()
         )
         if let startupError { model.presentedError = startupError }
         Task { await model.performStartupMaintenance() }
@@ -38,6 +41,7 @@ struct ScriptaApp: App {
         Window("Scripta", id: "main") {
             ContentView()
                 .environment(appModel)
+                .tracksWindowVisibility()
                 .onAppear { appDelegate.appModel = appModel }
         }
         .modelContainer(container)
@@ -59,8 +63,10 @@ struct ScriptaApp: App {
         )) {
             MenuBarContent()
                 .environment(appModel)
+                .tracksWindowVisibility()
         } label: {
             MenuBarLabel(recorder: appModel.recorder)
         }
+        .menuBarExtraStyle(.window)
     }
 }

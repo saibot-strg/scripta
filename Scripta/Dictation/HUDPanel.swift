@@ -4,9 +4,12 @@ import SwiftUI
 /// Borderless, non-activating panel for the dictation pill: never key, never
 /// in the window cycle, on every Space and above full-screen apps.
 final class HUDPanel: NSPanel {
+    /// Room for the widest pill (a message); the panel itself is invisible.
+    static let size = CGSize(width: 320, height: 80)
+
     init(rootView: some View) {
         super.init(
-            contentRect: NSRect(x: 0, y: 0, width: 300, height: 64),
+            contentRect: NSRect(origin: .zero, size: Self.size),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: true

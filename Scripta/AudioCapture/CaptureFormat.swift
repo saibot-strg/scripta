@@ -83,9 +83,12 @@ enum LevelMeter {
     /// Quietest level that still shows (in dBFS).
     static let floorDecibels: Float = -50
 
+    static func normalizedLevel(decibels: Float) -> Float {
+        min(max((decibels - floorDecibels) / -floorDecibels, 0), 1)
+    }
+
     static func normalizedLevel(rms: Float) -> Float {
         guard rms > 0 else { return 0 }
-        let decibels = 20 * log10(rms)
-        return min(max((decibels - floorDecibels) / -floorDecibels, 0), 1)
+        return normalizedLevel(decibels: 20 * log10(rms))
     }
 }

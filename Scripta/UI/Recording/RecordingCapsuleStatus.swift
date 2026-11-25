@@ -5,6 +5,7 @@ import SwiftUI
 struct RecordingCapsuleStatus: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.isWindowVisible) private var isWindowVisible
     let recorder: AudioRecorder
 
     var body: some View {
@@ -27,8 +28,8 @@ struct RecordingCapsuleStatus: View {
             HStack(spacing: 10) {
                 Image(systemName: isPaused ? "pause.circle.fill" : "circle.fill")
                     .font(isPaused ? .body : .caption)
-                    .foregroundStyle(isPaused ? Color.secondary : Color.red)
-                    .symbolEffect(.pulse, options: .repeating, isActive: !isPaused && !reduceMotion)
+                    .foregroundStyle(isPaused ? Color.secondary : Color.recording)
+                    .symbolEffect(.pulse, options: .repeating, isActive: !isPaused && !reduceMotion && isWindowVisible)
                     .frame(width: 16)
 
                 RecordingTimerText(recorder: recorder)
@@ -37,12 +38,12 @@ struct RecordingCapsuleStatus: View {
 
                 if recorder.isMeeting {
                     VStack(spacing: 3) {
-                        CapsuleMeter(label: "Ich", recorder: recorder, track: .microphone, tint: isPaused ? .secondary : .red)
-                        CapsuleMeter(label: "Andere", recorder: recorder, track: .system, tint: isPaused ? .secondary : .green)
+                        CapsuleMeter(label: "Ich", recorder: recorder, track: .microphone, tint: isPaused ? .secondary : .recording)
+                        CapsuleMeter(label: "Andere", recorder: recorder, track: .system, tint: isPaused ? .secondary : .brandSky)
                     }
                     .padding(.vertical, 6)
                 } else {
-                    LiveLevelMeter(recorder: recorder, tint: isPaused ? .secondary : .red)
+                    LiveLevelMeter(recorder: recorder, tint: isPaused ? .secondary : .recording)
                         .frame(height: 24)
                 }
             }

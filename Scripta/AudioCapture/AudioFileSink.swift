@@ -4,8 +4,9 @@ import Synchronization
 
 /// Messages from the capture thread to the UI.
 enum CaptureEvent: Sendable {
-    /// New meter levels (0...1, one per 50 ms) and the total recorded duration.
-    case progress(levels: [Float], duration: TimeInterval)
+    /// Levels of the newly recorded 50 ms blocks (dBFS, gaps on the timeline
+    /// included as silence) and the total recorded duration.
+    case progress(decibels: [Float], duration: TimeInterval)
     /// Writing failed; the file contains everything up to this point.
     case failed(message: String)
 }
@@ -89,6 +90,8 @@ final class AudioFileSink: AudioBufferReceiver {
         let event: CaptureEvent? = state.withLock { state in
             guard !state.hasFailed, let file = state.file else { return nil }
             do {
+                var decibels: [Float] = []
+                var wroteGap = false
                 if state.usesTimeline {
                     guard let origin = state.origin, state.pausedAt == nil else { return nil }
                     let captured = hostTime ?? mach_absolute_time()
@@ -100,14 +103,20 @@ final class AudioFileSink: AudioBufferReceiver {
                     if gap > Self.gapTolerance {
                         try Self.writeSilence(frames: gap, to: file)
                         state.framesWritten += gap
+                        // The meters keep one level per block of the timeline, silence included.
+                        decibels = state.meter.silence(frames: Int(gap))
+                        wroteGap = true
                     }
                 }
                 let converted = try state.converter.convert(buffer)
-                guard converted.frameLength > 0 else { return nil }
-                try file.write(from: converted)
-                state.framesWritten += AVAudioFramePosition(converted.frameLength)
-                let levels = state.meter.levels(of: converted)
-                return .progress(levels: levels, duration: Double(state.framesWritten) / CaptureFormat.sampleRate)
+                if converted.frameLength > 0 {
+                    try file.write(from: converted)
+                    state.framesWritten += AVAudioFramePosition(converted.frameLength)
+                    decibels += state.meter.decibels(of: converted)
+                } else if !wroteGap {
+                    return nil
+                }
+                return .progress(decibels: decibels, duration: Double(state.framesWritten) / CaptureFormat.sampleRate)
             } catch {
                 state.hasFailed = true
                 return .failed(message: error.localizedDescription)

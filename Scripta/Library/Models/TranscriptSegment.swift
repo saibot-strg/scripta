@@ -9,7 +9,7 @@ struct WordTiming: Codable, Hashable, Sendable {
     var confidence: Float?
 }
 
-extension LibrarySchemaV2 {
+extension LibrarySchemaV3 {
     /// A timed section of a transcript (roughly a sentence or a speaker turn).
     @Model
     final class TranscriptSegment {

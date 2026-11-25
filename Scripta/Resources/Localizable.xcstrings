@@ -31,6 +31,46 @@
         }
       }
     },
+    "%@ wird vom Mac gelöscht. Du kannst es jederzeit wieder laden." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ will be deleted from this Mac. You can download it again at any time."
+          }
+        }
+      }
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ · %lld Stimmen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld voices"
+          }
+        }
+      }
+    },
+    "%@ · Noch kein Transkript" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · No transcript yet"
+          }
+        }
+      }
+    },
     "%@ – du kannst die App währenddessen normal weiter benutzen." : {
       "localizations" : {
         "en" : {
@@ -401,12 +441,42 @@
         }
       }
     },
+    "Alle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        }
+      }
+    },
     "Alle Aufnahmen" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "All Recordings"
+          }
+        }
+      }
+    },
+    "Alle Aufnahmen liegen jetzt am neuen Speicherort." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All recordings are now in the new location."
+          }
+        }
+      }
+    },
+    "Alle Modelle laufen auf diesem Mac; Transkripte verlassen ihn nicht. Modelle werden einmalig von Hugging Face geladen (Apache 2.0). Empfohlen: Qwen 3.5 4B. Beim Schreiben braucht ein Modell etwa so viel Arbeitsspeicher wie sein Download groß ist, plus bis zu 1 GB." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All models run on this Mac; transcripts never leave it. Models are downloaded once from Hugging Face (Apache 2.0). Recommended: Qwen 3.5 4B. While writing, a model needs about as much memory as its download size, plus up to 1 GB."
           }
         }
       }
@@ -501,12 +571,32 @@
         }
       }
     },
+    "Anderswo gespeichert" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stored Elsewhere"
+          }
+        }
+      }
+    },
     "Anlegen" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Create"
+          }
+        }
+      }
+    },
+    "Ansicht" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View"
           }
         }
       }
@@ -531,22 +621,52 @@
         }
       }
     },
+    "Apple Intelligence ist ausgeschaltet. Du kannst es in den Systemeinstellungen unter „Apple Intelligence & Siri“ einschalten." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence is turned off. You can turn it on in System Settings under “Apple Intelligence & Siri”."
+          }
+        }
+      }
+    },
+    "Apple Intelligence ist gerade nicht verfügbar." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence isn't available right now."
+          }
+        }
+      }
+    },
+    "Apple Intelligence sieht bei langen Aufnahmen Ausschnitte aus Anfang, Mitte und Ende. Ein geladenes Modell liest das ganze Transkript." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For long recordings, Apple Intelligence sees passages from the beginning, middle and end. A downloaded model reads the whole transcript."
+          }
+        }
+      }
+    },
+    "Apple Intelligence wird noch vorbereitet. Versuche es später erneut." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence is still being set up. Try again later."
+          }
+        }
+      }
+    },
     "Audio und Video – bei Videos wird nur die Tonspur übernommen." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Audio and video – for videos only the audio track is kept."
-          }
-        }
-      }
-    },
-    "Audio- oder Videodateien importieren (⌘I) – oder einfach ins Fenster ziehen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Import audio or video files (⌘I) – or just drag them into the window"
           }
         }
       }
@@ -591,6 +711,16 @@
         }
       }
     },
+    "Aufnahme beenden und speichern" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop and save the recording"
+          }
+        }
+      }
+    },
     "Aufnahme beenden und speichern (⌘↩)" : {
       "localizations" : {
         "en" : {
@@ -617,16 +747,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recording"
-          }
-        }
-      }
-    },
-    "Aufnahme läuft · %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recording · %@"
           }
         }
       }
@@ -697,6 +817,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saving recording …"
+          }
+        }
+      }
+    },
+    "Aufnahmen verschoben" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordings Moved"
+          }
+        }
+      }
+    },
+    "Aufnehmen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record"
           }
         }
       }
@@ -841,6 +981,16 @@
         }
       }
     },
+    "Beenden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
+          }
+        }
+      }
+    },
     "Beim Anmelden starten" : {
       "localizations" : {
         "en" : {
@@ -901,12 +1051,32 @@
         }
       }
     },
-    "Bestehende Aufnahmen bleiben, wo sie sind. Ordner in iCloud Drive oder auf externen Platten funktionieren, solange sie verfügbar sind." : {
+    "Bereit" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Existing recordings stay where they are. Folders in iCloud Drive or on external disks work as long as they are available."
+            "value" : "Ready"
+          }
+        }
+      }
+    },
+    "Bestehende Aufnahmen bleiben, wo sie sind, bis du sie hierher verschiebst. Ordner in iCloud Drive oder auf externen Platten funktionieren, solange sie verfügbar sind." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Existing recordings stay where they are until you move them here. Folders in iCloud Drive or on external disks work as long as they are available."
+          }
+        }
+      }
+    },
+    "Bestehende Aufnahmen hierher verschieben?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move existing recordings here?"
           }
         }
       }
@@ -917,16 +1087,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Confirmed voice samples: %lld"
-          }
-        }
-      }
-    },
-    "Bibliothek" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Library"
           }
         }
       }
@@ -1021,12 +1181,72 @@
         }
       }
     },
+    "Das Sprachmodell hat keine Antwort geliefert: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The language model didn't answer: %@"
+          }
+        }
+      }
+    },
+    "Das Sprachmodell hat keine brauchbare Antwort geliefert." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The language model didn't give a usable answer."
+          }
+        }
+      }
+    },
+    "Das Sprachmodell ist nicht geladen. Lade es in den Einstellungen unter „Erkennung“." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The language model isn't downloaded. Download it in Settings under “Recognition”."
+          }
+        }
+      }
+    },
+    "Das Sprachmodell konnte nicht geladen werden: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The language model could not be loaded: %@"
+          }
+        }
+      }
+    },
+    "Das Sprachmodell liest das Transkript. Das dauert je nach Länge bis zu einer Minute." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The language model is reading the transcript. Depending on its length, this takes up to a minute."
+          }
+        }
+      }
+    },
     "Das Tastenkürzel ist bereits von einer anderen App belegt oder nicht erlaubt." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "The shortcut is already used by another app or not allowed."
+          }
+        }
+      }
+    },
+    "Das Transkript ist lang und wird in Teilen gelesen: Teil %lld von %lld." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The transcript is long and is read in parts: part %1$lld of %2$lld."
           }
         }
       }
@@ -1071,6 +1291,26 @@
         }
       }
     },
+    "Das Transkript wurde seitdem geändert." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The transcript has changed since."
+          }
+        }
+      }
+    },
+    "Datei nicht gefunden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File not found"
+          }
+        }
+      }
+    },
     "Datum" : {
       "localizations" : {
         "en" : {
@@ -1091,22 +1331,22 @@
         }
       }
     },
-    "Dauer %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Duration %@"
-          }
-        }
-      }
-    },
     "Der Name ändert sich auch in allen Transkripten, in denen die Person erkannt oder benannt wurde." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "The name also changes in every transcript in which the person was recognized or named."
+          }
+        }
+      }
+    },
+    "Der diktierte Text bleibt nach dem Einfügen in der Zwischenablage. Wenn kein Textfeld aktiv war, holst du ihn mit ⌘V zurück. Der vorherige Inhalt der Zwischenablage wird dabei ersetzt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The dictated text stays on the clipboard after it is inserted. If no text field had focus, press ⌘V to get it back. This replaces whatever was on the clipboard before."
           }
         }
       }
@@ -1201,6 +1441,36 @@
         }
       }
     },
+    "Die Datei bleibt, wo sie ist; Scripta vergisst sie nur." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The file stays where it is; Scripta just forgets it."
+          }
+        }
+      }
+    },
+    "Die Modelldatei ist nicht mehr erreichbar. Wähle sie in den Einstellungen erneut aus." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model file can no longer be found. Choose it again in Settings."
+          }
+        }
+      }
+    },
+    "Die Ordner werden verschoben, nicht kopiert, und heißen danach wie die Aufnahmen. Aufnahmen, die gerade bearbeitet werden, bleiben vorerst, wo sie sind." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The folders are moved, not copied, and are named after the recordings. Recordings that are being processed stay where they are for now."
+          }
+        }
+      }
+    },
     "Die Stimmproben werden gelöscht. Namen in Transkripten bleiben stehen." : {
       "localizations" : {
         "en" : {
@@ -1251,12 +1521,42 @@
         }
       }
     },
+    "Diese Aufnahme hat noch kein Transkript." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This recording has no transcript yet."
+          }
+        }
+      }
+    },
     "Diese Sprechblase gehört zu" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "This bubble belongs to"
+          }
+        }
+      }
+    },
+    "Diese Woche" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This Week"
+          }
+        }
+      }
+    },
+    "Dieser Mac unterstützt Apple Intelligence nicht." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This Mac doesn't support Apple Intelligence."
           }
         }
       }
@@ -1301,6 +1601,16 @@
         }
       }
     },
+    "Download abbrechen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel download"
+          }
+        }
+      }
+    },
     "Download-Seite öffnen" : {
       "localizations" : {
         "en" : {
@@ -1337,6 +1647,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dark"
+          }
+        }
+      }
+    },
+    "Eigene GGUF-Datei hinzufügen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add GGUF File …"
           }
         }
       }
@@ -1391,12 +1711,42 @@
         }
       }
     },
+    "Einstellungen öffnen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        }
+      }
+    },
     "Einstellungen …" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Settings …"
+          }
+        }
+      }
+    },
+    "Empfohlen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommended"
+          }
+        }
+      }
+    },
+    "Entfernen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove …"
           }
         }
       }
@@ -1417,6 +1767,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recognized"
+          }
+        }
+      }
+    },
+    "Erkennung" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognition"
           }
         }
       }
@@ -1571,6 +1931,16 @@
         }
       }
     },
+    "Filter aufheben" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear Filter"
+          }
+        }
+      }
+    },
     "FluidAudio und Textnormalisierung von FluidInference (Apache License 2.0)." : {
       "localizations" : {
         "en" : {
@@ -1627,6 +1997,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "For meetings where other people sit at your Mac with you. If no one can be heard online in the meeting, this happens automatically."
+          }
+        }
+      }
+    },
+    "Für Zusammenfassungen brauchst du ein Sprachmodell. Lade eines in den Einstellungen unter „Erkennung“, zum Beispiel Qwen 3.5 4B (3 GB)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summaries need a language model. Download one in Settings under “Recognition”, for example Qwen 3.5 4B (3 GB)."
+          }
+        }
+      }
+    },
+    "Für Zusammenfassungen brauchst du eines der Modelle unten. Apple Intelligence sieht zu wenig vom Transkript auf einmal." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summaries need one of the models below. Apple Intelligence sees too little of the transcript at once."
           }
         }
       }
@@ -1761,6 +2151,16 @@
         }
       }
     },
+    "Heute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        }
+      }
+    },
     "Hier ausprobieren: Kürzel halten und sprechen" : {
       "localizations" : {
         "en" : {
@@ -1777,6 +2177,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "There are no recordings here yet."
+          }
+        }
+      }
+    },
+    "Hierher verschieben …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move Here…"
           }
         }
       }
@@ -1851,12 +2261,12 @@
         }
       }
     },
-    "Importieren" : {
+    "Importieren (⌘I), sortieren und filtern" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import"
+            "value" : "Import (⌘I), sort and filter"
           }
         }
       }
@@ -1951,6 +2361,16 @@
         }
       }
     },
+    "In macOS integriert" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built into macOS"
+          }
+        }
+      }
+    },
     "Installiert" : {
       "localizations" : {
         "en" : {
@@ -2007,6 +2427,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Microphone Found"
+          }
+        }
+      }
+    },
+    "Kein Modell geladen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No model downloaded"
+          }
+        }
+      }
+    },
+    "Kein Modell verfügbar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No model available"
           }
         }
       }
@@ -2081,6 +2521,26 @@
         }
       }
     },
+    "Kopieren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
+          }
+        }
+      }
+    },
+    "Kurzfassung, Kernpunkte, Aufgaben und Entscheidungen – geschrieben von %@, lokal auf diesem Mac." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overview, key points, tasks and decisions – written by %@, locally on this Mac."
+          }
+        }
+      }
+    },
     "Kürzel drücken …" : {
       "localizations" : {
         "en" : {
@@ -2097,6 +2557,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hold the shortcut, speak, release: the text appears at the cursor – in any app. The audio stays in memory only and is never saved."
+          }
+        }
+      }
+    },
+    "Laden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download"
           }
         }
       }
@@ -2121,6 +2591,16 @@
         }
       }
     },
+    "Leg Aufnahmen über das Kontextmenü „In Ordner“ hier ab." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File recordings here with “Move to Folder” in the context menu."
+          }
+        }
+      }
+    },
     "Leises Mikrofon anheben" : {
       "localizations" : {
         "en" : {
@@ -2137,6 +2617,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Last Dictation"
+          }
+        }
+      }
+    },
+    "Liste" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List"
           }
         }
       }
@@ -2201,6 +2691,16 @@
         }
       }
     },
+    "MLX und mlx-swift-lm von ml-explore, llama.cpp von ggml.org und llama.swift von Mattt (MIT); swift-transformers und swift-jinja von Hugging Face (Apache License 2.0)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MLX and mlx-swift-lm by ml-explore, llama.cpp by ggml.org and llama.swift by Mattt (MIT); swift-transformers and swift-jinja by Hugging Face (Apache License 2.0)."
+          }
+        }
+      }
+    },
     "Markdown (.md)" : {
       "localizations" : {
         "en" : {
@@ -2251,16 +2751,6 @@
         }
       }
     },
-    "Meeting aufnehmen mit" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Record Meeting With"
-          }
-        }
-      }
-    },
     "Meeting aufnehmen: Mikrofon und Systemaudio getrennt (⇧⌘N)" : {
       "localizations" : {
         "en" : {
@@ -2271,12 +2761,12 @@
         }
       }
     },
-    "Meeting läuft · %@" : {
+    "Meeting läuft" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeting · %@"
+            "value" : "Recording Meeting"
           }
         }
       }
@@ -2337,6 +2827,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Microphone (“Me”) and system audio (“Others”) are recorded as separate tracks. Headphones keep them cleanly apart."
+          }
+        }
+      }
+    },
+    "Mikrofon wechseln" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch microphone"
           }
         }
       }
@@ -2431,6 +2931,16 @@
         }
       }
     },
+    "Modelle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Models"
+          }
+        }
+      }
+    },
     "Modus" : {
       "localizations" : {
         "en" : {
@@ -2471,6 +2981,16 @@
         }
       }
     },
+    "Nach der ersten Transkription ersetzt Scripta „Aufnahme …“ oder „Meeting …“ durch einen Titel aus dem Inhalt. Titel, die du selbst vergibst, bleiben. Mit ⌘Z kehrst du zum alten Titel zurück." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After the first transcription, Scripta replaces “Recording …” or “Meeting …” with a title based on the content. Titles you give yourself stay. ⌘Z brings back the old title."
+          }
+        }
+      }
+    },
     "Name" : {
       "localizations" : {
         "en" : {
@@ -2497,6 +3017,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Detect Again"
+          }
+        }
+      }
+    },
+    "Neu erstellen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create Again"
           }
         }
       }
@@ -2571,6 +3101,16 @@
         }
       }
     },
+    "Neuer Ordner …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Folder …"
+          }
+        }
+      }
+    },
     "Neuer Sprecher" : {
       "localizations" : {
         "en" : {
@@ -2597,6 +3137,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not downloaded"
+          }
+        }
+      }
+    },
+    "Nicht jetzt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Now"
           }
         }
       }
@@ -2631,6 +3181,16 @@
         }
       }
     },
+    "Noch anderswo: %lld. Sie werden gerade bearbeitet oder ihr Speicherort ist nicht erreichbar. Wähle später erneut „Hierher verschieben …“." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still elsewhere: %lld. They are being processed or their location can’t be reached. Choose “Move Here…” again later."
+          }
+        }
+      }
+    },
     "Noch kein Transkript" : {
       "localizations" : {
         "en" : {
@@ -2651,12 +3211,22 @@
         }
       }
     },
-    "Noch keine Ordner – lege sie links mit + an." : {
+    "Noch keine Ordner – lege sie über „Ordner“ über der Liste an." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No folders yet – create them on the left with +."
+            "value" : "No folders yet – create them with “Folders” above the list."
+          }
+        }
+      }
+    },
+    "Noch keine Zusammenfassung" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Summary Yet"
           }
         }
       }
@@ -2691,6 +3261,16 @@
         }
       }
     },
+    "Nur zeigen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Only"
+          }
+        }
+      }
+    },
     "OK" : {
       "localizations" : {
         "en" : {
@@ -2707,16 +3287,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Folders"
-          }
-        }
-      }
-    },
-    "Ordner anlegen mit +, dann Aufnahmen hineinziehen." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create folders with +, then drag recordings onto them."
           }
         }
       }
@@ -2767,6 +3337,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rename Folder"
+          }
+        }
+      }
+    },
+    "Ordner zeigen, anlegen oder ändern" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show, create or change folders"
           }
         }
       }
@@ -2887,16 +3467,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quality"
-          }
-        }
-      }
-    },
-    "Quelle" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source"
           }
         }
       }
@@ -3101,32 +3671,12 @@
         }
       }
     },
-    "Sortieren" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sort"
-          }
-        }
-      }
-    },
     "Sortieren nach" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sort By"
-          }
-        }
-      }
-    },
-    "Sortierung ändern" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Change sort order"
           }
         }
       }
@@ -3147,6 +3697,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Storage Location"
+          }
+        }
+      }
+    },
+    "Sprachbefehle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice Commands"
           }
         }
       }
@@ -3327,6 +3887,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Start a recording with ⌘N or drag audio and video files into this window."
+          }
+        }
+      }
+    },
+    "Startet, sobald die laufende Transkription fertig ist." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts as soon as the running transcription is finished."
           }
         }
       }
@@ -3561,6 +4131,16 @@
         }
       }
     },
+    "Text in der Zwischenablage behalten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep Text on the Clipboard"
+          }
+        }
+      }
+    },
     "Titel" : {
       "localizations" : {
         "en" : {
@@ -3571,12 +4151,92 @@
         }
       }
     },
+    "Titel aus dem Transkript erzeugen (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate a title from the transcript (%@)"
+          }
+        }
+      }
+    },
+    "Titel automatisch vorschlagen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggest titles automatically"
+          }
+        }
+      }
+    },
+    "Titel erzeugen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate Title"
+          }
+        }
+      }
+    },
+    "Titel erzeugen: schalte Apple Intelligence ein oder lade ein Sprachmodell (Einstellungen › Erkennung)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate Title: turn on Apple Intelligence or download a language model (Settings › Recognition)"
+          }
+        }
+      }
+    },
+    "Titel erzeugen: zuerst transkribieren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate Title: transcribe first"
+          }
+        }
+      }
+    },
+    "Titel erzeugt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title generated"
+          }
+        }
+      }
+    },
     "Titel und Transkripte" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Titles and transcripts"
+          }
+        }
+      }
+    },
+    "Titel und Zusammenfassungen (optional): Apple Intelligence oder Qwen 3.5 (Alibaba Cloud), Ministral 3 (Mistral AI) und Gemma 4 (Google), jeweils Apache License 2.0." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titles and summaries (optional): Apple Intelligence or Qwen 3.5 (Alibaba Cloud), Ministral 3 (Mistral AI) and Gemma 4 (Google), each Apache License 2.0."
+          }
+        }
+      }
+    },
+    "Titel wird erzeugt …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generating title …"
           }
         }
       }
@@ -3801,6 +4461,16 @@
         }
       }
     },
+    "Verschieben" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move"
+          }
+        }
+      }
+    },
     "Version %@" : {
       "localizations" : {
         "en" : {
@@ -3921,12 +4591,32 @@
         }
       }
     },
+    "Wird geschrieben …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Writing …"
+          }
+        }
+      }
+    },
     "Wird gespeichert …" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saving …"
+          }
+        }
+      }
+    },
+    "Wird transkribiert · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribing · %@"
           }
         }
       }
@@ -3971,22 +4661,22 @@
         }
       }
     },
-    "Zieh Aufnahmen aus „Alle Aufnahmen“ oder Audiodateien aus dem Finder auf diesen Ordner links." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drag recordings from “All Recordings” or audio files from the Finder onto this folder on the left."
-          }
-        }
-      }
-    },
     "Zu dieser Stelle springen" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jump to this point"
+          }
+        }
+      }
+    },
+    "Zu wenig Arbeitsspeicher" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough memory"
           }
         }
       }
@@ -4031,12 +4721,62 @@
         }
       }
     },
+    "Zusammenfassung" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summary"
+          }
+        }
+      }
+    },
+    "Zusammenfassung erstellen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create Summary"
+          }
+        }
+      }
+    },
+    "Zusammenfassung kopiert" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summary copied"
+          }
+        }
+      }
+    },
+    "Zusammenfassung wird erstellt …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creating summary …"
+          }
+        }
+      }
+    },
     "Zusammenführen mit" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Merge With"
+          }
+        }
+      }
+    },
+    "von %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "of %@"
           }
         }
       }
@@ -4141,6 +4881,16 @@
         }
       }
     },
+    "„%@“ löschen …" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete “%@” …"
+          }
+        }
+      }
+    },
     "„%@“ löschen?" : {
       "localizations" : {
         "en" : {
@@ -4197,6 +4947,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“Open at Login” Couldn’t Be Changed"
+          }
+        }
+      }
+    },
+    "„Punkt“, „Komma“, „Fragezeichen“, „Rufzeichen“, „Doppelpunkt“, „neue Zeile“, „neuer Absatz“, „Klammer auf“ … werden zu Satzzeichen und Zeilenumbrüchen, auch auf Englisch („period“, „new line“ …)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Period”, “comma”, “question mark”, “exclamation mark”, “colon”, “new line”, “new paragraph”, “open parenthesis” … become punctuation and line breaks, in German too (“Punkt”, “neue Zeile” …)."
           }
         }
       }

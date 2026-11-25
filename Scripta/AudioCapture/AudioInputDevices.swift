@@ -28,6 +28,13 @@ enum AudioInputDevices {
         return device.id
     }
 
+    /// The microphone recordings use right now: the chosen one if it is
+    /// connected, else the system default.
+    static func currentInputUID() -> String? {
+        if selectedDeviceID() != nil, let uid = RecordingSettings.microphoneUID { return uid }
+        return defaultDevice()?.uid
+    }
+
     /// The system's default input, used when no microphone is chosen or the
     /// chosen one isn't connected.
     static func defaultDevice() -> AudioInputDevice? {

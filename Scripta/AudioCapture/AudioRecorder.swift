@@ -39,10 +39,13 @@ final class AudioRecorder {
     /// Whole seconds of `duration`: changes once per second, so timers and
     /// menus that only show seconds don't re-render 20 times per second.
     private(set) var elapsedSeconds = 0
-    /// Recent microphone levels (0...1, newest last), 20 per second.
-    private(set) var levels: [Float] = []
+    /// Recent microphone levels (0...1), one per 50 ms block of the timeline.
+    /// A quiet microphone is shown raised, as it will be levelled afterwards.
+    private(set) var levels = LevelHistory()
     /// Meeting only: recent system audio levels.
-    private(set) var systemLevels: [Float] = []
+    private(set) var systemLevels = LevelHistory()
+    /// Where the level meters are on the timeline (they scroll by it).
+    private(set) var meterClock = MeterClock()
     private(set) var title = ""
     private(set) var isMeeting = false
     /// Meeting only: apps are playing sound but nothing arrives — most likely
@@ -61,11 +64,11 @@ final class AudioRecorder {
     var usesTestTone = false
     #endif
 
-    static let maxLevelCount = 160
-
     /// Asked at the start of each recording (the user may change the location).
     private let location: @MainActor () -> RecordingLocation
     private var session: Session?
+    /// Set while recording when the microphone gets levelled afterwards.
+    @ObservationIgnored private var microphoneGain: LiveMicrophoneGain?
 
     private struct Track {
         let role: TrackRole
@@ -130,8 +133,10 @@ final class AudioRecorder {
         isSystemAudioMissing = false
         duration = 0
         elapsedSeconds = 0
-        levels = []
-        systemLevels = []
+        levels = LevelHistory()
+        systemLevels = LevelHistory()
+        meterClock = MeterClock()
+        microphoneGain = RecordingSettings.levelsMicrophone ? LiveMicrophoneGain(decibels: rememberedMicrophoneGain()) : nil
 
         let location = location()
         let storage = location.storage
@@ -177,6 +182,7 @@ final class AudioRecorder {
         // audio while the microphone was still starting) are dropped.
         let origin = mach_absolute_time()
         tracks.forEach { $0.sink.startTimeline(at: origin) }
+        meterClock.start(at: .now)
 
         // Keep the Mac awake and out of App Nap while recording.
         let activity = ProcessInfo.processInfo.beginActivity(
@@ -200,6 +206,7 @@ final class AudioRecorder {
             $0.sink.pauseTimeline(at: now)
             $0.source.pause()
         }
+        meterClock.pause(at: .now)
         state = .paused
     }
 
@@ -210,6 +217,7 @@ final class AudioRecorder {
         }
         let now = mach_absolute_time()
         session.tracks.forEach { $0.sink.resumeTimeline(at: now) }
+        meterClock.resume(at: .now)
         state = .recording
     }
 
@@ -227,6 +235,7 @@ final class AudioRecorder {
     /// Stops recording and closes all files.
     func stop() -> FinishedRecording? {
         guard let session else { return nil }
+        rememberMicrophoneGain()
         var recordedDuration: TimeInterval = 0
         for track in session.tracks {
             track.source.stop()
@@ -240,8 +249,10 @@ final class AudioRecorder {
         activeRecordingID = nil
         isMeeting = false
         isSystemAudioMissing = false
-        levels = []
-        systemLevels = []
+        levels = LevelHistory()
+        systemLevels = LevelHistory()
+        meterClock = MeterClock()
+        microphoneGain = nil
         duration = 0
         elapsedSeconds = 0
         Logger.recording.info("Recording \(session.manifest.id, privacy: .public) stopped after \(recordedDuration, format: .fixed(precision: 1)) s")
@@ -255,26 +266,30 @@ final class AudioRecorder {
 
     private func handle(_ event: CaptureEvent, role: TrackRole) {
         switch event {
-        case .progress(let newLevels, let newDuration):
+        case .progress(let decibels, let newDuration):
+            // Every write to an observed property invalidates the views that
+            // read it, even with an unchanged value, and system audio arrives
+            // about 90 times per second: write only what changed.
             if role == .system {
-                Self.append(newLevels, to: &systemLevels)
-                if newLevels.contains(where: { $0 > 0 }) { isSystemAudioMissing = false }
+                guard !decibels.isEmpty else { return }
+                let newLevels = decibels.map(LevelMeter.normalizedLevel(decibels:))
+                systemLevels.append(contentsOf: newLevels)
+                if isSystemAudioMissing, newLevels.contains(where: { $0 > 0 }) { isSystemAudioMissing = false }
             } else {
                 duration = newDuration
                 let seconds = Int(newDuration)
                 if seconds != elapsedSeconds { elapsedSeconds = seconds }
-                Self.append(newLevels, to: &levels)
+                guard !decibels.isEmpty else { return }
+                microphoneGain?.add(decibels)
+                let gain = microphoneGain?.decibels ?? 0
+                levels.append(contentsOf: decibels.map { LevelMeter.normalizedLevel(decibels: $0 + gain) })
+                if meterClock.isCalibrating {
+                    meterClock.noteArrival(newBlocks: decibels.count, totalBlocks: levels.count, at: .now)
+                }
             }
         case .failed(let message):
             Logger.recording.error("Writing failed: \(message, privacy: .public)")
             onFailure?(.writeFailed(message: message))
-        }
-    }
-
-    private static func append(_ newLevels: [Float], to levels: inout [Float]) {
-        levels.append(contentsOf: newLevels)
-        if levels.count > maxLevelCount {
-            levels.removeFirst(levels.count - maxLevelCount)
         }
     }
 
@@ -285,7 +300,7 @@ final class AudioRecorder {
             try? await Task.sleep(for: .seconds(4))
             while !Task.isCancelled {
                 guard let self else { return }
-                let hasSignal = systemLevels.contains { $0 > 0 }
+                let hasSignal = systemLevels.levels.contains { $0 > 0 }
                 if hasSignal { return }
                 if state == .recording {
                     isSystemAudioMissing = AudioAppCatalog.isOtherAudioPlaying()
@@ -293,6 +308,24 @@ final class AudioRecorder {
                 try? await Task.sleep(for: .seconds(2))
             }
         }
+    }
+
+    // MARK: - Microphone gain
+
+    private func rememberedMicrophoneGain() -> Float {
+        #if DEBUG
+        if usesTestTone { return 0 }
+        #endif
+        return MicrophoneGainMemory.gain(forDevice: AudioInputDevices.currentInputUID()) ?? 0
+    }
+
+    /// For the next recording's or dictation's meter.
+    private func rememberMicrophoneGain() {
+        #if DEBUG
+        if usesTestTone { return }
+        #endif
+        guard let microphoneGain, microphoneGain.hasMeasured else { return }
+        MicrophoneGainMemory.remember(microphoneGain.decibels, forDevice: AudioInputDevices.currentInputUID())
     }
 
     // MARK: - Sources
@@ -308,7 +341,7 @@ final class AudioRecorder {
 
     private func makeSystemAudio(_ target: SystemAudioTarget) -> any AudioInputSource {
         #if DEBUG
-        if usesTestTone { return TestToneSource(frequency: 440) }
+        if usesTestTone { return TestToneSource(frequency: 440, chunkDuration: 0.01) }
         #endif
         return SystemAudioCapture(target: target)
     }

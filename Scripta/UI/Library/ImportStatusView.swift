@@ -9,7 +9,7 @@ struct ImportStatusView: View {
         HStack(spacing: 10) {
             if status.isFinished {
                 Image(systemName: status.importedIDs.isEmpty ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-                    .foregroundStyle(status.importedIDs.isEmpty ? .orange : .green)
+                    .foregroundStyle(status.importedIDs.isEmpty ? .orange : .success)
                 Text("\(status.importedIDs.count) Dateien importiert")
                 Spacer(minLength: 4)
                 if status.isQueued {

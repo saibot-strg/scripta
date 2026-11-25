@@ -66,6 +66,31 @@ struct DictationTests {
         #expect(pasteboard.string(forType: .string) == "vorher")
         #expect(pasteboard.data(forType: NSPasteboard.PasteboardType("com.example.custom")) == Data([1, 2, 3]))
     }
+
+    @MainActor
+    @Test("Text kept on the clipboard is not marked private; passing text is", arguments: [true, false])
+    func clipboardKeep(keepsOnClipboard: Bool) {
+        let pasteboard = NSPasteboard(name: NSPasteboard.Name("ScriptaTests-\(UUID().uuidString)"))
+        defer { pasteboard.releaseGlobally() }
+        pasteboard.clearContents()
+        pasteboard.setString("vorher", forType: .string)
+
+        TextInserter(pasteboard: pasteboard).writeForPaste("diktiert", keepsOnClipboard: keepsOnClipboard)
+
+        #expect(pasteboard.string(forType: .string) == "diktiert")
+        let types = Set(pasteboard.types ?? [])
+        let isMarkedPrivate = TextInserter.privacyMarkers.allSatisfy(types.contains)
+        #expect(isMarkedPrivate == !keepsOnClipboard)
+    }
+
+    @Test("Keeping dictations on the clipboard is off by default")
+    func clipboardKeepDefault() {
+        let defaults = UserDefaults.standard
+        let previous = defaults.object(forKey: DictationSettings.keepsOnClipboardKey)
+        defer { defaults.set(previous, forKey: DictationSettings.keepsOnClipboardKey) }
+        defaults.removeObject(forKey: DictationSettings.keepsOnClipboardKey)
+        #expect(DictationSettings.keepsOnClipboard == false)
+    }
 }
 
 /// Latency of the recognition step with the real model (opt-in by model availability).

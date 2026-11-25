@@ -1,26 +1,54 @@
 {
   "fill" : {
-    "linear-gradient" : [
-      "extended-srgb:0.27885,0.31228,0.35860,1.00000",
-      "extended-srgb:0.15204,0.18156,0.22410,1.00000"
-    ]
+    "solid" : "extended-srgb:0.01961,0.02745,0.05098,1.00000"
   },
   "groups" : [
     {
       "layers" : [
         {
-          "image-name" : "glyph.png",
-          "name" : "glyph"
+          "image-name" : "bars.png",
+          "name" : "bars",
+          "position" : {
+            "scale" : 0.625,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
         }
       ],
-      "name" : "Glyph",
+      "name" : "Bars",
       "shadow" : {
         "kind" : "neutral",
         "opacity" : 0.5
       },
       "translucency" : {
-        "enabled" : true,
-        "value" : 0.15
+        "enabled" : false,
+        "value" : 0.0
+      }
+    },
+    {
+      "layers" : [
+        {
+          "image-name" : "background.png",
+          "name" : "background",
+          "position" : {
+            "scale" : 0.725,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "name" : "Background",
+      "shadow" : {
+        "kind" : "none",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.0
       }
     }
   ],

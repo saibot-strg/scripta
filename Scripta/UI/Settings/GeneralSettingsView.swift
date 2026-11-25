@@ -1,7 +1,7 @@
 import ServiceManagement
 import SwiftUI
 
-/// Settings › Allgemein: language, appearance, behaviour, updates.
+/// Settings › Allgemein: language, appearance, behaviour, updates, permissions.
 struct GeneralSettingsView: View {
     @Environment(AppModel.self) private var appModel
     @AppStorage(SettingsKey.checksForUpdates) private var checksForUpdates = true
@@ -70,9 +70,11 @@ struct GeneralSettingsView: View {
                 Text("Scripta fragt einmal am Tag bei GitHub nach, ob es eine neue Version gibt. Daten über deine Aufnahmen oder deine Nutzung werden dabei nicht übertragen.")
                     .foregroundStyle(.secondary)
             }
+
+            PermissionsSettingsSection()
         }
         .formStyle(.grouped)
-        .frame(height: 520)
+        .frame(height: 600)
         .alert("„Beim Anmelden starten“ ließ sich nicht ändern", isPresented: $loginItemError.isPresent, presenting: loginItemError) { _ in
             Button("OK") {}
         } message: { message in

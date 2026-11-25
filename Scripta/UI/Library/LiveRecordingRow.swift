@@ -4,24 +4,19 @@ import SwiftUI
 /// like in Voice Memos: a red dot with the time and a light red wash.
 struct LiveRecordingRow: View {
     @Environment(AppModel.self) private var appModel
-    /// Increased while the row is selected in the focused list: the list then
-    /// draws white text on the accent color, where red would be hard to read.
-    @Environment(\.backgroundProminence) private var backgroundProminence
     let item: LiveRecording
 
     var body: some View {
         let recorder = appModel.recorder
         let isRunning = !item.isSaving && recorder.activeRecordingID == item.id
         let isPaused = isRunning && recorder.state == .paused
-        let isHighlighted = backgroundProminence == .increased
-        let tint: Color = isHighlighted ? .white : isRunning && !isPaused ? .red : .secondary
+        let tint: Color = isRunning && !isPaused ? .recording : .rowDetail
 
         HStack(spacing: 12) {
-            SourceIcon(source: item.source)
-
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
                     .font(.headline)
+                    .foregroundStyle(Color.rowTitle)
                     .lineLimit(1)
                 LiveRecordingStatusLine(isRunning: isRunning, isPaused: isPaused, tint: tint, recorder: recorder)
                     .font(.subheadline)
@@ -36,9 +31,8 @@ struct LiveRecordingRow: View {
         }
         .padding(.vertical, 5)
         .background {
-            // The selection highlight takes over while the row is selected.
             RoundedRectangle(cornerRadius: 8)
-                .fill(.red.opacity(isRunning && !isHighlighted ? 0.07 : 0))
+                .fill(Color.recording.opacity(isRunning ? 0.07 : 0))
                 .padding(.horizontal, -6)
                 .padding(.vertical, -1)
         }

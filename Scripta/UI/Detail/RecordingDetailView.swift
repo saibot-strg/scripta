@@ -1,11 +1,13 @@
 import SwiftUI
 
-/// Detail column: header, transcript (or its status) and the floating player.
+/// Detail column: the playback timeline pinned on top, below it header and
+/// transcript (or its status).
 struct RecordingDetailView: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let recording: Recording
     @AppStorage("detail.transcriptStyle") private var transcriptStyle: TranscriptStyle = .bubbles
+    @AppStorage(SettingsKey.detailPane) private var pane: DetailPane = .transcript
     @State private var layout = TranscriptLayout.empty
     @State private var activeSegmentID: UUID?
     @State private var isAssigningSpeakers = false
@@ -27,29 +29,38 @@ struct RecordingDetailView: View {
                 // build the rows that are visible.
                 LazyVStack(alignment: .leading, spacing: 0) {
                     DetailHeaderView(recording: recording)
-                        .padding(.bottom, 28)
+                        .padding(.bottom, 22)
 
                     if showsStatus {
                         TranscriptStatusCard(recording: recording, hasAudio: hasAudio)
                             .padding(.bottom, transcript == nil ? 0 : 28)
                     }
 
-                    if let transcript, recording.status == .done {
-                        SpeakerBanner(transcript: transcript) { isAssigningSpeakers = true }
-                            .padding(.bottom, 24)
+                    if transcript != nil, recording.status == .done {
+                        DetailPaneTabs(selection: $pane)
+                            .padding(.bottom, 22)
                     }
 
-                    TranscriptView(
-                        rows: rows,
-                        style: hasSpeakers ? transcriptStyle : .text,
-                        activeSegmentID: activeSegmentID,
-                        onSelect: play,
-                        onRenameSpeaker: { _ in isAssigningSpeakers = true }
-                    )
+                    if pane == .summary, transcript != nil, recording.status == .done {
+                        SummaryView(recording: recording)
+                    } else {
+                        if let transcript, recording.status == .done {
+                            SpeakerBanner(transcript: transcript) { isAssigningSpeakers = true }
+                                .padding(.bottom, 24)
+                        }
+
+                        TranscriptView(
+                            rows: rows,
+                            style: hasSpeakers ? transcriptStyle : .text,
+                            activeSegmentID: activeSegmentID,
+                            onSelect: play,
+                            onRenameSpeaker: { _ in isAssigningSpeakers = true }
+                        )
+                    }
                 }
                 .frame(maxWidth: 760, alignment: .leading)
                 .padding(.horizontal, 32)
-                .padding(.top, 28)
+                .padding(.top, 20)
                 .padding(.bottom, 24)
                 .frame(maxWidth: .infinity)
             }
@@ -62,10 +73,8 @@ struct RecordingDetailView: View {
         .background {
             PlaybackFollower(timeline: layout.timeline, activeSegmentID: $activeSegmentID)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            PlayerBarView()
-                .padding(.horizontal, 24)
-                .padding(.bottom, 18)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            PlaybackTimelineView(lanes: layout.lanes, transcriptEnd: layout.end)
         }
         .toolbar {
             ToolbarItem {
@@ -85,6 +94,9 @@ struct RecordingDetailView: View {
                 }
             }
             ToolbarItem {
+                GenerateTitleButton(recording: recording)
+            }
+            ToolbarItem {
                 Menu("Exportieren", systemImage: "square.and.arrow.up") {
                     ExportMenuItems(recording: recording)
                 }
@@ -100,6 +112,7 @@ struct RecordingDetailView: View {
         .task(id: recording.id) {
             hasAudio = appModel.library.audioURL(for: recording) != nil
             appModel.loadPlayer(for: recording)
+            _ = appModel.summary(for: recording)
         }
         .task(id: transcript?.modifiedAt) {
             layout = recording.transcript.map(TranscriptLayout.init) ?? .empty

@@ -12,6 +12,14 @@ import os
 ///   e.g. to test crash recovery with `kill -9`. `-StopRecordingAfter <s>` stops it.
 /// - `-RecordTestMeeting`: like `-RecordTestTone`, but a meeting with two tone tracks.
 ///   `-SelectLiveRecording` then selects it, to show the live detail view.
+/// - `-ShowDictationHUD <phase>`: shows the dictation pill in one phase
+///   (`recording`, `transcribing`, `done`, `message`, or `cycle` for a whole
+///   dictation over and over) without dictating.
+/// - `-EmphasizeSelection`: draws list selections as in the active window with
+///   keyboard focus, although the window is in the background (to check that look
+///   in a screenshot without taking the user's focus).
+/// - `-MiniaturizeAfter <s>`: minimizes the main window after the given delay,
+///   e.g. to measure the CPU load of a recording with the window out of sight.
 /// - `-ShowMeetingNotice`: shows the notice before a first meeting (stores nothing).
 /// - `-ProbeSystemAudio`: builds (but doesn't start) the system audio tap and logs it.
 /// - `-AutoPlay <s>`: starts playback after the given delay and logs the player state.
@@ -102,7 +110,7 @@ enum DebugLaunchOptions {
         if arguments.contains("-ShowSettings") {
             Task {
                 // The Settings scene can't be opened from here; the same view in a window can.
-                let pane = value(after: "-ShowSettings").flatMap(SettingsView.Pane.init) ?? .general
+                let pane = value(after: "-ShowSettings").flatMap(SettingsView.Pane.init(name:)) ?? .general
                 let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(pane: pane).environment(model)))
                 window.title = "Settings"
                 window.makeKeyAndOrderFront(nil)
@@ -123,6 +131,27 @@ enum DebugLaunchOptions {
                 window.title = "Speakers"
                 window.makeKeyAndOrderFront(nil)
                 speakerWindow = window
+            }
+        }
+
+        if let phase = value(after: "-ShowDictationHUD") {
+            model.dictation.showHUDPreview(phase)
+        }
+
+        if arguments.contains("-EmphasizeSelection") {
+            Task {
+                // Rows come and go, and AppKit resets the flag: keep setting it.
+                while !Task.isCancelled {
+                    for window in NSApp.windows { emphasizeRows(in: window.contentView) }
+                    try? await Task.sleep(for: .milliseconds(300))
+                }
+            }
+        }
+
+        if let seconds = value(after: "-MiniaturizeAfter").flatMap(Double.init) {
+            Task {
+                try? await Task.sleep(for: .seconds(seconds))
+                NSApp.windows.first { $0.canBecomeMain && $0.isVisible }?.miniaturize(nil)
             }
         }
 
@@ -156,7 +185,10 @@ enum DebugLaunchOptions {
                         TranscriptView(rows: rows, style: .text)
                     }
                 }
-                PlayerBarView()
+                PlaybackTimelineView(
+                    lanes: recording.transcript.map { TranscriptLayout($0).lanes } ?? [],
+                    transcriptEnd: recording.duration
+                )
             }
             if model.recorder.isActive {
                 ForEach(model.liveRecordings) { LiveRecordingRow(item: $0).frame(width: 340) }
@@ -179,6 +211,14 @@ enum DebugLaunchOptions {
                   let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { continue }
             try? png.write(to: URL.temporaryDirectory.appending(path: "ui-content-\(scheme == .dark ? "dark" : "light").png"))
         }
+    }
+
+    private static func emphasizeRows(in view: NSView?) {
+        guard let view else { return }
+        if let row = view as? NSTableRowView, !row.isEmphasized {
+            row.isEmphasized = true
+        }
+        for subview in view.subviews { emphasizeRows(in: subview) }
     }
 
     private static func value(after flag: String) -> String? {

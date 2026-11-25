@@ -9,9 +9,12 @@ struct RecordingSettingsView: View {
     @AppStorage(SettingsKey.meetingSource) private var meetingSource = ""
     @AppStorage(SettingsKey.levelsMicrophone) private var levelsMicrophone = true
     @State private var apps: [MeetingApp] = []
+    @State private var moveResult: (moved: Int, remaining: Int)?
 
     var body: some View {
+        @Bindable var appModel = appModel
         let locations = appModel.library.locations
+        let elsewhere = appModel.library.recordingsElsewhere().count
         Form {
             Section {
                 MicrophonePicker()
@@ -71,14 +74,40 @@ struct RecordingSettingsView: View {
                     Button("Im Finder zeigen", action: revealStorageFolder)
                 }
                 .disabled(appModel.recorder.isActive)
+                if elsewhere > 0 {
+                    LabeledContent("Anderswo gespeichert") {
+                        HStack {
+                            Text(elsewhere, format: .number)
+                            Button("Hierher verschieben …") { appModel.offersRecordingMove = true }
+                                .disabled(appModel.recorder.isActive || appModel.isMovingRecordings)
+                        }
+                    }
+                }
             } header: {
                 Text("Speicherort")
             } footer: {
-                Text("Bestehende Aufnahmen bleiben, wo sie sind. Ordner in iCloud Drive oder auf externen Platten funktionieren, solange sie verfügbar sind.")
+                Text("Bestehende Aufnahmen bleiben, wo sie sind, bis du sie hierher verschiebst. Ordner in iCloud Drive oder auf externen Platten funktionieren, solange sie verfügbar sind.")
                     .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
+        .alert("Bestehende Aufnahmen hierher verschieben?", isPresented: $appModel.offersRecordingMove) {
+            Button("Verschieben") {
+                Task { moveResult = await appModel.moveRecordingsToCurrentLocation() }
+            }
+            Button("Nicht jetzt", role: .cancel) {}
+        } message: {
+            Text("Die Ordner werden verschoben, nicht kopiert, und heißen danach wie die Aufnahmen. Aufnahmen, die gerade bearbeitet werden, bleiben vorerst, wo sie sind.")
+        }
+        .alert("Aufnahmen verschoben", isPresented: Binding(get: { moveResult != nil }, set: { if !$0 { moveResult = nil } })) {
+            Button("OK") {}
+        } message: {
+            if let moveResult, moveResult.remaining > 0 {
+                Text("Noch anderswo: \(moveResult.remaining). Sie werden gerade bearbeitet oder ihr Speicherort ist nicht erreichbar. Wähle später erneut „Hierher verschieben …“.")
+            } else {
+                Text("Alle Aufnahmen liegen jetzt am neuen Speicherort.")
+            }
+        }
         .frame(height: 560)
         .task {
             apps = AudioAppCatalog.availableApps()

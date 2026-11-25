@@ -64,7 +64,7 @@ struct AudioCaptureTests {
 
         var levels: [Float] = []
         for await event in sink.events {
-            if case .progress(let newLevels, _) = event { levels += newLevels }
+            if case .progress(let decibels, _) = event { levels += decibels.map(LevelMeter.normalizedLevel(decibels:)) }
         }
         #expect(levels.count == 30)
         #expect(levels.prefix(20).allSatisfy { $0 > 0.8 })

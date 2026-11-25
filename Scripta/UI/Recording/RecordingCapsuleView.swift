@@ -66,7 +66,7 @@ struct RecordingCapsuleView: View {
         }
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.circle)
-        .tint(.red)
+        .tint(.recording)
         .controlSize(.large)
         .disabled(!isEnabled)
         .help("Aufnahme beenden und speichern (⌘↩)")

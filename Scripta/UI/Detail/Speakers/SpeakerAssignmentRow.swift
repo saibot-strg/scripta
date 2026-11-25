@@ -28,7 +28,7 @@ struct SpeakerAssignmentRow: View {
                     TextField(speaker.defaultName, text: $names[speaker.id, fallback: speaker.displayName])
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 220)
-                        // "Jul" offers "Julian Zeder" instead of creating a second person.
+                        // "Ann" offers "Anna Beispiel" instead of creating a second person.
                         .textInputSuggestions {
                             ForEach(completions(for: name)) { person in
                                 Text(person.name)

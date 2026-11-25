@@ -183,8 +183,9 @@ private final class FakeEngine: TranscriptionEngine {
         try await Task.sleep(for: delay)
         if fails { throw TranscriptionError.audioTooShort }
         progress(1)
-        let text = fileURL.lastPathComponent.hasPrefix("system") ? "Hallo von den anderen." : "Hallo, hier spreche ich."
-        let offset: TimeInterval = fileURL.lastPathComponent.hasPrefix("system") ? 0 : 3
+        let isSystem = TestTrack.name(of: fileURL) == "system"
+        let text = isSystem ? "Hallo von den anderen." : "Hallo, hier spreche ich."
+        let offset: TimeInterval = isSystem ? 0 : 3
         let words = text.split(separator: " ").enumerated().map { index, word in
             let start = offset + Double(index) * 0.5
             return Scripta.WordTiming(text: String(word), start: start, end: start + 0.4, confidence: 1)
@@ -197,6 +198,17 @@ private final class FakeEngine: TranscriptionEngine {
     }
 
     func unload() async {}
+}
+
+/// Which meeting track a file is: "system", "microphone", or else its name.
+/// In the library the files are named after the recording ("Meeting (Systemaudio).caf").
+private enum TestTrack {
+    static func name(of fileURL: URL) -> String {
+        let name = fileURL.deletingPathExtension().lastPathComponent
+        if name.hasPrefix("system") || name.hasSuffix("(\(String(localized: "Systemaudio")))") { return "system" }
+        if name.hasPrefix("microphone") || name.hasSuffix("(\(String(localized: "Mikrofon")))") { return "microphone" }
+        return name
+    }
 }
 
 /// Splits the system track into two voices and finds one voice on the microphone.
@@ -212,10 +224,10 @@ private final class FakeDiarizer: SpeakerDiarizing {
     func prepare(progress: @escaping @Sendable (ModelPreparation) -> Void) async throws {}
 
     func diarize(fileURL: URL, speakerCount: Int?, progress: @escaping @Sendable (Double) -> Void) async throws -> Diarization {
-        requests.withLock { $0[fileURL.deletingPathExtension().lastPathComponent] = speakerCount }
+        requests.withLock { $0[TestTrack.name(of: fileURL)] = speakerCount }
         if fails { throw TranscriptionError.audioTooShort }
         progress(1)
-        if fileURL.lastPathComponent.hasPrefix("system") {
+        if TestTrack.name(of: fileURL) == "system" {
             // FakeEngine: "Hallo von den anderen." at 0, 0.5, 1.0, 1.5 s.
             return Diarization(turns: [SpeakerTurn(speaker: 1, start: 0, end: 0.95), SpeakerTurn(speaker: 2, start: 0.95, end: 2)])
         }

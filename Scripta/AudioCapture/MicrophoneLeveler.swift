@@ -28,13 +28,32 @@ enum MicrophoneLeveler {
     /// Gain in dB that brings the speech in `blockDecibels` (RMS of 50 ms
     /// blocks) to the target, or nil when no correction is needed or possible.
     static func gainDecibels(forBlockDecibels blockDecibels: [Float]) -> Float? {
+        speechDecibels(forBlockDecibels: blockDecibels).flatMap(gainDecibels(forSpeechDecibels:))
+    }
+
+    /// How loud the speech in `blockDecibels` is (90th percentile of the
+    /// blocks that carry speech), or nil when there isn't enough speech.
+    static func speechDecibels(forBlockDecibels blockDecibels: [Float]) -> Float? {
         let audible = blockDecibels.filter { $0 > silenceDecibels }.sorted()
         guard audible.count >= minimumSpeechBlocks else { return nil }
         let noiseFloor = audible[audible.count / 10]
         // Still sorted, so the percentile is a plain index.
         let speech = audible.filter { $0 >= noiseFloor + speechAboveFloorDecibels }
         guard speech.count >= minimumSpeechBlocks else { return nil }
-        let speechLevel = speech[speech.count * 9 / 10]
+        return speech[speech.count * 9 / 10]
+    }
+
+    /// How loud the speech in mono `samples` is, or nil without enough speech.
+    static func speechDecibels(of samples: [Float], sampleRate: Double) -> Float? {
+        guard !samples.isEmpty else { return nil }
+        var meter = LevelAccumulator(blockFrames: Int(sampleRate * 0.05))
+        let decibels = samples.withUnsafeBufferPointer { meter.add($0.baseAddress!, count: $0.count) }
+        return speechDecibels(forBlockDecibels: decibels)
+    }
+
+    /// Gain that brings speech at `speechLevel` to the target, or nil when
+    /// the correction is too small to be worth it.
+    static func gainDecibels(forSpeechDecibels speechLevel: Float) -> Float? {
         let gain = min(targetDecibels - speechLevel, maximumGainDecibels)
         return gain >= minimumGainDecibels ? gain : nil
     }
@@ -44,11 +63,8 @@ enum MicrophoneLeveler {
     /// Levels mono samples in place. Returns the applied gain in dB, or nil.
     @discardableResult
     static func level(_ samples: inout [Float], sampleRate: Double) -> Float? {
-        guard !samples.isEmpty else { return nil }
-        let blockFrames = Int(sampleRate * 0.05)
-        var levels = BlockLevels(blockFrames: blockFrames)
-        samples.withUnsafeBufferPointer { levels.add($0.baseAddress!, count: $0.count) }
-        guard let gain = gainDecibels(forBlockDecibels: levels.decibels) else { return nil }
+        guard let speech = speechDecibels(of: samples, sampleRate: sampleRate),
+              let gain = gainDecibels(forSpeechDecibels: speech) else { return nil }
         var limiter = PeakLimiter(gainDecibels: gain, sampleRate: sampleRate)
         samples.withUnsafeMutableBufferPointer { limiter.process($0.baseAddress!, count: $0.count) }
         return gain
@@ -73,14 +89,15 @@ enum MicrophoneLeveler {
         }
 
         // Pass 1: how loud is the speech?
-        var levels = BlockLevels(blockFrames: Int(format.sampleRate * 0.05))
+        var meter = LevelAccumulator(blockFrames: Int(format.sampleRate * 0.05))
+        var decibels: [Float] = []
         while input.framePosition < input.length {
             try Task.checkCancellation()
             try input.read(into: buffer)
             guard buffer.frameLength > 0 else { break }
-            levels.add(buffer.floatChannelData![0], count: Int(buffer.frameLength))
+            decibels += meter.decibels(of: buffer)
         }
-        guard let gain = gainDecibels(forBlockDecibels: levels.decibels) else { return nil }
+        guard let gain = gainDecibels(forBlockDecibels: decibels) else { return nil }
 
         // Pass 2: write the levelled copy.
         let temporary = url.deletingLastPathComponent().appending(path: "levelling-\(UUID().uuidString).caf")
@@ -109,36 +126,6 @@ enum MicrophoneLeveler {
         }
         Logger.recording.info("Levelled \(url.lastPathComponent, privacy: .public) by \(gain, format: .fixed(precision: 1)) dB")
         return gain
-    }
-}
-
-/// RMS of consecutive blocks in dBFS, fed buffer by buffer.
-private struct BlockLevels {
-    let blockFrames: Int
-    private(set) var decibels: [Float] = []
-    private var sumOfSquares: Float = 0
-    private var frameCount = 0
-
-    init(blockFrames: Int) {
-        self.blockFrames = blockFrames
-    }
-
-    mutating func add(_ samples: UnsafePointer<Float>, count: Int) {
-        var index = 0
-        while index < count {
-            let take = min(blockFrames - frameCount, count - index)
-            var sum: Float = 0
-            vDSP_svesq(samples + index, 1, &sum, vDSP_Length(take))
-            sumOfSquares += sum
-            frameCount += take
-            index += take
-            if frameCount == blockFrames {
-                let rms = (sumOfSquares / Float(blockFrames)).squareRoot()
-                decibels.append(rms > 0 ? 20 * log10(rms) : -120)
-                sumOfSquares = 0
-                frameCount = 0
-            }
-        }
     }
 }
 

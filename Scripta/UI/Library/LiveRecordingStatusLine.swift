@@ -7,6 +7,7 @@ struct LiveRecordingStatusLine: View {
     let tint: Color
     let recorder: AudioRecorder
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.isWindowVisible) private var isWindowVisible
 
     var body: some View {
         if isRunning {
@@ -16,7 +17,7 @@ struct LiveRecordingStatusLine: View {
                         Image(systemName: "pause.fill")
                             .font(.system(size: 8, weight: .bold))
                     } else {
-                        RecordingDot(isPulsing: !reduceMotion)
+                        RecordingDot(isPulsing: !reduceMotion && isWindowVisible)
                     }
                 }
                 .frame(width: 9)

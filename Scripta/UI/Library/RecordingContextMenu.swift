@@ -5,8 +5,6 @@ struct RecordingContextMenu: View {
     @Environment(AppModel.self) private var appModel
     let recording: Recording
     let folders: [Folder]
-    @Binding var renameTarget: Recording?
-    @Binding var renameText: String
     @Binding var deleteTarget: Recording?
 
     var body: some View {
@@ -27,8 +25,12 @@ struct RecordingContextMenu: View {
             .disabled(!hasAudio)
         }
         Divider()
-        Button("Umbenennen …", systemImage: "pencil", action: rename)
+        Button("Umbenennen", systemImage: "pencil", action: rename)
         if recording.transcript.map({ !$0.segments.isEmpty }) == true {
+            Button("Titel erzeugen", systemImage: "wand.and.sparkles") {
+                appModel.generateTitle(for: recording)
+            }
+            .disabled(!appModel.canGenerateTitle(for: recording))
             Button("Transkript kopieren", systemImage: "doc.on.doc") {
                 appModel.copyTranscript(of: recording)
             }
@@ -46,7 +48,7 @@ struct RecordingContextMenu: View {
                 Button("Aus dem Ordner nehmen") { appModel.move(recordingIDs: [recording.id], to: nil) }
             }
             if folders.isEmpty {
-                Text("Noch keine Ordner – lege sie links mit + an.")
+                Text("Noch keine Ordner – lege sie über „Ordner“ über der Liste an.")
             }
         }
         Button("Im Finder zeigen", systemImage: "folder") {
@@ -60,7 +62,7 @@ struct RecordingContextMenu: View {
     }
 
     private func rename() {
-        renameText = recording.title
-        renameTarget = recording
+        // The title in the list row turns into a text field.
+        appModel.renamingRecordingID = recording.id
     }
 }

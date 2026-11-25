@@ -42,14 +42,17 @@ struct RecordingFlowTests {
         model.loadPlayer(for: recording)
         #expect(model.player.isAvailable)
 
-        // Background AAC encoding replaces the PCM file of this very recording.
+        // Background AAC encoding replaces the PCM file of this very recording,
+        // which is named after the title ("Aufnahme 24.11.2026, 19.51.m4a").
+        let encodedName = "\(try #require(recording.folderName)).m4a"
+        #expect(recording.folderName == RecordingFileNames.baseName(for: recording.title))
         let deadline = ContinuousClock.now + .seconds(5)
-        while recording.primaryTrack?.fileName != CaptureFormat.encodedFileName(for: CaptureFormat.fileName), ContinuousClock.now < deadline {
+        while recording.primaryTrack?.fileName != encodedName, ContinuousClock.now < deadline {
             try await Task.sleep(for: .milliseconds(50))
         }
-        #expect(recording.primaryTrack?.fileName == CaptureFormat.encodedFileName(for: CaptureFormat.fileName))
+        #expect(recording.primaryTrack?.fileName == encodedName)
         let url = try #require(model.library.audioURL(for: recording))
-        #expect(url.lastPathComponent == CaptureFormat.encodedFileName(for: CaptureFormat.fileName))
+        #expect(url.lastPathComponent == encodedName)
         // The player switched to the encoded file.
         #expect(model.player.loadedURL == url)
         try await model.waitForEncoding()

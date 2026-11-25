@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-extension LibrarySchemaV2 {
+extension LibrarySchemaV3 {
     /// A folder in the sidebar. A recording is in at most one folder;
     /// deleting a folder keeps its recordings.
     @Model

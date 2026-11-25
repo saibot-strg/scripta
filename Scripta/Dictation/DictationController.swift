@@ -32,8 +32,10 @@ final class DictationController {
     }
 
     private(set) var phase: Phase = .idle
-    /// Recent microphone levels for the HUD.
-    private(set) var levels: [Float] = []
+    /// Recent microphone levels for the HUD, raised like the levelled audio.
+    private(set) var levels = LevelHistory()
+    /// Lets the HUD meter scroll smoothly (see `MeterClock`).
+    private(set) var meterClock = MeterClock()
     /// Set when the shortcut can't be registered (taken by another app).
     private(set) var registrationError: String?
     /// Key release → text inserted, of the last dictation.
@@ -46,6 +48,10 @@ final class DictationController {
     private var capture: MicrophoneCapture?
     private var buffer: DictationAudioBuffer?
     private var levelTask: Task<Void, Never>?
+    /// Microphone of the running dictation, for `MicrophoneGainMemory`.
+    @ObservationIgnored private var microphoneUID: String?
+    /// Raises a quiet microphone in the HUD meter.
+    @ObservationIgnored private var meterGain = DictationMeterGain()
     private var job: Task<Void, Never>?
 
     private static let shortcutID: UInt32 = 1
@@ -127,17 +133,31 @@ final class DictationController {
         let capture = MicrophoneCapture()
         self.buffer = buffer
         self.capture = capture
-        levels = []
+        levels = LevelHistory()
+        meterClock = MeterClock()
+        microphoneUID = AudioInputDevices.currentInputUID()
+        // The first syllable shows with the gain remembered for this microphone;
+        // after that the meter follows this dictation. For the display only, so
+        // it doesn't depend on "Leises Mikrofon anheben".
+        meterGain = DictationMeterGain(remembered: MicrophoneGainMemory.gain(forDevice: microphoneUID))
         phase = .recording
         hud.show(self)
         if DictationSettings.playsSounds { DictationSound.start.play() }
         try? hotKeys.register(.escape, id: Self.cancelID, onPress: { [weak self] in self?.cancel() })
 
         levelTask = Task { [weak self] in
-            for await newLevels in buffer.levels {
+            for await decibels in buffer.levels {
                 guard let self else { return }
-                levels.append(contentsOf: newLevels)
-                if levels.count > 60 { levels.removeFirst(levels.count - 60) }
+                if !meterClock.isStarted {
+                    // The microphone starts a moment after the key press; its first block is second zero.
+                    meterClock.start(at: .now - .seconds(Double(decibels.count) / MeterClock.blocksPerSecond))
+                }
+                meterGain.add(decibels)
+                let gain = meterGain.decibels
+                levels.append(contentsOf: decibels.map { LevelMeter.normalizedLevel(decibels: $0 + gain) })
+                if meterClock.isCalibrating {
+                    meterClock.noteArrival(newBlocks: decibels.count, totalBlocks: levels.count, at: .now)
+                }
             }
         }
         Task {
@@ -154,6 +174,8 @@ final class DictationController {
         guard phase == .recording, let capture, let buffer else { return }
         let releasedAt = ContinuousClock.now
         phase = .transcribing
+        meterClock.pause(at: releasedAt)
+        let microphoneUID = microphoneUID
 
         job = Task {
             defer { hotKeys.unregister(id: Self.cancelID) }
@@ -170,6 +192,13 @@ final class DictationController {
                 hud.hide()
                 return
             }
+            // How quiet this microphone is, for the next dictation's meter: the
+            // leveler's measure when the dictation has pauses to find speech by,
+            // else what the meter heard. Remembered once text was recognized.
+            let meterGain = meterGain
+            let measuredGain = MicrophoneLeveler.speechDecibels(of: samples, sampleRate: DictationAudioBuffer.sampleRate)
+                .map { MicrophoneLeveler.gainDecibels(forSpeechDecibels: $0) ?? 0 }
+                ?? (meterGain.isReliable ? meterGain.decibels : nil)
             if RecordingSettings.levelsMicrophone {
                 MicrophoneLeveler.level(&samples, sampleRate: DictationAudioBuffer.sampleRate)
             }
@@ -183,13 +212,17 @@ final class DictationController {
                     show(.failed(String(localized: "Nichts erkannt")))
                     return
                 }
-                let result = await inserter.insert(output)
+                if let measuredGain {
+                    MicrophoneGainMemory.remember(measuredGain, forDevice: microphoneUID)
+                }
+                let result = await inserter.insert(output, keepsOnClipboard: DictationSettings.keepsOnClipboard)
                 let latency = releasedAt.duration(to: .now)
                 lastLatency = latency
                 Logger.dictation.notice("""
                     Dictation: \(duration, format: .fixed(precision: 1)) s audio, \
                     recognition \(releasedAt.duration(to: recognizedAt).milliseconds) ms, \
-                    total \(latency.milliseconds) ms (\(String(describing: result), privacy: .public))
+                    total \(latency.milliseconds) ms (\(String(describing: result), privacy: .public)), \
+                    meter gain \(meterGain.decibels, format: .fixed(precision: 1)) dB
                     """)
                 show(.finished(result))
             } catch {
@@ -230,10 +263,61 @@ final class DictationController {
         }
     }
 
+    #if DEBUG
+    /// `-ShowDictationHUD <phase>`: shows the HUD in one phase (recording,
+    /// transcribing, done, message) with a synthetic voice, to look at it;
+    /// `cycle` plays a whole dictation over and over.
+    func showHUDPreview(_ name: String) {
+        if name == "cycle" {
+            Task {
+                while !Task.isCancelled {
+                    showHUDPreview("recording")
+                    try? await Task.sleep(for: .seconds(3.5))
+                    levelTask?.cancel()
+                    meterClock.pause(at: .now)
+                    phase = .transcribing
+                    try? await Task.sleep(for: .seconds(0.6))
+                    phase = .finished(.pasted)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    hud.hide()
+                    try? await Task.sleep(for: .seconds(1.5))
+                }
+            }
+            return
+        }
+        switch name {
+        case "transcribing": phase = .transcribing
+        case "done": phase = .finished(.pasted)
+        case "message": phase = .finished(.copiedToClipboard)
+        default: phase = .recording
+        }
+        levels = LevelHistory()
+        meterClock = MeterClock()
+        meterClock.start(at: .now)
+        hud.show(self)
+        guard phase == .recording else { return }
+        levelTask = Task { [weak self] in
+            while !Task.isCancelled, let self {
+                // Batches every 100 ms like the microphone, but always as many
+                // blocks as the clock says, even when the app was busy.
+                let due = Int((meterClock.elapsed(at: .now) ?? 0) * MeterClock.blocksPerSecond)
+                levels.append(contentsOf: (levels.count..<max(due, levels.count)).map {
+                    Float(0.2 + 0.6 * abs(sin(Double($0) / 3)))
+                })
+                try? await Task.sleep(for: .milliseconds(100))
+            }
+        }
+    }
+    #endif
+
     nonisolated static func format(_ text: String) -> String {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return "" }
-        return DictationSettings.appendsSpace ? trimmed + " " : trimmed
+        var output = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !output.isEmpty else { return "" }
+        if DictationSettings.usesVoiceCommands {
+            output = DictationCommands.apply(to: output)
+        }
+        // After a spoken line break the next dictation starts on the new line.
+        return DictationSettings.appendsSpace && !output.hasSuffix("\n") ? output + " " : output
     }
 }
 

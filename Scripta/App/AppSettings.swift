@@ -31,6 +31,18 @@ enum SettingsKey {
     static let skippedUpdateVersion = "updates.skippedVersion"
     /// The user confirmed the notice to tell others about meeting recordings.
     static let meetingNoticeConfirmed = "meeting.noticeConfirmed"
+    /// Language model for titles (`LanguageModelDescriptor.id`).
+    static let titleModel = "languageModel.title"
+    /// Language model for summaries (`LanguageModelDescriptor.id`).
+    static let summaryModel = "languageModel.summary"
+    /// Give new transcripts a title written by the language model (on by default).
+    static let suggestsTitles = "languageModel.suggestTitles"
+    /// GGUF files the user added: file names and security-scoped bookmarks (JSON).
+    static let customLanguageModels = "languageModel.customFiles"
+    /// Recordings the user renamed before their first transcript; they keep their title.
+    static let userTitledRecordings = "languageModel.userTitled"
+    /// The detail view shows the transcript or the summary (`DetailPane`).
+    static let detailPane = "detail.pane"
     /// The app's own language ("AppleLanguages" in the app's defaults).
     static let appleLanguages = "AppleLanguages"
 }

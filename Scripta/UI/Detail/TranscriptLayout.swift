@@ -24,6 +24,10 @@ struct TranscriptLayout {
     private(set) var version: Date?
     private(set) var rows: [Row] = []
     private(set) var timeline = TranscriptTimeline.empty
+    /// Who speaks when, for the playback timeline.
+    private(set) var lanes: [SpeakerLane] = []
+    /// End of the last passage.
+    private(set) var end: TimeInterval = 0
 
     static var empty: TranscriptLayout { TranscriptLayout() }
 
@@ -34,6 +38,8 @@ struct TranscriptLayout {
         transcriptID = transcript.id
         version = transcript.modifiedAt
         timeline = TranscriptTimeline(segments)
+        lanes = SpeakerLanes.make(from: segments)
+        end = segments.map(\.end).max() ?? 0
         var previousSpeaker: UUID?
         rows = segments.enumerated().map { offset, segment in
             let speaker = segment.speaker?.id

@@ -54,8 +54,12 @@ struct StreamConverter {
     }
 }
 
-/// Turns mono samples into meter levels, one per block (e.g. 50 ms).
+/// Turns mono samples into block levels in dBFS (RMS), one per block (e.g. 50 ms).
+/// Keeps a partly filled block across calls.
 struct LevelAccumulator {
+    /// Level of a block without any signal.
+    static let silenceDecibels: Float = -120
+
     let blockFrames: Int
     private var sumOfSquares: Float = 0
     private var frameCount = 0
@@ -64,25 +68,37 @@ struct LevelAccumulator {
         self.blockFrames = blockFrames
     }
 
-    mutating func levels(of buffer: AVAudioPCMBuffer) -> [Float] {
+    mutating func decibels(of buffer: AVAudioPCMBuffer) -> [Float] {
         guard let samples = buffer.floatChannelData?[0] else { return [] }
-        let count = Int(buffer.frameLength)
-        var levels: [Float] = []
+        return add(samples, count: Int(buffer.frameLength))
+    }
+
+    /// Digital silence, e.g. a gap on the timeline.
+    mutating func silence(frames: Int) -> [Float] {
+        add(nil, count: frames)
+    }
+
+    /// - Parameter samples: nil for silence.
+    mutating func add(_ samples: UnsafePointer<Float>?, count: Int) -> [Float] {
+        var decibels: [Float] = []
         var index = 0
         while index < count {
             let take = min(blockFrames - frameCount, count - index)
-            var sum: Float = 0
-            vDSP_svesq(samples + index, 1, &sum, vDSP_Length(take))
-            sumOfSquares += sum
+            if let samples {
+                var sum: Float = 0
+                vDSP_svesq(samples + index, 1, &sum, vDSP_Length(take))
+                sumOfSquares += sum
+            }
             frameCount += take
             index += take
             if frameCount == blockFrames {
-                levels.append(LevelMeter.normalizedLevel(rms: (sumOfSquares / Float(blockFrames)).squareRoot()))
+                let rms = (sumOfSquares / Float(blockFrames)).squareRoot()
+                decibels.append(rms > 0 ? 20 * log10(rms) : Self.silenceDecibels)
                 sumOfSquares = 0
                 frameCount = 0
             }
         }
-        return levels
+        return decibels
     }
 }
 

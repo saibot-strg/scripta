@@ -52,37 +52,48 @@ final class TextInserter {
         self.pasteboard = pasteboard
     }
 
-    func insert(_ text: String) async -> Result {
+    /// - Parameter keepsOnClipboard: Leave `text` on the clipboard afterwards
+    ///   (unmarked), so it survives a paste that landed nowhere.
+    func insert(_ text: String, keepsOnClipboard: Bool = false) async -> Result {
         guard !text.isEmpty else { return .inserted }
         if IsSecureEventInputEnabled() {
             copyToClipboard(text)
             return .blockedBySecureInput
         }
         if !Self.isSandboxed, insertViaAccessibility(text) {
+            if keepsOnClipboard { copyToClipboard(text) }
             return .inserted
         }
         guard Self.canPostEvents else {
             copyToClipboard(text)
             return .copiedToClipboard
         }
-        await paste(text)
+        await paste(text, keepsOnClipboard: keepsOnClipboard)
         return .pasted
     }
 
     // MARK: - Paste
 
-    func paste(_ text: String) async {
-        let snapshot = PasteboardSnapshot(pasteboard)
-        let changeCount = write(text, markedPrivate: true)
+    func paste(_ text: String, keepsOnClipboard: Bool = false) async {
+        let snapshot = keepsOnClipboard ? nil : PasteboardSnapshot(pasteboard)
+        let changeCount = writeForPaste(text, keepsOnClipboard: keepsOnClipboard)
 
         await waitForModifierRelease()
         postCommandV()
 
+        guard let snapshot else { return }
         try? await Task.sleep(for: Self.pasteboardRestoreDelay)
         // Restore only if nothing else changed the clipboard in the meantime.
         if pasteboard.changeCount == changeCount {
             snapshot.restore(to: pasteboard)
         }
+    }
+
+    /// Puts the text to paste on the clipboard. Text that only passes through
+    /// is marked private so clipboard managers skip it; text that stays is not.
+    @discardableResult
+    func writeForPaste(_ text: String, keepsOnClipboard: Bool) -> Int {
+        write(text, markedPrivate: !keepsOnClipboard)
     }
 
     private func copyToClipboard(_ text: String) {

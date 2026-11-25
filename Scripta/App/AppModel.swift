@@ -17,6 +17,9 @@ final class AppModel {
     let dictation: DictationController
     let player = PlayerModel()
     let updates = UpdateChecker()
+    /// Titles and summaries by a language model.
+    let languageModels: LanguageModelService
+    let automaticTitle: AutomaticTitle
     /// ⌘Z for the user's own edits (see `UndoCoordinator`).
     let undo: UndoCoordinator
     /// Asked before the first meeting recording.
@@ -30,6 +33,8 @@ final class AppModel {
             if oldValue != selectedRecordingID { player.unload() }
         }
     }
+    /// The recording whose title is being edited in its list row.
+    var renamingRecordingID: UUID?
     var searchText = ""
     /// Incremented to move keyboard focus into the search field (⌘F).
     private(set) var searchFocusRequest = 0
@@ -43,8 +48,19 @@ final class AppModel {
     /// Recordings currently being encoded to AAC.
     private(set) var encodingIDs: Set<UUID> = []
 
-    /// Without `voices`, an empty in-memory voice store is used (tests, previews).
-    init(library: LibraryService, voices: VoiceLibrary? = nil) {
+    /// A new storage location was chosen while recordings are elsewhere:
+    /// Settings asks whether to move them there.
+    var offersRecordingMove = false
+    private(set) var isMovingRecordings = false
+
+    /// Without `voices`, an empty in-memory voice store is used; without
+    /// `languageModels`, titles and summaries are off (tests, previews).
+    init(
+        library: LibraryService,
+        voices: VoiceLibrary? = nil,
+        languageModels: LanguageModelService? = nil,
+        automaticTitle: AutomaticTitle = AutomaticTitle()
+    ) {
         self.library = library
         let voices = voices ?? .makeInMemory()
         self.voices = voices
@@ -54,7 +70,14 @@ final class AppModel {
         transcription = TranscriptionService(library: library, diarizer: SpeakerDiarizer(), voices: voices)
         dictation = DictationController(transcription: transcription)
         undo = UndoCoordinator()
+        self.languageModels = languageModels ?? LanguageModelService(isEnabled: false)
+        self.automaticTitle = automaticTitle
         transcription.onTranscriptReplaced = { [weak self] in self?.undo.clear() }
+        library.isUsingFiles = { [weak self] id in self?.encodingIDs.contains(id) ?? false }
+        self.languageModels.isTranscribing = { [transcription] in transcription.runningID != nil }
+        transcription.onTranscriptStored = { [weak self] id, isFirst in
+            self?.transcriptStored(recordingID: id, isFirst: isFirst)
+        }
         recorder.onFailure = { [weak self] error in
             self?.stopRecording()
             self?.presentedError = PresentableError(error)
@@ -78,7 +101,8 @@ final class AppModel {
 
     // MARK: - Startup
 
-    /// Recovers interrupted recordings and finishes pending AAC encodings.
+    /// Recovers interrupted recordings, names folders after titles and
+    /// finishes pending AAC encodings.
     func performStartupMaintenance() async {
         let recovered = await RecordingRecovery(library: library)
             .recoverInterruptedRecordings(activeRecordingID: { [recorder] in recorder.activeRecordingID })
@@ -88,6 +112,10 @@ final class AppModel {
                 message: String(localized: "Scripta wurde während einer Aufnahme beendet. Alles bis zu diesem Zeitpunkt ist gespeichert.")
             )
         }
+        // Existing recordings are renamed only once the backup of the library exists.
+        if LibraryBackup.isDone() {
+            await nameFilesAfterTitles()
+        }
         let recordings = (try? library.modelContext.fetch(FetchDescriptor<Recording>())) ?? []
         for recording in recordings {
             encodeIfNeeded(recording)
@@ -96,6 +124,19 @@ final class AppModel {
         dictation.applySettings()
         updates.startAutomaticChecks()
         await transcription.installModelIfNeeded()
+    }
+
+    /// Names every recording's folder and files after its title: renames
+    /// recordings from before named folders, and renames that had to wait
+    /// for a job when the app quit. Oldest first, so of two recordings with
+    /// the same title the older one gets the plain name.
+    func nameFilesAfterTitles() async {
+        let descriptor = FetchDescriptor<Recording>(sortBy: [SortDescriptor(\.createdAt)])
+        let ids = ((try? library.modelContext.fetch(descriptor)) ?? []).map(\.id)
+        for id in ids {
+            library.nameFiles(ofRecordingWithID: id)
+            await Task.yield()
+        }
     }
 
     // MARK: - Import
@@ -343,7 +384,11 @@ final class AppModel {
 
     /// Asks where to save, then writes the transcript in the chosen format.
     func export(_ recording: Recording, as format: ExportFormat) {
-        guard let document = exportDocument(for: recording) else { return }
+        guard var document = exportDocument(for: recording) else { return }
+        // Markdown includes the summary, unless the transcript changed since.
+        if format == .markdown, let summary = summary(for: recording), !summary.isOutdated(for: recording.transcript) {
+            document.summary = summary.text
+        }
         Task {
             let panel = NSSavePanel()
             panel.allowedContentTypes = [format.contentType]
@@ -614,17 +659,22 @@ final class AppModel {
             .map { (trackID: $0.id, fileName: $0.fileName) }
         guard !pending.isEmpty else { return }
 
+        // Stays valid: the folder keeps its name while `encodingIDs` holds the recording.
+        guard let folder = library.folderURL(for: recording) else { return }
         let id = recording.id
-        let storage = library.storage(for: recording)
         let bitRate = RecordingSettings.quality.aacBitRate
         encodingIDs.insert(id)
 
         Task {
-            defer { encodingIDs.remove(id) }
+            defer {
+                encodingIDs.remove(id)
+                // A rename that waited for the encoding.
+                library.nameFiles(ofRecordingWithID: id)
+            }
             for item in pending {
-                let source = storage.fileURL(for: id, fileName: item.fileName)
+                let source = folder.appending(path: item.fileName, directoryHint: .notDirectory)
                 let encodedName = CaptureFormat.encodedFileName(for: item.fileName)
-                let destination = storage.fileURL(for: id, fileName: encodedName)
+                let destination = folder.appending(path: encodedName, directoryHint: .notDirectory)
                 do {
                     try await AudioEncoder.encodeAAC(source: source, destination: destination, bitRate: bitRate)
                     // The recording may have been deleted in the meantime.
@@ -673,6 +723,8 @@ final class AppModel {
         perform { try library.rename(recording, to: title) }
         guard recording.title != previous else { return }
         let id = recording.id
+        // Named before its first transcript: no title suggestion replaces it.
+        if recording.transcript == nil { automaticTitle.markUserTitled(id) }
         undo.register(String(localized: "Aufnahme umbenennen")) { [weak self] in
             guard let self, let recording = library.recording(withID: id) else { return }
             rename(recording, to: previous)
@@ -687,6 +739,8 @@ final class AppModel {
         }
         transcription.cancel(recording)
         voices.forgetRecording(recording.id)
+        languageModels.forgetSummary(for: recording.id)
+        automaticTitle.forget(recording.id)
         perform { try library.delete(recording) }
         undo.clear()
     }
@@ -878,11 +932,34 @@ final class AppModel {
         panel.message = String(localized: "Ordner für neue Aufnahmen wählen")
         guard panel.runModal() == .OK, let url = panel.url else { return }
         perform { try library.locations.use(url) }
+        offersRecordingMove = !library.recordingsElsewhere().isEmpty
     }
 
     func useDefaultStorage() {
         guard !recorder.isActive else { return }
         library.locations.useDefault()
+        offersRecordingMove = !library.recordingsElsewhere().isEmpty
+    }
+
+    /// Moves every recording to the location for new recordings, oldest
+    /// first; folders are named after the titles on the way. Recordings a
+    /// job is using or whose location can't be reached stay where they are.
+    /// - Returns: How many were moved and how many are still elsewhere.
+    func moveRecordingsToCurrentLocation() async -> (moved: Int, remaining: Int) {
+        guard !recorder.isActive, !isMovingRecordings else { return (0, library.recordingsElsewhere().count) }
+        isMovingRecordings = true
+        defer { isMovingRecordings = false }
+        let target = library.locations.current
+        let bookmark = library.locations.currentBookmark
+        var moved = 0
+        for id in library.recordingsElsewhere().map(\.id) {
+            guard let recording = library.recording(withID: id) else { continue }
+            if library.moveFiles(of: recording, to: target, bookmark: bookmark) { moved += 1 }
+            await Task.yield()
+        }
+        let remaining = library.recordingsElsewhere().count
+        Logger.storage.notice("Moved \(moved) recordings to the storage location, \(remaining) remain elsewhere")
+        return (moved, remaining)
     }
 
     func revealInFinder(_ recording: Recording) {

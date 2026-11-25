@@ -8,6 +8,8 @@ struct DictationSettingsView: View {
     @AppStorage(DictationSettings.modeKey) private var mode: DictationController.Mode = .hold
     @AppStorage(DictationSettings.appendsSpaceKey) private var appendsSpace = true
     @AppStorage(DictationSettings.playsSoundsKey) private var playsSounds = false
+    @AppStorage(DictationSettings.keepsOnClipboardKey) private var keepsOnClipboard = false
+    @AppStorage(DictationSettings.usesVoiceCommandsKey) private var usesVoiceCommands = true
     @State private var shortcut = DictationSettings.shortcut
     @State private var canPaste = TextInserter.canPostEvents
     @State private var trial = ""
@@ -37,6 +39,14 @@ struct DictationSettingsView: View {
                     ForEach(DictationController.Mode.allCases) { Text($0.label).tag($0) }
                 }
                 Toggle("Leerzeichen nach dem Text", isOn: $appendsSpace)
+                Toggle(isOn: $usesVoiceCommands) {
+                    Text("Sprachbefehle")
+                    Text("„Punkt“, „Komma“, „Fragezeichen“, „Rufzeichen“, „Doppelpunkt“, „neue Zeile“, „neuer Absatz“, „Klammer auf“ … werden zu Satzzeichen und Zeilenumbrüchen, auch auf Englisch („period“, „new line“ …).")
+                }
+                Toggle(isOn: $keepsOnClipboard) {
+                    Text("Text in der Zwischenablage behalten")
+                    Text("Der diktierte Text bleibt nach dem Einfügen in der Zwischenablage. Wenn kein Textfeld aktiv war, holst du ihn mit ⌘V zurück. Der vorherige Inhalt der Zwischenablage wird dabei ersetzt.")
+                }
                 Toggle(isOn: $playsSounds) {
                     Text("Ton bei Start und Ende")
                     Text("Ein leiser Ton, damit du hörst, wann das Diktat läuft. Mit Lautsprechern kann das Mikrofon den Startton mit aufnehmen.")
@@ -47,7 +57,7 @@ struct DictationSettingsView: View {
             Section {
                 LabeledContent {
                     if canPaste {
-                        Label("Erlaubt", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+                        Label("Erlaubt", systemImage: "checkmark.circle.fill").foregroundStyle(.success)
                     } else {
                         HStack {
                             Button("Erlauben") {

@@ -13,7 +13,7 @@ struct RecordingListEmptyState: View {
             ContentUnavailableView {
                 Label("Ordner ist leer", systemImage: "folder")
             } description: {
-                Text("Zieh Aufnahmen aus „Alle Aufnahmen“ oder Audiodateien aus dem Finder auf diesen Ordner links.")
+                Text("Leg Aufnahmen über das Kontextmenü „In Ordner“ hier ab.")
             }
         } else if item == .all {
             ContentUnavailableView {

@@ -64,7 +64,7 @@ struct TrashTests {
         defer { try? FileManager.default.removeItem(at: storage.rootURL) }
         let id = UUID()
         try storage.makeFolder(for: id)
-        try storage.trashFolder(for: id, title: "Test")
+        try storage.trashFolder(for: id, named: nil, title: "Test")
         #expect(!FileManager.default.fileExists(atPath: storage.folderURL(for: id).path(percentEncoded: false)))
         #expect(try FileManager.default.contentsOfDirectory(atPath: storage.rootURL.path(percentEncoded: false)).isEmpty)
     }

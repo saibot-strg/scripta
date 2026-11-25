@@ -30,6 +30,11 @@ jobs:
         if: github.ref_type == 'tag'
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
 
+      # MLX (local language models) compiles Metal shaders; since Xcode 26 the
+      # Metal toolchain is a separate download.
+      - name: Install Metal toolchain
+        run: xcodebuild -downloadComponent MetalToolchain
+
       - name: Build and package
         env:
           BUILD_NUMBER: ${{ github.run_number }}

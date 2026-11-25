@@ -8,6 +8,9 @@ struct AppCommands: Commands {
         let recorder = appModel.recorder
         let player = appModel.player
 
+        // Darstellung › Seitenleiste ein-/ausblenden: the list has no toggle button of its own.
+        SidebarCommands()
+
         CommandGroup(replacing: .appInfo) {
             Button("Über Scripta") {
                 NSApp.orderFrontStandardAboutPanel(options: [.credits: AboutCredits.text])
@@ -51,6 +54,12 @@ struct AppCommands: Commands {
             .keyboardShortcut("i")
 
             Divider()
+            Button("Umbenennen", systemImage: "pencil") {
+                appModel.renamingRecordingID = appModel.selectedRecordingID
+            }
+            .disabled(appModel.selectedRecording == nil)
+
+            Divider()
             let exportable = appModel.selectedRecording.flatMap { recording in
                 recording.transcript.map { $0.segments.isEmpty ? nil : recording } ?? nil
             }
@@ -86,6 +95,23 @@ struct AppCommands: Commands {
                 appModel.transcribeAllPending()
             }
             .keyboardShortcut("t", modifiers: [.command, .shift])
+
+            Divider()
+            Button("Titel erzeugen", systemImage: "wand.and.sparkles") {
+                if let recording = appModel.selectedRecording { appModel.generateTitle(for: recording) }
+            }
+            .keyboardShortcut("t", modifiers: [.command, .option])
+            .disabled(appModel.selectedRecording.map { !appModel.canGenerateTitle(for: $0) } ?? true)
+            Button("Zusammenfassung erstellen", systemImage: "text.append") {
+                guard let recording = appModel.selectedRecording else { return }
+                UserDefaults.standard.set(DetailPane.summary.rawValue, forKey: SettingsKey.detailPane)
+                appModel.summarize(recording)
+            }
+            .disabled(appModel.selectedRecording.map { recording in
+                recording.transcript.map(\.segments.isEmpty) ?? true
+                    || appModel.languageModels.summaryModel == nil
+                    || appModel.languageModels.summaryJobs[recording.id] != nil
+            } ?? true)
         }
 
         // Placed before the standard text editing group so ⌘F always reaches the library search.

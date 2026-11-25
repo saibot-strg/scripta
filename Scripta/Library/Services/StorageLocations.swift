@@ -41,12 +41,14 @@ final class StorageLocations {
 
     var isDefault: Bool { currentBookmark == nil }
 
-    /// Storage of a recording saved with the given bookmark (nil = default).
-    func storage(forBookmark bookmark: Data?) -> RecordingStorage {
+    /// Storage of a recording saved with the given bookmark (nil = default);
+    /// nil if that folder can't be reached (e.g. external disk not connected).
+    /// Never the default instead: folders are named after titles, so a folder
+    /// there with the same name would belong to another recording.
+    func storage(forBookmark bookmark: Data?) -> RecordingStorage? {
         guard let bookmark else { return defaultStorage }
         if bookmark == currentBookmark { return current }
-        guard let url = resolve(bookmark) else { return defaultStorage }
-        return RecordingStorage(rootURL: url)
+        return resolve(bookmark).map { RecordingStorage(rootURL: $0) }
     }
 
     /// Every location that may hold recordings (for crash recovery).

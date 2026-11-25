@@ -2,7 +2,7 @@ import AppKit
 import SwiftData
 import SwiftUI
 
-/// Main window: sidebar (filters), recording list and detail, like Mail or Notes.
+/// Main window: the recording list with its filters, and the detail.
 struct ContentView: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.undoManager) private var undoManager
@@ -16,9 +16,6 @@ struct ContentView: View {
         @Bindable var appModel = appModel
 
         NavigationSplitView {
-            SidebarView(selection: $appModel.sidebarSelection)
-                .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 300)
-        } content: {
             RecordingListView(
                 item: appModel.sidebarSelection ?? .all,
                 sortField: $sortField,
@@ -26,11 +23,13 @@ struct ContentView: View {
                 searchText: appModel.searchText,
                 selection: $appModel.selectedRecordingID
             )
-            .navigationSplitViewColumnWidth(min: 300, ideal: 350, max: 500)
+            .navigationSplitViewColumnWidth(min: 340, ideal: 360, max: 500)
         } detail: {
             DetailColumn()
         }
-        .searchable(text: $appModel.searchText, prompt: Text("Titel und Transkripte"))
+        .searchable(text: $appModel.searchText, placement: .sidebar, prompt: Text("Titel und Transkripte"))
+        // The header of the detail names the recording; the toolbar stays free for its buttons.
+        .toolbar(removing: .title)
         .searchFocused($isSearchFieldFocused)
         .onChange(of: appModel.searchFocusRequest) {
             isSearchFieldFocused = true

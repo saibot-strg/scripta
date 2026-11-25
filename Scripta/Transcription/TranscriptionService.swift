@@ -45,6 +45,8 @@ final class TranscriptionService {
     /// Called after a transcript was replaced by a new one (its old segments
     /// and speakers are gone).
     @ObservationIgnored var onTranscriptReplaced: () -> Void = {}
+    /// Called after a transcript was stored; `true` if the recording had none before.
+    @ObservationIgnored var onTranscriptStored: (_ recordingID: UUID, _ isFirst: Bool) -> Void = { _, _ in }
 
     /// Keeps the model in memory (dictation needs it instantly).
     var keepsModelLoaded = false {
@@ -237,6 +239,8 @@ final class TranscriptionService {
                 runningID = id
                 await process(id)
                 runningID = nil
+                // A rename that waited for the transcription.
+                library.nameFiles(ofRecordingWithID: id)
                 progress[id] = nil
                 queue.removeAll { $0 == id }
             }
@@ -399,6 +403,7 @@ final class TranscriptionService {
     /// the speakers whose voices are recognized.
     private func store(_ draft: DraftTranscript, in recording: Recording) throws {
         let drafts = draft.segments
+        let isFirst = recording.transcript == nil
         if let old = recording.transcript {
             voices?.forget(labelIDs: old.speakers.map(\.id))
             recording.transcript = nil
@@ -444,5 +449,6 @@ final class TranscriptionService {
         recording.errorMessage = nil
         try library.save()
         Logger.transcription.notice("Transcribed \(drafts.count) segments")
+        if !drafts.isEmpty { onTranscriptStored(recording.id, isFirst) }
     }
 }

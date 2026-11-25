@@ -1,9 +1,18 @@
 import SwiftUI
 
-/// The settings window, one tab per area.
+/// The settings window: four panes.
 struct SettingsView: View {
     enum Pane: String, Hashable {
-        case general, recording, transcription, people, dictation, permissions
+        case general, recording, recognition, dictation
+
+        /// Also accepts the names of panes that were merged into these four.
+        init?(name: String) {
+            switch name {
+            case "transcription", "languageModel", "people": self = .recognition
+            case "permissions": self = .general
+            default: self.init(rawValue: name)
+            }
+        }
     }
 
     @State private var pane: Pane
@@ -20,17 +29,11 @@ struct SettingsView: View {
             Tab("Aufnahme", systemImage: "mic", value: .recording) {
                 RecordingSettingsView()
             }
-            Tab("Transkription", systemImage: "text.bubble", value: .transcription) {
-                TranscriptionSettingsView()
-            }
-            Tab("Personen", systemImage: "person.2", value: .people) {
-                PeopleSettingsView()
+            Tab("Erkennung", systemImage: "waveform", value: .recognition) {
+                RecognitionSettingsView()
             }
             Tab("Diktat", systemImage: "mic.badge.plus", value: .dictation) {
                 DictationSettingsView()
-            }
-            Tab("Berechtigungen", systemImage: "lock.shield", value: .permissions) {
-                PermissionsSettingsView()
             }
         }
         .frame(width: 520)

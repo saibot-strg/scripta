@@ -6,7 +6,7 @@ import Synchronization
 final class DictationAudioBuffer: AudioBufferReceiver {
     static let sampleRate: Double = 16_000
 
-    /// Meter levels for the HUD (0...1, one per 50 ms).
+    /// Levels for the HUD meter: dBFS of each 50 ms block.
     let levels: AsyncStream<[Float]>
     private let continuation: AsyncStream<[Float]>.Continuation
     private let state: Mutex<State>
@@ -38,7 +38,7 @@ final class DictationAudioBuffer: AudioBufferReceiver {
                   let converted = try? state.converter.convert(buffer),
                   let channel = converted.floatChannelData?[0] else { return nil }
             state.samples.append(contentsOf: UnsafeBufferPointer(start: channel, count: Int(converted.frameLength)))
-            return state.meter.levels(of: converted)
+            return state.meter.decibels(of: converted)
         }
         if let newLevels, !newLevels.isEmpty {
             continuation.yield(newLevels)

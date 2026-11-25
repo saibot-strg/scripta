@@ -14,10 +14,18 @@ struct PlaybackRateMenu: View {
             .pickerStyle(.inline)
         } label: {
             Text("\(player.rate, format: .number.precision(.fractionLength(0...2)))×")
+                .font(.callout)
                 .monospacedDigit()
+                .foregroundStyle(Color.primary)
+                .padding(.horizontal, 9)
+                .frame(height: 24)
+                .contentShape(.capsule)
         }
+        .menuStyle(.button)
         .menuIndicator(.hidden)
-        .buttonStyle(.glass)
+        .buttonStyle(.plain)
+        .fixedSize()
+        .background(Color.primary.opacity(0.08), in: .capsule)
         .help("Wiedergabetempo")
         .accessibilityLabel(Text("Wiedergabetempo"))
     }

@@ -36,8 +36,8 @@ extension TranscriptionStatus {
         switch self {
         case .notTranscribed: .secondary
         case .queued: .orange
-        case .running: .blue
-        case .done: .green
+        case .running: .processing
+        case .done: .success
         case .failed: .red
         }
     }
